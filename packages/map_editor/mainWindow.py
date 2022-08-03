@@ -354,6 +354,9 @@ class DuckWindow(QtWidgets.QMainWindow):
     def undo_button_clicked(self):
         print('undo_button_clicked')
 
+    def collect_button_clicked(self):
+        print('collect_button_clicked')
+
     #  Brush mode
     def brush_mode(self) -> None:
         self.map_api.brush_mode(self.brush_button.isChecked())
