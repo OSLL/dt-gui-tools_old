@@ -1,3 +1,4 @@
+import glob
 import logging
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QKeyEvent
@@ -14,6 +15,11 @@ from mapViewer import MapViewer
 from utils.debug import DebugLine
 from typing import Dict, Any
 from pathlib import Path
+from forms.collect_info import Collect_Info
+from forms.info_generate import CollectInfoGenerate
+from dt_map_generator.duckietown_map import DuckietownMap
+from dt_map_generator.generator import Generator
+
 import os
 import shutil
 
@@ -38,6 +44,9 @@ class MapAPI:
         self._editor_state = EditorState()
         self.change_obj_info_form = None
         self.init_info_form = NewMapInfoForm()
+        self.map_generate_form = None
+        # self.collect_info_generate = CollectInfoGenerate()
+        self.collect_info_generate = Collect_Info()
 
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
         path = self._qt_api.get_dir(parent, "open")
@@ -207,6 +216,19 @@ class MapAPI:
     #  Undo
     def undo_button_clicked(self):
         pass
+
+    def collect_button_clicked(self):
+        self.collect_info_generate.send_info.connect(self.generateNewMap)
+        self.collect_info_generate.show()
+        self.set_move_mode(False)
+
+    def generateNewMap(self, info: Dict[str, Any]):
+        DuckietownMap(Generator(info)).new().generateNewMap(info)
+        self._map_viewer.open_map(info['path'], info['map_name'])
+        # info.clear()
+        filelist = glob.glob(os.path.join('./maps/map1/', "*.yaml"))
+        for f in filelist:
+            os.remove(f)
 
     #  Brush mode
     def brush_mode(self, brush_button_is_checked: bool) -> None:

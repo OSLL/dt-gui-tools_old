@@ -128,6 +128,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         a4 = QtWidgets.QAction(QtGui.QIcon("img/icons/save_as.png"), _translate("MainWindow", "Save map as (Ctrl+Alt+S)"), self)
         a5 = QtWidgets.QAction(QtGui.QIcon("img/icons/png.png"), _translate("MainWindow", "Export to PNG (Ctrl+P)"), self)
 
+
         # TODO
         '''
         b1 = QtWidgets.QAction(QtGui.QIcon("img/icons/copy.png"), _translate("MainWindow", "Copy"), self)
@@ -143,11 +144,13 @@ class DuckWindow(QtWidgets.QMainWindow):
         '''
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
+        c2 = QtWidgets.QAction(QtGui.QIcon("img/icons/generate.png"), _translate("MainWindow", "Generate (Ctrl+G)"), self)
 
         # TODO
         #c2 = QtWidgets.QAction(QtGui.QIcon("img/icons/trim.png"),
         #                       _translate("MainWindow", "Delete extreme empty blocks"), self)
         c1.setShortcut("Ctrl+R")
+        c2.setShortcut("Ctrl+G")
         #c2.setShortcut("Ctrl+F")
 
         self.brush_button.setIcon(QtGui.QIcon("img/icons/brush.png"))
@@ -171,6 +174,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         '''
 
         c1.triggered.connect(self.rotate_selected_tiles)
+        c2.triggered.connect(self.collect_button_clicked)
         # TODO
         #c2.triggered.connect(self.trimClicked)
 
@@ -184,6 +188,7 @@ class DuckWindow(QtWidgets.QMainWindow):
             tool_bar.addSeparator()
         tool_bar.addWidget(self.brush_button)
         tool_bar.addAction(c1)
+        tool_bar.addAction(c2)
         # TODO
         #tool_bar.addAction(c2)
 
@@ -355,7 +360,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         print('undo_button_clicked')
 
     def collect_button_clicked(self):
-        print('collect_button_clicked')
+        self.map_api.collect_button_clicked()
 
     #  Brush mode
     def brush_mode(self) -> None:

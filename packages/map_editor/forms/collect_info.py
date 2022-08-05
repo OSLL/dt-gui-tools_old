@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 import sys
 
 class Collect_Info(QDialog):
-
+	send_info = QtCore.pyqtSignal(object)
 	def __init__(self):
 		super(Collect_Info, self).__init__()
 
@@ -10,17 +11,32 @@ class Collect_Info(QDialog):
 
 		self.setGeometry(100, 100, 500, 550)
 
-		self.formGroupBox = QGroupBox("Form 1")
+		self.formGroupBox = QGroupBox("Collect Data")
 
 		self.size_width = QSpinBox()
 
 		self.size_height = QSpinBox()
 
-		self.crossroad_count = QSpinBox()
+		self.tile_width = QLineEdit()
+		self.tile_width.setText("0.585")
 
-		self.road_length = QSpinBox()
+		self.tile_height = QLineEdit()
+		self.tile_height.setText("0.585")
 
+		self.crossroad_count_triple = QSpinBox()
+		self.crossroad_count_quad = QSpinBox()
+
+		self.traffic_signs = QSpinBox()
+		self.ground_tags = QSpinBox()
+		self.citizens = QSpinBox()
+		self.vehicles = QSpinBox()
+
+		# self.road_length = QSpinBox()
+		self.map_name = QLineEdit()
+		self.map_name.setText('map_1')
 		self.save_path = QLineEdit()
+
+		self.save_path.setText("./maps/map1/")
 
 		self.watchtowers = QCheckBox()
 
@@ -28,9 +44,10 @@ class Collect_Info(QDialog):
 
 		self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
-		error_dialog = QtWidgets.QErrorMessage()
-		error_dialog.showMessage('Oh no!')
+		# error_dialog = QtWidgets.QErrorMessage()
+		# error_dialog.showMessage('Oh no!')
 
+		# self.buttonBox.accepted.connect(self.checkCorrectnessOfData())
 		self.buttonBox.accepted.connect(self.getInfo)
 
 		self.buttonBox.rejected.connect(self.reject)
@@ -43,36 +60,70 @@ class Collect_Info(QDialog):
 
 		self.setLayout(mainLayout)
 
-	def showError(self):
-		button = QMessageBox.critical(
-			self,
-			"Error",
-			"Incorrect input data.",
-			buttons=QMessageBox.Discard | QMessageBox.NoToAll | QMessageBox.Ignore,
-			defaultButton=QMessageBox.Discard,
-		)
+	# def showError(self):
+	# 	button = QMessageBox.critical(
+	# 		self,
+	# 		"Error",
+	# 		"Incorrect input data.",
+	# 		buttons=QMessageBox.Discard,
+	# 		defaultButton=QMessageBox.Discard,
+	# 	)
+	#
+	# 	if button == QMessageBox.Discard:
+	# 		print("Discard!")
+	# 	elif button == QMessageBox.NoToAll:
+	# 		print("No to all!")
+	# 	else:
+	# 		print("Ignore!")
 
-		if button == QMessageBox.Discard:
-			print("Discard!")
-		elif button == QMessageBox.NoToAll:
-			print("No to all!")
-		else:
-			print("Ignore!")
-
-	def checkCorrectnessOfData(self):
-		if self.size_width < 3 or self.size_width > 10:
-			self.showError()
+	# def checkCorrectnessOfData(self):
+	# 	if int(self.size_width.text()) < 3 or int(self.size_width.text()) > 10:
+	# 		self.showError()
+	# 		self.reject()
+	# 	elif int(self.size_height.text()) < 3 or int(self.size_height.text()) > 10:
+	# 		self.showError()
+	# 		self.reject()
+	# 	elif float(self.tile_width.text()) <= 0:
+	# 		self.showError()
+	# 		self.reject()
+	# 	elif float(self.tile_height.text()) <= 0:
+	# 		self.showError()
+	# 		self.reject()
+	# 	else:
+	# 		self.getInfo()
 
 	def getInfo(self):
 
 		# printing the form information
 		print("Width : {0}".format(self.size_width.text()))
 		print("Height : {0}".format(self.size_height.text()))
-		print("Crossroads count : {0}".format(self.crossroad_count.text()))
-		print("Road length : {0}".format(self.road_length.text()))
+		print("Tile Width : {0}".format(self.tile_width.text()))
+		print("Tile Height : {0}".format(self.tile_height.text()))
+		# print("Road length : {0}".format(self.road_length.text()))
 		print("Path : {0}".format(self.save_path.text()))
 		print("Watchtowers: {0}".format(self.watchtowers.isChecked()))
-
+		info = {
+			'x': int(self.size_width.text()),
+			'y': int(self.size_height.text()),
+			'width': int(self.size_width.text()),
+			'height': int(self.size_height.text()),
+			'length': 10,
+			'path': self.save_path.text(),
+			'crossroads_data': {
+				'triple': int(self.crossroad_count_triple.text()),
+				'quad': int(self.crossroad_count_quad.text()),
+			},
+			'map_name': self.map_name,
+			'tile_width': float(self.tile_width.text()),
+			'tile_height': float(self.tile_height.text()),
+			'dir_name': self.save_path.text(),
+			'traffic_signs': int(self.traffic_signs.text()),
+			'ground_tags': int(self.ground_tags.text()),
+			'citizens': int(self.citizens.text()),
+			'vehicles': int(self.vehicles.text()),
+			'watchtowers': self.watchtowers.isChecked(),
+		}
+		self.send_info.emit(info)
 		self.close()
 
 	def createForm(self):
@@ -80,31 +131,30 @@ class Collect_Info(QDialog):
 		layout = QFormLayout()
 
 		layout.addRow(QLabel("Width"), self.size_width)
-
 		layout.addRow(QLabel("Height"), self.size_height)
+		layout.addRow(QLabel("Tile_Width"), self.tile_width)
+		layout.addRow(QLabel("Tile Height"), self.tile_height)
+		layout.addRow(QLabel("Triple crossroad count"), self.crossroad_count_triple)
+		layout.addRow(QLabel("Quad crossroad count"), self.crossroad_count_quad)
+		layout.addRow(QLabel("Traffic_signs"), self.traffic_signs)
+		layout.addRow(QLabel("Ground_tags"), self.ground_tags)
+		layout.addRow(QLabel("Citizens"), self.citizens)
+		layout.addRow(QLabel("Vehicles"), self.vehicles)
+		layout.addRow(QLabel("Map Name"), self.map_name)
 
-		layout.addRow(QLabel("Crossroad count"), self.crossroad_count)
-
-		layout.addRow(QLabel("Road length"), self.road_length)
-
+		# layout.addRow(QLabel("Road length"), self.road_length)
 		layout.addRow(QLabel("Path"), self.save_path)
-
 		layout.addRow(QLabel("Generate watchtowers"), self.watchtowers)
-
 		self.formGroupBox.setLayout(layout)
 
 
 # main method
 if __name__ == '__main__':
 
-	# create pyqt5 app
 	app = QApplication(sys.argv)
 
-	# create the instance of our Window
 	window = Collect_Info()
 
-	# showing the window
 	window.show()
 
-	# start the app
 	sys.exit(app.exec())
