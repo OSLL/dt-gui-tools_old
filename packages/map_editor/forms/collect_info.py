@@ -1,3 +1,4 @@
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 import sys
@@ -8,18 +9,12 @@ class Collect_Info(QDialog):
 		super(Collect_Info, self).__init__()
 
 		self.setWindowTitle("Init information")
-
 		self.setGeometry(100, 100, 500, 550)
-
 		self.formGroupBox = QGroupBox("Collect Data")
-
 		self.size_width = QSpinBox()
-
 		self.size_height = QSpinBox()
-
 		self.tile_width = QLineEdit()
 		self.tile_width.setText("0.585")
-
 		self.tile_height = QLineEdit()
 		self.tile_height.setText("0.585")
 
@@ -39,58 +34,37 @@ class Collect_Info(QDialog):
 		self.save_path.setText("./maps/map1/")
 
 		self.watchtowers = QCheckBox()
-
 		self.createForm()
-
 		self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
-		# error_dialog = QtWidgets.QErrorMessage()
-		# error_dialog.showMessage('Oh no!')
-
-		# self.buttonBox.accepted.connect(self.checkCorrectnessOfData())
-		self.buttonBox.accepted.connect(self.getInfo)
-
+		self.buttonBox.accepted.connect(self.checkCorrectnessOfData)
 		self.buttonBox.rejected.connect(self.reject)
 
 		mainLayout = QVBoxLayout()
-
 		mainLayout.addWidget(self.formGroupBox)
-
 		mainLayout.addWidget(self.buttonBox)
-
 		self.setLayout(mainLayout)
 
-	# def showError(self):
-	# 	button = QMessageBox.critical(
-	# 		self,
-	# 		"Error",
-	# 		"Incorrect input data.",
-	# 		buttons=QMessageBox.Discard,
-	# 		defaultButton=QMessageBox.Discard,
-	# 	)
-	#
-	# 	if button == QMessageBox.Discard:
-	# 		print("Discard!")
-	# 	elif button == QMessageBox.NoToAll:
-	# 		print("No to all!")
-	# 	else:
-	# 		print("Ignore!")
+	def showError(self, message):
+		self.error_dialog = QtWidgets.QErrorMessage()
+		self.error_dialog.showMessage(message)
 
-	# def checkCorrectnessOfData(self):
-	# 	if int(self.size_width.text()) < 3 or int(self.size_width.text()) > 10:
-	# 		self.showError()
-	# 		self.reject()
-	# 	elif int(self.size_height.text()) < 3 or int(self.size_height.text()) > 10:
-	# 		self.showError()
-	# 		self.reject()
-	# 	elif float(self.tile_width.text()) <= 0:
-	# 		self.showError()
-	# 		self.reject()
-	# 	elif float(self.tile_height.text()) <= 0:
-	# 		self.showError()
-	# 		self.reject()
-	# 	else:
-	# 		self.getInfo()
+
+	def checkCorrectnessOfData(self):
+		if int(self.size_width.text()) < 3:
+			self.showError('Width cannot be less than 3')
+			self.reject()
+		elif int(self.size_height.text()) < 3:
+			self.showError('Height cannot be less than 3')
+			self.reject()
+		elif float(self.tile_width.text()) <= 0:
+			self.showError('Tile width cannot be less or equal to 0')
+			self.reject()
+		elif float(self.tile_height.text()) <= 0:
+			self.showError('Tile height cannot be less or equal to 0')
+			self.reject()
+		else:
+			self.getInfo()
 
 	def getInfo(self):
 
@@ -152,9 +126,6 @@ class Collect_Info(QDialog):
 if __name__ == '__main__':
 
 	app = QApplication(sys.argv)
-
 	window = Collect_Info()
-
 	window.show()
-
 	sys.exit(app.exec())
