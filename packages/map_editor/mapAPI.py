@@ -16,7 +16,6 @@ from utils.debug import DebugLine
 from typing import Dict, Any
 from pathlib import Path
 from forms.collect_info import Collect_Info
-from forms.info_generate import CollectInfoGenerate
 from dt_map_generator.duckietown_map import DuckietownMap
 from dt_map_generator.generator import Generator
 
@@ -45,7 +44,6 @@ class MapAPI:
         self.change_obj_info_form = None
         self.init_info_form = NewMapInfoForm()
         self.map_generate_form = None
-        # self.collect_info_generate = CollectInfoGenerate()
         self.collect_info_generate = Collect_Info()
 
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
