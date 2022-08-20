@@ -223,10 +223,6 @@ class MapAPI:
     def generateNewMap(self, info: Dict[str, Any]):
         DuckietownMap(Generator(info)).new().generateNewMap(info)
         self._map_viewer.open_map(info['path'], info['map_name'])
-        # info.clear()
-        filelist = glob.glob(os.path.join('./maps/map1/', "*.yaml"))
-        for f in filelist:
-            os.remove(f)
 
     #  Brush mode
     def brush_mode(self, brush_button_is_checked: bool) -> None:
