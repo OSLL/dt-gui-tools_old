@@ -8,7 +8,7 @@ class Collect_Info(QDialog):
 	def __init__(self):
 		super(Collect_Info, self).__init__()
 
-		self.setWindowTitle("Init information")
+		self.setWindowTitle("Map generation")
 		self.setGeometry(100, 100, 500, 550)
 		self.formGroupBox = QGroupBox("Collect Data")
 		self.size_width = QSpinBox()
