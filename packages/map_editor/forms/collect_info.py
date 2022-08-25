@@ -17,6 +17,8 @@ class Collect_Info(QDialog):
 		self.tile_width.setText("0.585")
 		self.tile_height = QLineEdit()
 		self.tile_height.setText("0.585")
+		self.road_length = QSpinBox()
+		self.road_length.setValue(10)
 
 		self.crossroad_count_triple = QSpinBox()
 		self.crossroad_count_quad = QSpinBox()
@@ -81,7 +83,7 @@ class Collect_Info(QDialog):
 			'y': int(self.size_height.text()),
 			'width': int(self.size_width.text()),
 			'height': int(self.size_height.text()),
-			'length': 10,
+			'length': int(self.road_length.text()),
 			'path': self.save_path.text(),
 			'crossroads_data': {
 				'triple': int(self.crossroad_count_triple.text()),
@@ -108,6 +110,7 @@ class Collect_Info(QDialog):
 		layout.addRow(QLabel("Height"), self.size_height)
 		layout.addRow(QLabel("Tile_Width"), self.tile_width)
 		layout.addRow(QLabel("Tile Height"), self.tile_height)
+		layout.addRow(QLabel("Road length"), self.road_length)
 		layout.addRow(QLabel("Triple crossroad count"), self.crossroad_count_triple)
 		layout.addRow(QLabel("Quad crossroad count"), self.crossroad_count_quad)
 		layout.addRow(QLabel("Traffic_signs"), self.traffic_signs)
