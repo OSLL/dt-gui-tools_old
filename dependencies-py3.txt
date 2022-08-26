@@ -5,9 +5,12 @@ numpy
 duckietown-world-daffy
 
 # Map editor
+numpy==1.18.5
 PyQt5
+pyinstaller==4.0
 PyYAML==5.3.1
-pynput==1.7.1
+wheel==0.37.1
+git+https://github.com/OSLL/lib-dt-maps.git@new_layer
 
 # Jupyter notebook
 jupyterlab

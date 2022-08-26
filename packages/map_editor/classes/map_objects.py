@@ -126,6 +126,7 @@ class DraggableImage(ImageObject):
             self.change_position((new_pos.x(), new_pos.y()))
             self.move_in_map((new_pos.x(), new_pos.y()))
             self.drag_start_pos = None
+            self.parentWidget().scene_update()
 
 
 if __name__ == '__main__':

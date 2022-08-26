@@ -11,7 +11,7 @@ from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
 from classes.Commands.GetDefaultLayerConf import GetDefaultLayerConf
 from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
-from classes.objects import DraggableImage, ImageObject
+from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from layers import TileLayerHandler, WatchtowersLayerHandler, \
     FramesLayerHandler, TileMapsLayerHandler, CitizensHandler, \
