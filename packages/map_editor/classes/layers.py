@@ -6,6 +6,7 @@ from utils.maps import REGISTER
 from mapStorage import MapStorage
 from utils.maps import create_layer
 from typing import Dict, Any
+from classes.basic.chain import AbstractHandler
 
 
 class AbstractLayer(ABC):
@@ -42,3 +43,17 @@ class AbstractLayer(ABC):
 
     def set_layer_handler(self, handler: EntityHelper) -> None:
         self._layer_handler = handler
+
+
+class BasicLayer(AbstractLayer, AbstractHandler):
+    def __init__(self):
+        super(BasicLayer, self).__init__()
+
+    @abstractmethod
+    def layer_name(self) -> str:
+        pass
+
+    @abstractmethod
+    def default_conf(self) -> Dict[str, Any]:
+        pass
+

@@ -4,9 +4,8 @@ from typing import Any, Dict
 from utils.constants import TILES, TILE_SIZE, TILE_MAPS, WATCHTOWERS, \
     FRAMES, TRAFFIC_SIGNS, GROUND_TAGS, VEHICLES, CITIZENS
 from mapStorage import MapStorage
-from classes.layers import AbstractLayer
+from classes.layers import BasicLayer
 from classes.basic.command import Command
-from classes.basic.chain import AbstractHandler
 from classes.MapDescription import MapDescription
 from classes.Commands.GetLayerCommand import GetLayerCommand
 from dt_maps.types.watchtowers import WatchtowerType
@@ -16,9 +15,9 @@ from dt_maps.types.citizens import CitizenType
 from dt_maps.types.vehicles import VehicleType, ColorType
 
 
-class TileLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TileLayerHandler, self).__init__(*kwargs)
+class TileLayerHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(TileLayerHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -39,9 +38,9 @@ class TileLayerHandler(AbstractHandler, AbstractLayer):
                in [t.value for t in TileType]
 
 
-class WatchtowersLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(WatchtowersLayerHandler, self).__init__(*kwargs)
+class WatchtowersLayerHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(WatchtowersLayerHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -62,9 +61,9 @@ class WatchtowersLayerHandler(AbstractHandler, AbstractLayer):
                in [t.value for t in WatchtowerType]
 
 
-class FramesLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(FramesLayerHandler, self).__init__(*kwargs)
+class FramesLayerHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(FramesLayerHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -82,9 +81,9 @@ class FramesLayerHandler(AbstractHandler, AbstractLayer):
                          'pitch': 0.0}, 'relative_to': ""}
 
 
-class TileMapsLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TileMapsLayerHandler, self).__init__(*kwargs)
+class TileMapsLayerHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(TileMapsLayerHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -100,9 +99,9 @@ class TileMapsLayerHandler(AbstractHandler, AbstractLayer):
         return {TILE_SIZE: {'x': 0.585, 'y': 0.585}}
 
 
-class TrafficSignsHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TrafficSignsHandler, self).__init__(*kwargs)
+class TrafficSignsHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(TrafficSignsHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -123,9 +122,9 @@ class TrafficSignsHandler(AbstractHandler, AbstractLayer):
                config.get("type") in [t.value for t in TrafficSignType]
 
 
-class GroundTagsHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(GroundTagsHandler, self).__init__(*kwargs)
+class GroundTagsHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(GroundTagsHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -142,9 +141,9 @@ class GroundTagsHandler(AbstractHandler, AbstractLayer):
         return {"size": 0.15, "id": 0, "family": "36h11"}
 
 
-class CitizensHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(CitizensHandler, self).__init__(*kwargs)
+class CitizensHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(CitizensHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
@@ -165,9 +164,9 @@ class CitizensHandler(AbstractHandler, AbstractLayer):
                config.get("color") in [t.value for t in CitizenType]
 
 
-class VehiclesHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(VehiclesHandler, self).__init__(*kwargs)
+class VehiclesHandler(BasicLayer):
+    def __init__(self) -> None:
+        super(VehiclesHandler, self).__init__()
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name(),
