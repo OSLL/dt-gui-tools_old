@@ -1,4 +1,4 @@
-OBJECTS_TYPES = ["watchtowers", "citizens", "vehicles", "ground_tags"]
+OBJECTS_TYPES = ["watchtowers", "citizens", "ground_tags"]#"vehicles",
 NOT_DRAGGABLE = ["tiles"]
 LAYERS_WITH_TYPES = ["traffic_signs", "tiles"]
 TILES = "tiles"

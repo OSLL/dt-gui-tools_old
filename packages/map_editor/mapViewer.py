@@ -15,7 +15,7 @@ from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from layers import TileLayerHandler, WatchtowersLayerHandler, \
     FramesLayerHandler, TileMapsLayerHandler, CitizensHandler, \
-    TrafficSignsHandler, GroundTagsHandler, VehiclesHandler
+    TrafficSignsHandler, GroundTagsHandler#, VehiclesHandler
 from coordinatesTransformer import CoordinatesTransformer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
@@ -93,12 +93,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         citizens = CitizensHandler()
         traffic_signs = TrafficSignsHandler()
         ground_tags = GroundTagsHandler()
-        vehicles = VehiclesHandler()
+        #vehicles = VehiclesHandler()
         # self.decorations = DecorationsHandler()
 
         handlers_list = [self.tiles, watchtowers, frames,
                          tile_maps, citizens, traffic_signs,
-                         vehicles, ground_tags]
+                         ground_tags]#vehicles,
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
         self.handlers = self.tiles

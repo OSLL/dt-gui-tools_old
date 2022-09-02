@@ -12,25 +12,27 @@ from classes.basic.chain import AbstractHandler
 class AbstractLayer(ABC):
     _data: MapLayer = None
     _layer_handler: EntityHelper = None
+    _layer_name: str = ""
 
-    def __init__(self) -> None:
+    def __init__(self, layer_name: str) -> None:
         self.dm = MapStorage().map
-        try:
-            self.data = self.dm.layers[self.layer_name()]
-        except KeyError:
-            logging.error(f"Empty layer {self.layer_name()}")
-            create_layer(self.dm, self.layer_name(), {})
-            self.data = self.dm.layers[self.layer_name()]
-        self._layer_handler = REGISTER[self.layer_name()]
+        self._layer_name = layer_name
 
-    @abstractmethod
+        try:
+            self.data = self.dm.layers[self.layer_name]
+        except KeyError:
+            logging.error(f"Empty layer {self.layer_name}")
+            create_layer(self.dm, self.layer_name, self.default_conf())
+            self.data = self.dm.layers[self.layer_name]
+        self._layer_handler = REGISTER[self.layer_name]
+
+    @property
     def layer_name(self) -> str:
-        pass
+        return self._layer_name
 
     def render(self) -> None:
         pass
 
-    @abstractmethod
     def default_conf(self) -> Dict[str, Any]:
         pass
 
@@ -46,14 +48,7 @@ class AbstractLayer(ABC):
 
 
 class BasicLayer(AbstractLayer, AbstractHandler):
-    def __init__(self):
-        super(BasicLayer, self).__init__()
+    def __init__(self, layer_name: str):
+        super(BasicLayer, self).__init__(layer_name)
 
-    @abstractmethod
-    def layer_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def default_conf(self) -> Dict[str, Any]:
-        pass
 
