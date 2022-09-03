@@ -103,10 +103,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     class_name += name
                 layer_name = f"{class_name}LayerHandler"
                 attribute = getattr(module, layer_name)
-                if isclass(attribute):
-                    # add the class to this package's variables
-                    globals()[layer_name] = attribute
-                    handlers_list.append(attribute())
+                handlers_list.append(attribute())
             else:
                 DT_MAP_LAYERS[layer_name] = REGISTER[layer_name]
                 handler = BasicLayer(layer_name)
@@ -139,7 +136,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             object_name: str = f"{self.tile_map}/{type_of_element}{i}"
             if object_name not in self.objects:
                 self.add_obj_on_map(layer_name, object_name)
+                print(self.get_layer("vehicles"))
                 self.add_obj_image(layer_name, object_name, item_name=item_name)
+                print(self.objects)
                 self.scaled_obj(self.get_object(object_name),
                                 {'scale': self.scale})
                 break
