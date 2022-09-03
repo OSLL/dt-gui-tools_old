@@ -15,9 +15,9 @@ from dt_maps.types.citizens import CitizenType
 from dt_maps.types.vehicles import VehicleType, ColorType
 
 
-class TileLayerHandler(BasicLayer):
+class TilesLayerHandler(BasicLayer):
     def __init__(self) -> None:
-        super(TileLayerHandler, self).__init__(TILES)
+        super(TilesLayerHandler, self).__init__(TILES)
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -87,9 +87,9 @@ class TileMapsLayerHandler(BasicLayer):
         return super().handle(command)
 
 
-class TrafficSignsHandler(BasicLayer):
+class TrafficSignsLayerHandler(BasicLayer):
     def __init__(self) -> None:
-        super(TrafficSignsHandler, self).__init__(TRAFFIC_SIGNS)
+        super(TrafficSignsLayerHandler, self).__init__(TRAFFIC_SIGNS)
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -107,9 +107,9 @@ class TrafficSignsHandler(BasicLayer):
                config.get("type") in [t.value for t in TrafficSignType]
 
 
-class GroundTagsHandler(BasicLayer):
+class GroundTagsLayerHandler(BasicLayer):
     def __init__(self) -> None:
-        super(GroundTagsHandler, self).__init__(GROUND_TAGS)
+        super(GroundTagsLayerHandler, self).__init__(GROUND_TAGS)
 
     def default_conf(self) -> Dict[str, Any]:
         return {"size": 0.15, "id": 0, "family": "36h11"}
@@ -123,9 +123,9 @@ class GroundTagsHandler(BasicLayer):
         return super().handle(command)
 
 
-class CitizensHandler(BasicLayer):
+class CitizensLayerHandler(BasicLayer):
     def __init__(self) -> None:
-        super(CitizensHandler, self).__init__(CITIZENS)
+        super(CitizensLayerHandler, self).__init__(CITIZENS)
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -166,7 +166,7 @@ class CitizensHandler(BasicLayer):
 
 if __name__ == '__main__':
     MapStorage(MapDescription(Path("./maps/tm1"), "test"))
-    tile_layer = TileLayerHandler()
+    tile_layer = TilesLayerHandler()
     watchtower_layer = WatchtowersLayerHandler()
     tile_layer.set_next(watchtower_layer)
     layer = tile_layer

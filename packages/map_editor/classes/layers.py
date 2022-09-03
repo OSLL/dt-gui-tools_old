@@ -1,10 +1,10 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from dt_maps import MapLayer
 from dt_maps.types.commons import EntityHelper
-from utils.maps import REGISTER
+from classes.basic.command import Command
+from utils.maps import DT_MAP_LAYERS, create_layer
 from mapStorage import MapStorage
-from utils.maps import create_layer
 from typing import Dict, Any
 from classes.basic.chain import AbstractHandler
 
@@ -24,7 +24,7 @@ class AbstractLayer(ABC):
             logging.error(f"Empty layer {self.layer_name}")
             create_layer(self.dm, self.layer_name, self.default_conf())
             self.data = self.dm.layers[self.layer_name]
-        self._layer_handler = REGISTER[self.layer_name]
+        self._layer_handler = DT_MAP_LAYERS[self.layer_name]
 
     @property
     def layer_name(self) -> str:
@@ -34,7 +34,7 @@ class AbstractLayer(ABC):
         pass
 
     def default_conf(self) -> Dict[str, Any]:
-        pass
+        return {}
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         for field in config:
@@ -51,4 +51,10 @@ class BasicLayer(AbstractLayer, AbstractHandler):
     def __init__(self, layer_name: str):
         super(BasicLayer, self).__init__(layer_name)
 
-
+    def handle(self, command: Command) -> Any:
+        response = command.execute(self.dm, self.data, self.layer_name,
+                                   self.default_conf(),
+                                   check_config=self.check_config)
+        if response:
+            return response
+        return super().handle(command)

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+from importlib import import_module
+from inspect import isclass
+from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QKeyEvent
 from dt_maps.types.tiles import Tile
 from dt_maps import MapLayer
+from dt_maps.Map import REGISTER
 from classes.Commands.AddObjCommand import AddObjCommand
 from classes.Commands.DeleteObjCommand import DeleteObjCommand
 from classes.Commands.GetLayerCommand import GetLayerCommand
@@ -13,9 +17,9 @@ from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
-from layers import TileLayerHandler, WatchtowersLayerHandler, \
-    FramesLayerHandler, TileMapsLayerHandler, CitizensHandler, \
-    TrafficSignsHandler, GroundTagsHandler#, VehiclesHandler
+#from layers import TilesLayerHandler, WatchtowersLayerHandler, \
+#    FramesLayerHandler, TileMapsLayerHandler, CitizensLayerHandler, \
+#    TrafficSignsLayerHandler, GroundTagsLayerHandler#, VehiclesHandler
 from coordinatesTransformer import CoordinatesTransformer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
@@ -23,18 +27,17 @@ from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    REGISTER
+    DT_MAP_LAYERS
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
     TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE
 from classes.MapDescription import MapDescription
-from pathlib import Path
+from classes.layers import BasicLayer
 
 
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     map = None
     tile_sprites: Dict[str, QtGui.QImage] = {'empty': QtGui.QImage()}
-    tiles = None
     map_height = 10
     objects = {}
     handlers = None
@@ -76,7 +79,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
-        for layer_name in REGISTER:
+        for layer_name in DT_MAP_LAYERS:
             layer = self.get_layer(layer_name)
             if layer_name not in LAYERS_WITH_TYPES and \
             layer_name not in OBJECTS_TYPES or not layer:
@@ -86,22 +89,31 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
-        self.tiles = TileLayerHandler()
-        watchtowers = WatchtowersLayerHandler()
-        frames = FramesLayerHandler()
-        tile_maps = TileMapsLayerHandler()
-        citizens = CitizensHandler()
-        traffic_signs = TrafficSignsHandler()
-        ground_tags = GroundTagsHandler()
-        #vehicles = VehiclesHandler()
-        # self.decorations = DecorationsHandler()
-
-        handlers_list = [self.tiles, watchtowers, frames,
-                         tile_maps, citizens, traffic_signs,
-                         ground_tags]#vehicles,
+        handlers_list = []
+        module = import_module("layers")
+        for layer_name in REGISTER:
+            if layer_name in DT_MAP_LAYERS:
+                # get name of handler
+                layer_name_list = layer_name.split("_")
+                class_name = ""
+                for name in layer_name_list:
+                    name = list(name)
+                    name[0] = name[0].upper()
+                    name = "".join(name)
+                    class_name += name
+                layer_name = f"{class_name}LayerHandler"
+                attribute = getattr(module, layer_name)
+                if isclass(attribute):
+                    # add the class to this package's variables
+                    globals()[layer_name] = attribute
+                    handlers_list.append(attribute())
+            else:
+                DT_MAP_LAYERS[layer_name] = REGISTER[layer_name]
+                handler = BasicLayer(layer_name)
+                handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
-        self.handlers = self.tiles
+        self.handlers = handlers_list[0]
 
     def set_map_viewer_sizes(self, tile_width: float = 0, tile_height: float = 0) -> None:
         if not (tile_width and tile_height):

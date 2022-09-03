@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 from dt_maps.types.tile_maps import TileSize
 from dt_maps.types.tiles import Tile
 from dt_maps.types.traffic_signs import TrafficSign
@@ -16,7 +15,7 @@ from typing import Dict, Any
 from utils.constants import FRAMES, WATCHTOWERS, TILES, TILE_MAPS, VEHICLES, \
     CITIZENS, TRAFFIC_SIGNS, GROUND_TAGS
 
-REGISTER = {
+DT_MAP_LAYERS = {
     FRAMES: Frame,
     TILES: Tile,
     TILE_MAPS: TileSize,
@@ -37,7 +36,7 @@ def create_layer(dm: Map, layer_name: str, layer: Dict[str, Any]) -> None:
     dm._layers.__dict__[layer_name] = layer
     register = lambda l, t: dm.layers.get(l).register_entity_helper(
         t) if dm.layers.has(l) else 0
-    register(layer_name, REGISTER[layer_name])
+    register(layer_name, DT_MAP_LAYERS[layer_name])
 
 
 def set_obj(layer: MapLayer, obj_name: str, default_conf: dict) -> None:
