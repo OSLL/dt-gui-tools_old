@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5 import QtCore
 from typing import Dict, Any
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, QVBoxLayout, \
@@ -53,8 +55,11 @@ class EditObject(QDialog):
                         self.info_send["frame"][frame_key] = (
                             self.info["types"][frame_key])(
                             self.info[frame_key].text())
-            for key in self.info_send["new_config"]:
-                self.info_send["new_config"][key] = (self.info["types"][key])(self.info[key].text())
+            try:
+                for key in self.info_send["new_config"]:
+                    self.info_send["new_config"][key] = (self.info["types"][key])(self.info[key].text())
+            except TypeError:
+                pass
         except ValueError:
             self.info_send["is_valid"] = False
         self.get_info.emit(self.info_send)
@@ -62,13 +67,16 @@ class EditObject(QDialog):
 
     def create_form(self, config: Dict[str, Any], frame: Dict[str, Any]) -> None:
         layout = QFormLayout()
-        for key in config:
-            # tree level
-            edit = QLineEdit(self)
-            self.info[key] = edit
-            self.info["types"][key] = type(config[key])
-            edit.setText(str(config[key]))
-            layout.addRow(QLabel(key), edit)
+        try:
+            for key in config:
+                # tree level
+                edit = QLineEdit(self)
+                self.info[key] = edit
+                self.info["types"][key] = type(config[key])
+                edit.setText(str(config[key]))
+                layout.addRow(QLabel(key), edit)
+        except TypeError:
+            pass
         layout.addWidget(QHLine())
         # TODO
         for frame_key in frame:

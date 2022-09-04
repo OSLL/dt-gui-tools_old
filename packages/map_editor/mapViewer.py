@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from importlib import import_module
 from inspect import isclass
 from pathlib import Path
@@ -17,20 +18,16 @@ from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
-#from layers import TilesLayerHandler, WatchtowersLayerHandler, \
-#    FramesLayerHandler, TileMapsLayerHandler, CitizensLayerHandler, \
-#    TrafficSignsLayerHandler, GroundTagsLayerHandler#, VehiclesHandler
 from coordinatesTransformer import CoordinatesTransformer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
 from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
-from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    DT_MAP_LAYERS
+from utils.maps import default_map_storage, get_map_height, get_map_width
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
-    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE
+    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, KNOWN_LAYERS
 from classes.MapDescription import MapDescription
 from classes.layers import BasicLayer
 
@@ -66,6 +63,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setScene(QtWidgets.QGraphicsScene())
         self.map = default_map_storage()
         self.init_handlers()
+
         self.set_map_viewer_sizes()
         self.coordinates_transformer = CoordinatesTransformer(self.scale,
                                                               self.map_height,
@@ -79,10 +77,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
-        for layer_name in DT_MAP_LAYERS:
+        for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
             if layer_name not in LAYERS_WITH_TYPES and \
-            layer_name not in OBJECTS_TYPES or not layer:
+                    layer_name not in OBJECTS_TYPES or not layer:
                 continue
             for object_name in layer:
                 layer_object = layer[object_name]
@@ -92,7 +90,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         handlers_list = []
         module = import_module("layers")
         for layer_name in REGISTER:
-            if layer_name in DT_MAP_LAYERS:
+            if layer_name in KNOWN_LAYERS:
                 # get name of handler
                 layer_name_list = layer_name.split("_")
                 class_name = ""
@@ -105,7 +103,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 attribute = getattr(module, layer_name)
                 handlers_list.append(attribute())
             else:
-                DT_MAP_LAYERS[layer_name] = REGISTER[layer_name]
                 handler = BasicLayer(layer_name)
                 handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
@@ -136,9 +133,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             object_name: str = f"{self.tile_map}/{type_of_element}{i}"
             if object_name not in self.objects:
                 self.add_obj_on_map(layer_name, object_name)
-                print(self.get_layer("vehicles"))
                 self.add_obj_image(layer_name, object_name, item_name=item_name)
-                print(self.objects)
                 self.scaled_obj(self.get_object(object_name),
                                 {'scale': self.scale})
                 break
@@ -302,11 +297,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         layer = self.get_layer(layer_name)
         obj = layer[name]
         default_layer_conf = self.get_default_layer_conf(layer_name)
-        for key in default_layer_conf:
-            try:
-                default_layer_conf[key] = obj[key].value
-            except AttributeError:
-                default_layer_conf[key] = obj[key]
+        try:
+            for key in default_layer_conf:
+                try:
+                    default_layer_conf[key] = obj[key].value
+                except AttributeError:
+                    default_layer_conf[key] = obj[key]
+        except TypeError:
+            logging.error(f"Empty default conf for obj {name}")
         return default_layer_conf
 
     def change_obj_info(self, layer_name: str, obj_name: str) -> None:

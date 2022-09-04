@@ -2,8 +2,9 @@ import logging
 from abc import ABC
 from dt_maps import MapLayer
 from dt_maps.types.commons import EntityHelper
+from dt_maps.Map import REGISTER
 from classes.basic.command import Command
-from utils.maps import DT_MAP_LAYERS, create_layer
+from utils.maps import create_layer
 from mapStorage import MapStorage
 from typing import Dict, Any
 from classes.basic.chain import AbstractHandler
@@ -22,9 +23,9 @@ class AbstractLayer(ABC):
             self.data = self.dm.layers[self.layer_name]
         except KeyError:
             logging.error(f"Empty layer {self.layer_name}")
-            create_layer(self.dm, self.layer_name, self.default_conf())
+            create_layer(self.dm, self.layer_name, {})
             self.data = self.dm.layers[self.layer_name]
-        self._layer_handler = DT_MAP_LAYERS[self.layer_name]
+        self._layer_handler = REGISTER[self.layer_name]
 
     @property
     def layer_name(self) -> str:
@@ -37,6 +38,8 @@ class AbstractLayer(ABC):
         return {}
 
     def check_config(self, config: Dict[str, Any]) -> bool:
+        if not config:
+            return True
         for field in config:
             map_layer_type = self._layer_handler._get_property_types(self._layer_handler, field)
             if not isinstance(config[field], map_layer_type):
