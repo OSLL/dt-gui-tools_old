@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from importlib import import_module
-from inspect import isclass
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
@@ -91,7 +90,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         module = import_module("layers")
         for layer_name in REGISTER:
             if layer_name in KNOWN_LAYERS:
-                # get name of handler
+                # get name of handler for known layers
                 layer_name_list = layer_name.split("_")
                 class_name = ""
                 for name in layer_name_list:
@@ -103,6 +102,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 attribute = getattr(module, layer_name)
                 handlers_list.append(attribute())
             else:
+                # create basic layer handler for unknown layers
                 handler = BasicLayer(layer_name)
                 handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
@@ -143,6 +143,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                       layer_object=None, item_name: str = None) -> None:
         new_obj = None
         img_name = layer_name
+        # get path for object image from layer_name
         if layer_name in LAYERS_WITH_TYPES and layer_object:
             img_name = layer_object.type.value
         elif item_name:
