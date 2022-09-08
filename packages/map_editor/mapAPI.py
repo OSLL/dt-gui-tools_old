@@ -38,6 +38,7 @@ class MapAPI:
         self._editor_state = EditorState()
         self.change_obj_info_form = None
         self.init_info_form = NewMapInfoForm()
+        self.init_info_form.send_info.connect(self.create_map_triggered)
 
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
         path = self._qt_api.get_dir(parent, "open")
@@ -49,7 +50,6 @@ class MapAPI:
         print('import old format')
 
     def create_map_form(self) -> None:
-        self.init_info_form.send_info.connect(self.create_map_triggered)
         self.init_info_form.show()
         self.set_move_mode(False)
 
