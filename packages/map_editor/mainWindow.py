@@ -37,12 +37,13 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.ui.horizontalLayout.addWidget(self.map_viewer)
         self.initUi()
 
-        if args.debug:
-            self.debug_line = DebugLine()
-            self.debug_line.setParent(self)
-            self.debug_line.setMaximumHeight(20)
-            self.ui.horizontalLayout.addWidget(self.debug_line, Qt.AlignBottom)
-            self.map_api.set_debug_mode(self.debug_line)
+
+        # if args.debug:
+        self.debug_line = DebugLine()
+        self.debug_line.setParent(self)
+        self.debug_line.setMaximumHeight(20)
+        self.ui.horizontalLayout.addWidget(self.debug_line, Qt.AlignBottom)
+        self.map_api.set_debug_mode(self.debug_line)
 
         self.update_layer_tree()
 

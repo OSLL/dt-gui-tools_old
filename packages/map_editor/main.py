@@ -2,6 +2,8 @@
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTranslator
+from PyQt5.QtGui import QIcon
+
 from mainWindow import DuckWindow
 from argparse import ArgumentParser
 from trash.logger import init_logger
@@ -20,6 +22,7 @@ def init_translator(app, path):
 
 def main(args):
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(QIcon("./img/icons/duckie.ico"))
 
     # Install translator
     init_translator(app, args.locale_path)
