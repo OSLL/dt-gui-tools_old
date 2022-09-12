@@ -32,7 +32,7 @@ class TileLayerHandler(AbstractHandler, AbstractLayer):
         return TILES
 
     def default_conf(self) -> Dict[str, Any]:
-        return {'i': 0, 'j': 0, 'k': 0, 'type': 'floor'}
+        return {'i': 0, 'j': 0, 'type': 'floor'}
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and config.get("type") \
