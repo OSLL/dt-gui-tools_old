@@ -62,8 +62,8 @@ class MapAPI:
                     shutil.rmtree(path)
                 os.makedirs(path)
                 self._map_viewer.create_new_map(info, path)
-            except OSError:
-                logging.error(f"Cannot create path {path} for new map")
+            except OSError as err:
+                logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
     def create_region(self):
         print('create_region')

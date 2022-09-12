@@ -22,7 +22,7 @@ class NewMapInfoForm(QDialog):
         self.nameTileSizeYEdit = QLineEdit(self)
         self.nameTileSizeYEdit.setText("0.585")
         self.nameDirEdit = QLineEdit(self)
-        self.nameDirEdit.setText("./maps/map1")
+        self.nameDirEdit.setText("/out/map1")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.get_info)
         self.buttonBox.rejected.connect(self.reject)
