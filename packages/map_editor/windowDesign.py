@@ -154,13 +154,13 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.block_list)
         self.block_widget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.block_widget)
-        #self.info_widget = QtWidgets.QDockWidget(MainWindow)
+        self.info_widget = QtWidgets.QDockWidget(MainWindow)
         #sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         #sizePolicy.setHorizontalStretch(0)
         #sizePolicy.setVerticalStretch(0)
         #sizePolicy.setHeightForWidth(self.info_widget.sizePolicy().hasHeightForWidth())
-        #self.info_widget.setSizePolicy(sizePolicy)
-        #self.info_widget.setMinimumSize(QtCore.QSize(175, 250))
+        self.info_widget.setSizePolicy(sizePolicy)
+        self.info_widget.setMinimumSize(QtCore.QSize(175, 250))
 
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
@@ -181,18 +181,19 @@ class Ui_MainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(211, 215, 207))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Window, brush)
-        #self.info_widget.setPalette(palette)
+        self.info_widget.setPalette(palette)
         font = QtGui.QFont()
         font.setPointSize(11)
         font.setItalic(False)
-        '''
+
         self.info_widget.setFont(font)
         self.info_widget.setAcceptDrops(False)
         self.info_widget.setAutoFillBackground(True)
         self.info_widget.setFeatures(QtWidgets.QDockWidget.AllDockWidgetFeatures)
-        self.info_widget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea|QtCore.Qt.RightDockWidgetArea|QtCore.Qt.TopDockWidgetArea)
+        self.info_widget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea|QtCore.Qt.RightDockWidgetArea|QtCore.Qt.TopDockWidgetArea)\
+
         self.info_widget.setObjectName("info_widget")
-        '''
+
         self.dockWidgetContents_2 = QtWidgets.QWidget()
         self.dockWidgetContents_2.setObjectName("dockWidgetContents_2")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents_2)
@@ -201,9 +202,10 @@ class Ui_MainWindow(object):
         self.info_browser.setAutoFillBackground(False)
         self.info_browser.setObjectName("info_browser")
         self.verticalLayout.addWidget(self.info_browser)
-        '''
+
         self.info_widget.setWidget(self.dockWidgetContents_2)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.info_widget)
+        '''
         
         self.layer_info_widget = QtWidgets.QDockWidget(MainWindow)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
@@ -368,10 +370,11 @@ class Ui_MainWindow(object):
         
         self.menubar.addAction(self.menuDbl.menuAction())
         self.menubar.addAction(self.maps.menuAction())
-        self.menubar.addAction(self.help.menuAction())
-        #self.menubar.addAction(self.settings.menuAction())
-        #self.menubar.addAction(self.utils.menuAction()) TODO
         '''
+        #self.menubar.addAction(self.help.menuAction())
+        #self.menubar.addAction(self.settings.menuAction())
+        #self.menubar.addAction(self.utils.menuAction()) #TODO
+
         self.menubar.addAction(self.file.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -381,16 +384,18 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Map Builder"))
         self.file.setTitle(_translate("MainWindow", "File"))
+
+        #self.maps.setTitle(_translate("MainWindow", "Map Info"))
+
+        #self.help.setTitle(_translate("MainWindow", "Help"))
         '''
-        self.maps.setTitle(_translate("MainWindow", "Map Info"))
-        self.help.setTitle(_translate("MainWindow", "Help"))
         self.settings.setTitle(_translate("MainWindow", "Settings"))
         self.utils.setTitle(_translate("MainWindow", "Utils"))
         self.menuDbl.setTitle(_translate("MainWindow", "View"))
         '''
         self.tool_bar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.block_widget.setWindowTitle(_translate("MainWindow", "Maps, traffic_signs, and objects"))
-        #self.info_widget.setWindowTitle(_translate("MainWindow", "Description"))
+        self.info_widget.setWindowTitle(_translate("MainWindow", "Description"))
         #self.layer_info_widget.setWindowTitle(_translate("MainWindow", "Layers"))
         #self.map_info_widget.setWindowTitle(_translate("MainWindow", "Map editor"))
         self.default_fill_label.setText(_translate("MainWindow", "Default fill"))

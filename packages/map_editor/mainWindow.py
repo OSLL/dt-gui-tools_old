@@ -87,8 +87,8 @@ class DuckWindow(QtWidgets.QMainWindow):
         #  Initialize floating blocks
         block_widget = self.ui.block_widget
         # TODO
-        #info_widget = self.ui.info_widget
-        map_info_widget = self.ui.map_info_widget
+        info_widget = self.ui.info_widget
+        #map_info_widget = self.ui.map_info_widget
         #layer_info_widget = self.ui.layer_info_widget
 
         #  Assign actions to buttons
@@ -116,9 +116,11 @@ class DuckWindow(QtWidgets.QMainWindow):
         '''
 
         block_widget.closeEvent = functools.partial(self.blocks_event)
-        #info_widget.closeEvent = functools.partial(self.info_event)
-        map_info_widget.closeEvent = functools.partial(self.map_event)
+        info_widget.closeEvent = functools.partial(self.info_event)
+        #map_info_widget.closeEvent = functools.partial(self.map_event)
         #layer_info_widget.closeEvent = functools.partial(self.close_layer_window_event)
+
+        self.ui.info_browser.setText(self.info_json["description"])
 
         #  QToolBar setting
         tool_bar = self.ui.tool_bar
