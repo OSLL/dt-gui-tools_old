@@ -226,8 +226,8 @@ class MapAPI:
         path_to_delete = info['path']
         # info.clear()
         filelist = glob.glob(os.path.join(path_to_delete, "*.yaml"))
-        for f in filelist:
-            os.remove(f)
+        # for f in filelist:
+        #     os.remove(f)
 
 
     #  Brush mode
