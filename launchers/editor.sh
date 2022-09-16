@@ -16,7 +16,7 @@ dt-launchfile-init
 # set locale for app
 locale=${1:-'en'}
 
-#set dir
+# set default directory to open
 wkdir="/out"
 
 # launching app
