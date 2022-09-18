@@ -14,9 +14,16 @@ def default_map_storage() -> MapStorage:
 def create_layer(dm: Map, layer_name: str, layer: Dict[str, Any]) -> None:
     layer = MapLayer(dm, layer_name, layer)
     dm._layers.__dict__[layer_name] = layer
+    print("create", layer)
     register = lambda l, t: dm.layers.get(l).register_entity_helper(
         t) if dm.layers.has(l) else 0
+    #REGISTER.__delitem__("vehicles")
+    print(layer_name, REGISTER[layer_name])
+    #if layer_name not in REGISTER:
+
+
     register(layer_name, REGISTER[layer_name])
+
 
 
 def set_obj(layer: MapLayer, obj_name: str, default_conf: dict) -> None:

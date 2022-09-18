@@ -28,7 +28,7 @@ from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
     TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, KNOWN_LAYERS
 from classes.MapDescription import MapDescription
-from classes.layers import BasicLayer
+from classes.layers import BasicLayerHandler, DynamicLayer
 
 
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
@@ -58,11 +58,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QGraphicsView.__init__(self)
-
+        #REGISTER.__delitem__("vehicles")
+        print(REGISTER)
         self.setScene(QtWidgets.QGraphicsScene())
         self.map = default_map_storage()
         self.init_handlers()
-
         self.set_map_viewer_sizes()
         self.coordinates_transformer = CoordinatesTransformer(self.scale,
                                                               self.map_height,
@@ -88,7 +88,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def init_handlers(self) -> None:
         handlers_list = []
         module = import_module("layers")
-        for layer_name in REGISTER:
+        for layer_name in self.map.map.layers:
             if layer_name in KNOWN_LAYERS:
                 # get name of handler for known layers
                 layer_name_list = layer_name.split("_")
@@ -102,8 +102,19 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 attribute = getattr(module, layer_name)
                 handlers_list.append(attribute())
             else:
-                # create basic layer handler for unknown layers
-                handler = BasicLayer(layer_name)
+                # create dynamic layer and
+                # basic layer handler for unknown layers
+                print("handler", self.map.map.layers[layer_name])
+                fields = []
+                keys = list(self.map.map.layers[layer_name].keys())
+                if len(keys) > 0:
+                    conf = self.map.map.layers[layer_name][keys[0]]
+                    fields = list(conf.keys())
+                dynamic_layer = DynamicLayer(fields, layer_name, self.map.map)
+                REGISTER[layer_name] = dynamic_layer
+
+
+                handler = BasicLayerHandler(layer_name, fields)
                 handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
@@ -144,7 +155,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         new_obj = None
         img_name = layer_name
         # get path for object image from layer_name
-        if layer_name in LAYERS_WITH_TYPES and layer_object:
+        if layer_name not in KNOWN_LAYERS:
+            print(layer_name)
+            new_obj = DraggableImage(f"./img/objects/unknown.png", self,
+                                     object_name, layer_name)
+        elif layer_name in LAYERS_WITH_TYPES and layer_object:
             img_name = layer_object.type.value
         elif item_name:
             img_name = item_name
@@ -296,6 +311,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def get_object_conf(self, layer_name: str, name: str) -> Dict[str, Any]:
         layer = self.get_layer(layer_name)
+        print(layer)
         obj = layer[name]
         default_layer_conf = self.get_default_layer_conf(layer_name)
         try:
