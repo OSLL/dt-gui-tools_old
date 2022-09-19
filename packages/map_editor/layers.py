@@ -18,7 +18,7 @@ from dt_maps.types.vehicles import VehicleType, ColorType
 class TilesLayerHandler(BasicLayerHandler):
     def __init__(self) -> None:
         super(TilesLayerHandler, self).__init__(TILES)
-        self._default_conf = {'i': 0, 'j': 0, 'k': 0, 'type': 'floor'}
+        self._default_conf = {'i': 0, 'j': 0, 'type': 'floor'}
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -54,8 +54,9 @@ class WatchtowersLayerHandler(BasicLayerHandler):
 class FramesLayerHandler(BasicLayerHandler):
     def __init__(self) -> None:
         super(FramesLayerHandler, self).__init__(FRAMES)
-        self._default_conf = {'pose': {'x': 1.0, 'y': 1.0, 'z': 0.0, 'yaw': 0.0, 'roll': 0.0,
-                         'pitch': 0.0}, 'relative_to': ""}
+        self._default_conf = {'pose': {'x': 1.0, 'y': 1.0, 'z': 0.0, 'yaw': 0.0,
+                                       'roll': 0.0,
+                              'pitch': 0.0}, 'relative_to': ""}
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -129,9 +130,10 @@ class CitizensLayerHandler(BasicLayerHandler):
                config.get("color") in [t.value for t in CitizenType]
 
 
-'''class VehiclesHandler(BasicLayer):
+class VehiclesLayerHandler(BasicLayerHandler):
     def __init__(self) -> None:
-        super(VehiclesHandler, self).__init__(VEHICLES)
+        super(VehiclesLayerHandler, self).__init__(VEHICLES)
+        self._default_conf = {"color": "blue", "configuration": "DB18", "id": 0}
 
     def handle(self, command: Command) -> Any:
         response = command.execute(self.dm, self.data, self.layer_name,
@@ -141,13 +143,10 @@ class CitizensLayerHandler(BasicLayerHandler):
             return response
         return super().handle(command)
 
-    def default_conf(self) -> Dict[str, Any]:
-        return {"color": "blue", "configuration": "DB18", "id": 0}
-
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and \
                config.get("configuration") in [t.value for t in VehicleType] and \
-               config.get("color") in [t.value for t in ColorType]'''
+               config.get("color") in [t.value for t in ColorType]
 
 
 if __name__ == '__main__':

@@ -176,6 +176,7 @@ class MapAPI:
             window.set_default_fill(item_name)
         else:
             type_of_element = self.info_json['info'][item_name]['type']
+            #self._map_viewer.add_obj(type_of_element, item_name)
             try:    
                 self._map_viewer.add_obj(type_of_element, item_name)
             except KeyError:

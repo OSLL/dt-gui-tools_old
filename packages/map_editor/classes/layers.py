@@ -23,12 +23,12 @@ class AbstractLayer(ABC):
 
         try:
             self.data = self.dm.layers[self.layer_name]
-            if layer_name == "vehicles":
-                print(self.data)
         except KeyError:
+            print("create layer", layer_name)
             logging.error(f"Empty layer {self.layer_name}")
             create_layer(self.dm, self.layer_name, {})
             self.data = self.dm.layers[self.layer_name]
+        #print(REGISTER)
         self._layer_handler = REGISTER[self.layer_name]
 
     @property

@@ -589,7 +589,7 @@
             "icon": "img/traffic_signs/pedestrian.png"
         },
         "truck": {
-            "type": "object",
+            "type": "truck",
             "lang": {
                 "ru": {
                     "name": "Грузовик",

@@ -21,7 +21,7 @@ REGISTER = {
     TILES: Tile,
     TILE_MAPS: TileSize,
     WATCHTOWERS: Watchtower,
-    VEHICLES: Vehicle,
+    #VEHICLES: Vehicle,
     CITIZENS: Citizen,
     TRAFFIC_SIGNS: TrafficSign,
     GROUND_TAGS: GroundTag
