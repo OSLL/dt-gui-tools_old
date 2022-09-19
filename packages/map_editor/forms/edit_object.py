@@ -44,20 +44,19 @@ class EditObject(QDialog):
         try:
             #TODO
             for frame_key in self.info_send["frame"]:
-                if frame_key == 'relative_to':
-                    self.info_send["frame"][frame_key] = (
-                        self.info["types"][frame_key])(
-                        self.info[frame_key].text())
+                if frame_key == "relative_to":
+                    list_for_edit = [frame_key]
                 else:
-                    for frame_val in self.info_send["frame"][frame_key]:
-                        if isinstance(self.info_send["frame"][frame_key], dict):
-                            row_name = f"{frame_key}.{frame_val}"
-                            self.info_send["frame"][frame_key][frame_val] = \
-                                (self.info["types"][row_name])(self.info[row_name].text())
-                        else:
-                            self.info_send["frame"][frame_key] = (
-                                self.info["types"][frame_key])(
-                                self.info[frame_key].text())
+                    list_for_edit = self.info_send["frame"][frame_key]
+                for frame_val in list_for_edit:
+                    if isinstance(self.info_send["frame"][frame_key], dict):
+                        row_name = f"{frame_key}.{frame_val}"
+                        self.info_send["frame"][frame_key][frame_val] = \
+                            (self.info["types"][row_name])(self.info[row_name].text())
+                    else:
+                        self.info_send["frame"][frame_key] = (
+                            self.info["types"][frame_key])(
+                            self.info[frame_key].text())
             for key in self.info_send["new_config"]:
                 self.info_send["new_config"][key] = (self.info["types"][key])(self.info[key].text())
         except ValueError:
@@ -77,35 +76,24 @@ class EditObject(QDialog):
         layout.addWidget(QHLine())
         # TODO
         for frame_key in frame:
-            if frame_key == 'relative_to':
+            if frame_key == "relative_to":
+                list_for_edit = [frame_key]
+            else:
+                list_for_edit = frame[frame_key]
+            for frame_val in list_for_edit:
                 edit = QLineEdit(self)
                 if not isinstance(frame[frame_key], dict):
                     row_name = frame_key
                     val = frame[frame_key]
                 else:
-                    row_name = frame_key
-                    val = frame[frame_key]
+                    row_name = f"{frame_key}.{frame_val}"
+                    val = frame[frame_key][frame_val]
                 self.info["types"][row_name] = type(val)
                 self.info[row_name] = edit
                 edit.setText(str(val))
                 if not self.is_draggable:
                     edit.setDisabled(True)
                 layout.addRow(QLabel(row_name), edit)
-            else:
-                for frame_val in frame[frame_key]:
-                    edit = QLineEdit(self)
-                    if not isinstance(frame[frame_key], dict):
-                        row_name = frame_key
-                        val = frame[frame_key]
-                    else:
-                        row_name = f"{frame_key}.{frame_val}"
-                        val = frame[frame_key][frame_val]
-                    self.info["types"][row_name] = type(val)
-                    self.info[row_name] = edit
-                    edit.setText(str(val))
-                    if not self.is_draggable:
-                        edit.setDisabled(True)
-                    layout.addRow(QLabel(row_name), edit)
         self.formGroupBox.setLayout(layout)
 
 

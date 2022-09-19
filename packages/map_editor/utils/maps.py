@@ -53,6 +53,10 @@ def change_map_directory(dm: Map, new_dir: str) -> None:
     dm._assets_dir = os.path.join(dm._path, "assets")
 
 
+def change_map_name(dm: Map, new_name: str) -> None:
+    dm._name = new_name
+
+
 def get_map_height(tiles: Dict[str, Any]) -> int:
     return get_map_size(tiles, "j")
     
