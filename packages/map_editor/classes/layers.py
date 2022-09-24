@@ -4,7 +4,7 @@ from dt_maps import MapLayer
 from dt_maps.types.commons import EntityHelper
 from classes.basic.chain import AbstractHandler
 from classes.basic.command import Command
-from utils.maps import REGISTER
+from dt_maps.Map import REGISTER
 from mapStorage import MapStorage
 from utils.maps import create_layer
 from typing import Dict, Any
@@ -30,7 +30,11 @@ class AbstractLayer(ABC):
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         for field in config:
-            map_layer_type = self._layer_handler._get_property_types(self._layer_handler, field)
+            try:
+                map_layer_type = self._layer_handler._get_property_types(self._layer_handler, field)
+            except TypeError:
+                map_layer_type = self._layer_handler._get_property_types(
+                    field)
             if not isinstance(config[field], map_layer_type):
                 return False
         return True
@@ -50,3 +54,25 @@ class BasicLayerHandler(AbstractHandler, AbstractLayer):
         if response:
             return response
         return super().handle(command)
+
+
+class DynamicLayer(EntityHelper):
+    _fields: Dict[str, str] = {}
+    _layer_name: str = ""
+
+    def __init__(self, **kwargs):
+        super(DynamicLayer, self).__init__(kwargs["map"], kwargs["layer_name"])
+        self._layer_name = kwargs["layer_name"]
+        for field_type in kwargs["fields"]:
+            # TODO added for dicts
+            self._fields[field_type] = ""
+            setattr(self, field_type, "")
+
+    def _get_property_values(self, name: str) -> str:
+        return self._fields[name]
+
+    def _get_property_types(self, name: str) -> Any:
+        return type(self._fields[name])
+
+    def _get_layer_name(self) -> str:
+        return self._layer_name

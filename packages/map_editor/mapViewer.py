@@ -14,7 +14,7 @@ from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
 from classes.Commands.GetDefaultLayerConf import GetDefaultLayerConf
 from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
-from classes.layers import BasicLayerHandler
+from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from coordinatesTransformer import CoordinatesTransformer
@@ -24,12 +24,13 @@ from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    REGISTER, change_map_name, convert_layer_name
+    change_map_name, convert_layer_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
     TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, KNOWN_LAYERS
 from classes.MapDescription import MapDescription
 from pathlib import Path
+from dt_maps.Map import REGISTER
 
 
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
@@ -78,19 +79,19 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def init_objects(self) -> None:
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
-            if layer_name not in LAYERS_WITH_TYPES and \
-            layer_name not in OBJECTS_TYPES or not layer:
-                continue
-            for object_name in layer:
-                layer_object = layer[object_name]
-                self.add_obj_image(layer_name, object_name, layer_object)
+            if layer:
+                for object_name in layer:
+                    layer_object = layer[object_name]
+                    self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
         handlers_list = []
         module = import_module("layers")
-        for layer_name in REGISTER:
+        layers_names = list(self.map.map.layers.__dict__.keys())
+
+        for layer_name in layers_names:
             if layer_name in KNOWN_LAYERS:
-                # get name of handler for known layers
+                # dynamically import handlers for known layers
                 layer_name_list = layer_name.split("_")
                 class_name = ""
                 for name in layer_name_list:
@@ -102,6 +103,22 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 attribute = getattr(module, layer_name)
                 handlers_list.append(
                     attribute(layer_name=convert_layer_name(class_name)))
+            else:
+                # get unknown layer config from .yaml
+                keys = list(self.map.map.layers[layer_name].keys())
+                conf = {}
+                if len(keys) > 0:
+                    conf = self.map.map.layers[layer_name][keys[0]]
+                # create dynamic layer
+                dynamic_layer = DynamicLayer(fields=conf.keys(),
+                                             layer_name=layer_name,
+                                             map=self.map.map)
+                # register new dynamic layer in map.layers
+                REGISTER[layer_name] = dynamic_layer
+                # added basic layer handler
+                handler = BasicLayerHandler(default_conf=conf,
+                                            layer_name=layer_name)
+                handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
         self.handlers = handlers_list[0]
@@ -145,6 +162,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                       layer_object=None, item_name: str = None) -> None:
         new_obj = None
         img_name = layer_name
+        if layer_name in self.map.map.layers and layer_name not in KNOWN_LAYERS:
+            new_obj = DraggableImage(f"./img/objects/unknown.png", self,
+                                     object_name, layer_name)
         if layer_name in LAYERS_WITH_TYPES and layer_object:
             img_name = layer_object.type.value
         elif item_name:
