@@ -1,8 +1,7 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from dt_maps import MapLayer
 from dt_maps.types.commons import EntityHelper
-
 from classes.basic.chain import AbstractHandler
 from classes.basic.command import Command
 from utils.maps import REGISTER
@@ -14,29 +13,20 @@ from typing import Dict, Any
 class AbstractLayer(ABC):
     _data: MapLayer = None
     _layer_handler: EntityHelper = None
-    #_layer_name: str = ""
+    _layer_name: str = ""
+    _default_conf: Dict[str, Any] = {}
 
     def __init__(self, **kwargs) -> None:
         self.dm = MapStorage().map
-        #self._layer_name = kwargs["layer_name"]
+        self._layer_name = kwargs["layer_name"]
+        self._default_conf = kwargs["default_conf"]
         try:
-            self.data = self.dm.layers[self.layer_name()]
+            self.data = self.dm.layers[self._layer_name]
         except KeyError:
-            logging.error(f"Empty layer {self.layer_name()}")
-            create_layer(self.dm, self.layer_name(), {})
-            self.data = self.dm.layers[self.layer_name()]
-        self._layer_handler = REGISTER[self.layer_name()]
-
-    def layer_name(self) -> str:
-        pass
-    #    return self._layer_name
-
-    def render(self) -> None:
-        pass
-
-    @abstractmethod
-    def default_conf(self) -> Dict[str, Any]:
-        pass
+            logging.error(f"Empty layer {self._layer_name}")
+            create_layer(self.dm, self._layer_name, {})
+            self.data = self.dm.layers[self._layer_name]
+        self._layer_handler = REGISTER[self._layer_name]
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         for field in config:
@@ -54,15 +44,9 @@ class BasicLayerHandler(AbstractHandler, AbstractLayer):
         super(BasicLayerHandler, self).__init__(**kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.data, self.layer_name(),
-                                   self.default_conf(),
+        response = command.execute(self.data, self._layer_name,
+                                   self._default_conf.copy(),
                                    check_config=self.check_config)
         if response:
             return response
         return super().handle(command)
-
-    def layer_name(self) -> str:
-        pass
-
-    def default_conf(self) -> Dict[str, Any]:
-        pass

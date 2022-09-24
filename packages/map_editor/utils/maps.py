@@ -81,6 +81,16 @@ def get_map_size(tiles: Dict[str, Any], side: str) -> int:
         return 0
 
 
+def convert_layer_name(class_name: str):
+    res = class_name[0].lower()
+    for char in class_name[1:]:
+        if char.isupper():
+            res += f"_{char.lower()}"
+        else:
+            res += char
+    return res
+
+
 if __name__ == '__main__':
     m = default_map_storage()
     print(m.map.name)

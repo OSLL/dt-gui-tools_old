@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from importlib import import_module
+
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QKeyEvent
@@ -12,11 +14,9 @@ from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
 from classes.Commands.GetDefaultLayerConf import GetDefaultLayerConf
 from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
+from classes.layers import BasicLayerHandler
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
-from layers import TileLayerHandler, WatchtowersLayerHandler, \
-    FramesLayerHandler, TileMapsLayerHandler, CitizensHandler, \
-    TrafficSignsHandler, GroundTagsHandler, VehiclesHandler
 from coordinatesTransformer import CoordinatesTransformer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
@@ -24,10 +24,10 @@ from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    REGISTER, change_map_name
+    REGISTER, change_map_name, convert_layer_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
-    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG
+    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, KNOWN_LAYERS
 from classes.MapDescription import MapDescription
 from pathlib import Path
 
@@ -86,22 +86,25 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
-        self.tiles = TileLayerHandler()
-        watchtowers = WatchtowersLayerHandler()
-        frames = FramesLayerHandler()
-        tile_maps = TileMapsLayerHandler()
-        citizens = CitizensHandler()
-        traffic_signs = TrafficSignsHandler()
-        ground_tags = GroundTagsHandler()
-        vehicles = VehiclesHandler()
-        # self.decorations = DecorationsHandler()
-
-        handlers_list = [self.tiles, watchtowers, frames,
-                         tile_maps, citizens, traffic_signs,
-                         vehicles, ground_tags]
+        handlers_list = []
+        module = import_module("layers")
+        for layer_name in REGISTER:
+            if layer_name in KNOWN_LAYERS:
+                # get name of handler for known layers
+                layer_name_list = layer_name.split("_")
+                class_name = ""
+                for name in layer_name_list:
+                    name = list(name)
+                    name[0] = name[0].upper()
+                    name = "".join(name)
+                    class_name += name
+                layer_name = f"{class_name}LayerHandler"
+                attribute = getattr(module, layer_name)
+                handlers_list.append(
+                    attribute(layer_name=convert_layer_name(class_name)))
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
-        self.handlers = self.tiles
+        self.handlers = handlers_list[0]
 
     def set_map_viewer_sizes(self, tile_width: float = 0, tile_height: float = 0) -> None:
         if not (tile_width and tile_height):
