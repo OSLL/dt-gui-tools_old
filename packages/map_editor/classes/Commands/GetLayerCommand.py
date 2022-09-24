@@ -1,5 +1,5 @@
 from typing import Optional
-from dt_maps import Map, MapLayer
+from dt_maps import MapLayer
 from classes.basic.command import Command
 
 

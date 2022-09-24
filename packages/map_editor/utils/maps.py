@@ -60,7 +60,7 @@ def get_map_size(tiles: Dict[str, Any], side: str) -> int:
         return 0
 
 
-def convert_layer_name(class_name: str):
+def convert_layer_name(class_name: str) -> str:
     res = class_name[0].lower()
     for char in class_name[1:]:
         if char.isupper():

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from importlib import import_module
-
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QKeyEvent
@@ -89,6 +88,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         module = import_module("layers")
         layers_names = list(self.map.map.layers.__dict__.keys())
 
+
         for layer_name in layers_names:
             if layer_name in KNOWN_LAYERS:
                 # dynamically import handlers for known layers
@@ -123,7 +123,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             handlers_list[i].set_next(handlers_list[i + 1])
         self.handlers = handlers_list[0]
 
-    def set_map_viewer_sizes(self, tile_width: float = 0, tile_height: float = 0) -> None:
+    def set_map_viewer_sizes(self, tile_width: float = 0,
+                             tile_height: float = 0) -> None:
         if not (tile_width and tile_height):
             try:
                 tile_map_obj = self.get_layer(TILE_MAPS)[self.tile_map]
@@ -165,7 +166,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if layer_name in self.map.map.layers and layer_name not in KNOWN_LAYERS:
             new_obj = DraggableImage(f"./img/objects/unknown.png", self,
                                      object_name, layer_name)
-        if layer_name in LAYERS_WITH_TYPES and layer_object:
+        elif layer_name in LAYERS_WITH_TYPES and layer_object:
             img_name = layer_object.type.value
         elif item_name:
             img_name = item_name
@@ -190,7 +191,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.move_obj(new_obj, {"new_coordinates": new_coordinates})
             self.objects[object_name] = new_obj
             if new_obj.layer_name in LAYERS_WITH_TYPES:
-                self.handlers.handle(ChangeTypeCommand(new_obj.layer_name, object_name, img_name))
+                self.handlers.handle(ChangeTypeCommand(new_obj.layer_name,
+                                                       object_name, img_name))
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
 
     def add_obj_on_map(self, layer_name: str, object_name: str) -> None:
@@ -209,7 +211,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(MoveTileCommand(tile_name, tile_id))
 
     def set_tile_size_command(self, tile_map: str,
-                      tile_size: Tuple[float, float]) -> None:
+                              tile_size: Tuple[float, float]) -> None:
         self.handlers.handle(SetTileSizeCommand(tile_map, tile_size))
 
     def delete_objects(self):
@@ -227,7 +229,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             obj.move_object((obj.pos().x() + delta_coord[0],
                              obj.pos().y() + delta_coord[1]))
 
-    def set_obj_map_pos(self, obj: ImageObject, new_pos: Tuple[float, float]) -> None:
+    def set_obj_map_pos(self, obj: ImageObject,
+                        new_pos: Tuple[float, float]) -> None:
         obj.set_obj_map_pos(new_pos)
 
     def move_obj_on_map(self, frame_name: str,
@@ -315,7 +318,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         return self.handlers.handle(GetDefaultLayerConf(layer_name))
 
     def get_object_conf(self, layer_name: str, name: str) -> Dict[str, Any]:
-        layer = self.get_layer(layer_name)
+        layer = self.get_layer(layer_name).copy()
         obj = layer[name]
         default_layer_conf = self.get_default_layer_conf(layer_name)
         for key in default_layer_conf:
@@ -381,6 +384,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         else:
             self.parentWidget().parent().view_info_form("Error",
                                                         "Invalid values entered!")
+
 
     def check_layer_config(self, layer_name: str, new_config: Dict[str, Any]):
         return self.handlers.handle(CheckConfigCommand(layer_name, new_config))
