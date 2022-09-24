@@ -11,7 +11,7 @@ class AddRelativeToObj(Command):
         self._object_name = object_name
         self._relative_to = relative_to
 
-    def execute(self, dm: Map, layer: MapLayer, layer_name: str, *args,
+    def execute(self, layer: MapLayer, layer_name: str, *args,
                 **kwargs) -> None:
         if layer_name == FRAMES:
             layer[self._object_name][RELATIVE_TO] = self._relative_to

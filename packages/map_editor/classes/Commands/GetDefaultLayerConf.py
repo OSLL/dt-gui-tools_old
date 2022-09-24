@@ -9,8 +9,7 @@ class GetDefaultLayerConf(Command):
     def __init__(self, layer_name) -> None:
         self._layer_name = layer_name
 
-    def execute(self, dm: Map,
-                layer: MapLayer,
+    def execute(self, layer: MapLayer,
                 layer_name: str,
                 default_conf: dict,
                 *args, **kwargs) -> Dict[str, Any]:

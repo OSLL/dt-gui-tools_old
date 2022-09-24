@@ -9,8 +9,7 @@ class GetLayerCommand(Command):
     def __init__(self, layer_name) -> None:
         self._layer_name = layer_name
 
-    def execute(self, dm: Map,
-                layer: MapLayer,
+    def execute(self, layer: MapLayer,
                 layer_name: str,
                 *args, **kwargs) -> Optional[MapLayer]:
         if layer_name == self._layer_name:

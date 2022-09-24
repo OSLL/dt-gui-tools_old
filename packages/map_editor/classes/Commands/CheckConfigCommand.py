@@ -11,8 +11,8 @@ class CheckConfigCommand(Command):
         self._layer_name = layer_name
         self._new_config = new_config
 
-    def execute(self, dm: Map, layer: MapLayer,
-                layer_name: str, *args, **kwargs) -> None:
+    def execute(self, layer: MapLayer, layer_name: str, *args,
+                **kwargs) -> None:
         if layer_name == self._layer_name:
             check_config = kwargs["check_config"]
             return check_config(self._new_config)

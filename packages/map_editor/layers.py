@@ -21,7 +21,7 @@ class TileLayerHandler(AbstractHandler, AbstractLayer):
         super(TileLayerHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -44,7 +44,7 @@ class WatchtowersLayerHandler(AbstractHandler, AbstractLayer):
         super(WatchtowersLayerHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -67,7 +67,7 @@ class FramesLayerHandler(AbstractHandler, AbstractLayer):
         super(FramesLayerHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -87,7 +87,7 @@ class TileMapsLayerHandler(AbstractHandler, AbstractLayer):
         super(TileMapsLayerHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf())
         if response:
             return response
@@ -105,7 +105,7 @@ class TrafficSignsHandler(AbstractHandler, AbstractLayer):
         super(TrafficSignsHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -128,7 +128,7 @@ class GroundTagsHandler(AbstractHandler, AbstractLayer):
         super(GroundTagsHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -147,7 +147,7 @@ class CitizensHandler(AbstractHandler, AbstractLayer):
         super(CitizensHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
@@ -170,7 +170,7 @@ class VehiclesHandler(AbstractHandler, AbstractLayer):
         super(VehiclesHandler, self).__init__(*kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
+        response = command.execute(self.data, self.layer_name(),
                                    self.default_conf(),
                                    check_config=self.check_config)
         if response:
