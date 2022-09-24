@@ -87,8 +87,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         handlers_list = []
         module = import_module("layers")
         layers_names = list(self.map.map.layers.__dict__.keys())
-
-
         for layer_name in layers_names:
             if layer_name in KNOWN_LAYERS:
                 # dynamically import handlers for known layers
@@ -108,7 +106,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 keys = list(self.map.map.layers[layer_name].keys())
                 conf = {}
                 if len(keys) > 0:
+                    # set default conf with empty values
                     conf = self.map.map.layers[layer_name][keys[0]]
+                    for field in conf:
+                        conf[field] = ""
                 # create dynamic layer
                 dynamic_layer = DynamicLayer(fields=conf.keys(),
                                              layer_name=layer_name,
