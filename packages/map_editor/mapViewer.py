@@ -23,7 +23,7 @@ from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    change_map_name, convert_layer_name
+    change_map_name, convert_layer_name_to_class_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
     TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, KNOWN_LAYERS
@@ -90,24 +90,18 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for layer_name in layers_names:
             if layer_name in KNOWN_LAYERS:
                 # dynamically import handlers for known layers
-                layer_name_list = layer_name.split("_")
-                class_name = ""
-                for name in layer_name_list:
-                    name = list(name)
-                    name[0] = name[0].upper()
-                    name = "".join(name)
-                    class_name += name
-                layer_name = f"{class_name}LayerHandler"
-                attribute = getattr(module, layer_name)
+                class_name = convert_layer_name_to_class_name(layer_name)
+                handler_layer_name = f"{class_name}LayerHandler"
+                attribute = getattr(module, handler_layer_name)
                 handlers_list.append(
-                    attribute(layer_name=convert_layer_name(class_name)))
+                    attribute(layer_name=layer_name))
             else:
                 # get unknown layer config from .yaml
                 keys = list(self.map.map.layers[layer_name].keys())
                 conf = {}
                 if len(keys) > 0:
                     # set default conf with empty values
-                    conf = self.map.map.layers[layer_name][keys[0]]
+                    conf = self.map.map.layers[layer_name][keys[0]].copy()
                     for field in conf:
                         conf[field] = ""
                 # create dynamic layer
@@ -322,6 +316,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         layer = self.get_layer(layer_name).copy()
         obj = layer[name]
         default_layer_conf = self.get_default_layer_conf(layer_name)
+        if not default_layer_conf:
+            default_layer_conf = {}
         for key in default_layer_conf:
             try:
                 default_layer_conf[key] = obj[key].value

@@ -60,14 +60,15 @@ def get_map_size(tiles: Dict[str, Any], side: str) -> int:
         return 0
 
 
-def convert_layer_name(class_name: str) -> str:
-    res = class_name[0].lower()
-    for char in class_name[1:]:
-        if char.isupper():
-            res += f"_{char.lower()}"
-        else:
-            res += char
-    return res
+def convert_layer_name_to_class_name(layer_name: str) -> str:
+    layer_name_list = layer_name.split("_")
+    class_name = ""
+    for name in layer_name_list:
+        name = list(name)
+        name[0] = name[0].upper()
+        name = "".join(name)
+        class_name += name
+    return class_name
 
 
 if __name__ == '__main__':
