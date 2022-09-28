@@ -43,7 +43,10 @@ class MapAPI:
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
         path = self._qt_api.get_dir(parent, "open")
         if path:
-            self._map_viewer.open_map(Path(path), self._map_storage.map.name)
+            if len(os.listdir(path)):
+                self._map_viewer.open_map(Path(path), self._map_storage.map.name)
+            else:
+                self.view_info_form("Info", "Can't open empty directory")
         self.set_move_mode(False)
 
     def import_old_format(self):

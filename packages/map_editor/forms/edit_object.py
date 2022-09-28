@@ -66,6 +66,8 @@ class EditObject(QDialog):
                 self.info_send["new_config"][key] = val
         except ValueError:
             self.info_send["is_valid"] = False
+        except SyntaxError:
+            self.info_send["is_valid"] = False
         self.get_info.emit(self.info_send)
         self.close()
 
