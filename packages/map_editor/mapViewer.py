@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from importlib import import_module
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
@@ -86,7 +87,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def init_handlers(self) -> None:
         handlers_list = []
         module = import_module("layers")
+        register_layers = REGISTER.keys()
         layers_names = list(self.map.map.layers.__dict__.keys())
+        for key in register_layers:
+            if key not in layers_names:
+                layers_names.append(key)
         for layer_name in layers_names:
             if layer_name in KNOWN_LAYERS:
                 # dynamically import handlers for known layers
@@ -97,11 +102,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     attribute(layer_name=layer_name))
             else:
                 # get unknown layer config from .yaml
-                keys = list(self.map.map.layers[layer_name].keys())
+                try:
+                    keys = list(self.map.map.layers[layer_name].keys())
+                except KeyError:
+                    continue
                 conf = {}
                 if len(keys) > 0:
                     # set default conf with empty values
-                    conf = self.map.map.layers[layer_name][keys[0]].copy()
+                    conf = deepcopy(self.map.map.layers[layer_name][keys[0]])
                 # create dynamic layer
                 dynamic_layer = DynamicLayer(conf=conf,
                                              layer_name=layer_name,
@@ -313,7 +321,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def get_object_conf(self, layer_name: str, name: str) -> Dict[str, Any]:
         layer = self.get_layer(layer_name).copy()
         obj = layer[name]
-        default_layer_conf = self.get_default_layer_conf(layer_name)
+        default_layer_conf = self.get_default_layer_conf(layer_name).copy()
         if not default_layer_conf:
             default_layer_conf = {}
         for key in default_layer_conf:

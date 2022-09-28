@@ -8,6 +8,7 @@ from dt_maps.Map import REGISTER
 from mapStorage import MapStorage
 from utils.maps import create_layer
 from typing import Dict, Any
+from copy import deepcopy
 
 
 class AbstractLayer(ABC):
@@ -21,11 +22,11 @@ class AbstractLayer(ABC):
         self._layer_name = kwargs["layer_name"]
         self._default_conf = kwargs["default_conf"]
         try:
-            self.data = self.dm.layers[self._layer_name]
+            self._data = self.dm.layers[self._layer_name]
         except KeyError:
             logging.error(f"Empty layer {self._layer_name}")
             create_layer(self.dm, self._layer_name, {})
-            self.data = self.dm.layers[self._layer_name]
+            self._data = self.dm.layers[self._layer_name]
         self._layer_handler = REGISTER[self._layer_name]
 
     def check_config(self, config: Dict[str, Any]) -> bool:
@@ -48,8 +49,8 @@ class BasicLayerHandler(AbstractHandler, AbstractLayer):
         super(BasicLayerHandler, self).__init__(**kwargs)
 
     def handle(self, command: Command) -> Any:
-        response = command.execute(self.data, self._layer_name,
-                                   self._default_conf.copy(),
+        response = command.execute(self._data, self._layer_name,
+                                   deepcopy(self._default_conf),
                                    check_config=self.check_config)
         if response:
             return response
