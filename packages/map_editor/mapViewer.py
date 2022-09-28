@@ -102,10 +102,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 if len(keys) > 0:
                     # set default conf with empty values
                     conf = self.map.map.layers[layer_name][keys[0]].copy()
-                    for field in conf:
-                        conf[field] = ""
                 # create dynamic layer
-                dynamic_layer = DynamicLayer(fields=conf.keys(),
+                dynamic_layer = DynamicLayer(conf=conf,
                                              layer_name=layer_name,
                                              map=self.map.map)
                 # register new dynamic layer in map.layers

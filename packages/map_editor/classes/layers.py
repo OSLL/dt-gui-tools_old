@@ -57,16 +57,15 @@ class BasicLayerHandler(AbstractHandler, AbstractLayer):
 
 
 class DynamicLayer(EntityHelper):
-    _fields: Dict[str, str] = {}
+    _fields: Dict[str, Any] = {}
     _layer_name: str = ""
 
     def __init__(self, **kwargs):
         super(DynamicLayer, self).__init__(kwargs["map"], kwargs["layer_name"])
         self._layer_name = kwargs["layer_name"]
-        for field_type in kwargs["fields"]:
-            # TODO added for dicts
-            self._fields[field_type] = ""
-            setattr(self, field_type, "")
+        for field_name, field_val in kwargs["conf"].items():
+            self._fields[field_name] = field_val
+            setattr(self, field_name, field_val)
 
     def _get_property_values(self, name: str) -> str:
         return self._fields[name]

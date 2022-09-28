@@ -1,0 +1,14 @@
+trucks:
+  map_1/truck1:
+    kot: qwer
+    lot:
+    - 1
+    - 2
+    - 4
+    mor: 1
+    not:
+      qw: qwe
+    obzhor:
+    - 1
+    - a
+    - 4
