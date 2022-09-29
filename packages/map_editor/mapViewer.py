@@ -85,6 +85,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
+        # import handlers for module layers
         handlers_list = []
         module = import_module("layers")
         register_layers = REGISTER.keys()

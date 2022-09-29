@@ -6,6 +6,7 @@ from classes.basic.chain import AbstractHandler
 from classes.basic.command import Command
 from dt_maps.Map import REGISTER
 from mapStorage import MapStorage
+from utils.constants import LAYER_NAME
 from utils.maps import create_layer
 from typing import Dict, Any
 from copy import deepcopy
@@ -19,7 +20,7 @@ class AbstractLayer(ABC):
 
     def __init__(self, **kwargs) -> None:
         self.dm = MapStorage().map
-        self._layer_name = kwargs["layer_name"]
+        self._layer_name = kwargs[LAYER_NAME]
         self._default_conf = kwargs["default_conf"]
         try:
             self._data = self.dm.layers[self._layer_name]
@@ -62,8 +63,8 @@ class DynamicLayer(EntityHelper):
     _layer_name: str = ""
 
     def __init__(self, **kwargs):
-        super(DynamicLayer, self).__init__(kwargs["map"], kwargs["layer_name"])
-        self._layer_name = kwargs["layer_name"]
+        super(DynamicLayer, self).__init__(kwargs["map"], kwargs[LAYER_NAME])
+        self._layer_name = kwargs[LAYER_NAME]
         for field_name, field_val in kwargs["conf"].items():
             self._fields[field_name] = field_val
             setattr(self, field_name, field_val)
