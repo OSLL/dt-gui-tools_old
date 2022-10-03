@@ -3,6 +3,7 @@ NOT_DRAGGABLE = ["tiles"]
 LAYERS_WITH_TYPES = ["traffic_signs", "tiles"]
 KNOWN_LAYERS = ["frames", "tiles", "tile_maps", "watchtowers", "citizens",
                 "traffic_signs", "ground_tags", "vehicles"]
+REQUIRED_LAYERS = ["tiles.yaml", "frames.yaml", "tile_maps.yaml"]
 TILES = "tiles"
 FRAMES = "frames"
 FRAME = "frame"

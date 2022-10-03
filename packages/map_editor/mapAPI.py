@@ -7,7 +7,7 @@ from forms.quit import quit_message_box
 from forms.default_forms import form_yes
 from forms.start_info import NewMapInfoForm
 from forms.edit_object import EditObject
-from utils.maps import change_map_directory, change_map_name
+from utils.maps import change_map_directory
 from utils.qtWindowAPI import QtWindowAPI
 from mapStorage import MapStorage
 from mapViewer import MapViewer
@@ -16,6 +16,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
+from utils.constants import REQUIRED_LAYERS
 
 
 TILE_TYPES = ('block', 'road')
@@ -45,13 +46,13 @@ class MapAPI:
         if path:
             dir_content = os.listdir(path)
             if len(dir_content):
-                check_list = ["tiles.yaml", "frames.yaml", "tile_maps.yaml"]
                 status = True
-                for file_name in check_list:
+                for file_name in REQUIRED_LAYERS:
                     if file_name not in dir_content:
                         self.view_info_form("Info",
                                             f"Can't open directory, no file {file_name}")
                         status = False
+                        break
                 if status:
                     self._map_viewer.open_map(Path(path), self._map_storage.map.name)
             else:
