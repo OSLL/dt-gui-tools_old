@@ -77,11 +77,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
+        frames = self.get_layer("frames")
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
-            if layer:
+            if layer and layer_name != "frames":
                 for object_name in layer:
                     layer_object = layer[object_name]
+                    if not object_name in frames:
+                        self.add_frame_on_map(object_name)
                     self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
@@ -582,6 +585,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.open_map(path, info["map_name"], True, (width, height),
                       (tile_width, tile_height))
         self.set_coordinates_transformer_data()
+
 
     def set_coordinates_transformer_data(self):
         self.coordinates_transformer.set_scale(self.scale)

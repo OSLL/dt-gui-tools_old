@@ -75,6 +75,7 @@ class MapAPI:
                     shutil.rmtree(path)
                 os.makedirs(path)
                 self._map_viewer.create_new_map(info, path)
+                self.save_map_triggered()
             except OSError as err:
                 logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
