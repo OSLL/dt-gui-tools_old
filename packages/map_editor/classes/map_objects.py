@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
+from painter import Painter
 
 
 class ImageObject(QtWidgets.QLabel):
@@ -16,6 +17,7 @@ class ImageObject(QtWidgets.QLabel):
         self.pixmap = None
         self.change_image(img_path)
         self.setMouseTracking(True)
+        self.is_select = False
 
     def is_draggable(self) -> bool:
         return False
@@ -125,7 +127,15 @@ class DraggableImage(ImageObject):
             self.change_position((new_pos.x(), new_pos.y()))
             self.move_in_map((new_pos.x(), new_pos.y()))
             self.drag_start_pos = None
+
+            #self.update()
+            #Painter.draw_border(self.pixmap, (self.pos().x(), self.pos().y()),
+            #                    self)
             self.parentWidget().scene_update()
+
+    #def paintEvent(self, QPaintEvent):
+    #    print(self.name)
+    #    Painter.draw_border(self.pixmap, (self.pos().x(), self.pos().y()), self)
 
 
 if __name__ == '__main__':
