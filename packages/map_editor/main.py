@@ -3,7 +3,6 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTranslator
 from PyQt5.QtGui import QIcon
-
 from mainWindow import DuckWindow
 from argparse import ArgumentParser
 from utils.logger import init_logger
