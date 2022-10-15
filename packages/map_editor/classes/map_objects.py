@@ -112,6 +112,7 @@ class DraggableImage(ImageObject):
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.drag_start_pos = event.pos()
             self.raise_()
+            self.is_select = True
         elif event.button() == QtCore.Qt.RightButton:
             self.change_obj()
 
@@ -127,15 +128,14 @@ class DraggableImage(ImageObject):
             self.change_position((new_pos.x(), new_pos.y()))
             self.move_in_map((new_pos.x(), new_pos.y()))
             self.drag_start_pos = None
-
-            #self.update()
-            #Painter.draw_border(self.pixmap, (self.pos().x(), self.pos().y()),
-            #                    self)
             self.parentWidget().scene_update()
 
-    #def paintEvent(self, QPaintEvent):
-    #    print(self.name)
-    #    Painter.draw_border(self.pixmap, (self.pos().x(), self.pos().y()), self)
+    def paintEvent(self, QPaintEvent) -> None:
+        if self.is_select:
+            Painter.draw_border(self)
+        else:
+            painter = QtGui.QPainter(self)
+            painter.drawPixmap(self.rect(), self.pixmap)
 
 
 if __name__ == '__main__':

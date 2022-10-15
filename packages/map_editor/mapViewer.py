@@ -432,10 +432,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                self.grid_width, self.grid_height,
                                )
 
-    def highlight_select_object(self, obj: ImageObject, args: Dict[str, Any]):
-        if obj.is_draggable() and obj.is_select:
-            print(obj.name)
-
     def change_tile_type(self, args: Dict[str, Any]) -> None:
         new_tile_type = args["default_fill"]
         tile_name = args["tile_name"]
@@ -543,8 +539,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if not self.is_to_png:
             self.change_tiles_handler(self.highlight_select_tile,
                                       {"painter": painter})
-            self.change_object_handler(self.highlight_select_object,
-                                       {"painter": painter})
         self.scene_update()
 
     def get_raw_selection(self):
@@ -567,7 +561,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             ]
 
     def select_objects(self) -> None:
-        print('sel')
         raw_selection = [
                 min(self.mouse_start_x, self.mouse_cur_x),
                 min(self.mouse_start_y, self.mouse_cur_y),
