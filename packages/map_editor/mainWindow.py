@@ -19,7 +19,7 @@ class DuckWindow(QtWidgets.QMainWindow):
     map_api = None
     info_json = None
 
-    def __init__(self, args, elem_info="doc/info.json"):
+    def __init__(self, args, elem_info="doc/info.json") -> None:
         super().__init__()
 
         #  The brush button / override the closeEvent
@@ -60,7 +60,7 @@ class DuckWindow(QtWidgets.QMainWindow):
             # logger.debug("duck_window.get_translation. No such locale: {}".format(self.locale))
             return elem['lang']['en']
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.center()
         self.show()
 
@@ -259,11 +259,11 @@ class DuckWindow(QtWidgets.QMainWindow):
         pass
 
     #  Save map
-    def save_map_triggered(self):
+    def save_map_triggered(self) -> None:
         self.map_api.save_map_triggered()
 
     #  Save map as
-    def save_map_as_triggered(self):
+    def save_map_as_triggered(self) -> None:
         self.map_api.save_map_as_triggered(self)
 
     #  Calculate map characteristics
@@ -274,7 +274,7 @@ class DuckWindow(QtWidgets.QMainWindow):
     def about_author_triggered(self):
         pass
 
-    def save_map_as_png(self):
+    def save_map_as_png(self) -> None:
         self.map_api.save_map_as_png(self)
 
     #  Exit

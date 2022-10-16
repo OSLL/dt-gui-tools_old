@@ -62,7 +62,7 @@ class DynamicLayer(EntityHelper):
     _fields: Dict[str, Any] = {}
     _layer_name: str = ""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(DynamicLayer, self).__init__(kwargs["map"], kwargs[LAYER_NAME])
         self._layer_name = kwargs[LAYER_NAME]
         for field_name, field_val in kwargs["conf"].items():
