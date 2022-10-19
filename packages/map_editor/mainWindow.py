@@ -241,7 +241,6 @@ class DuckWindow(QtWidgets.QMainWindow):
         pass
 
     def to_the_map_corner(self) -> None:
-        print("press")
         self.map_api.to_the_map_corner()
 
     #  Create a new map

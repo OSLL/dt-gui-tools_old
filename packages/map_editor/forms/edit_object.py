@@ -12,6 +12,7 @@ class EditObject(QDialog):
     def __init__(self, layer_name: str, name: str, config: Dict[str, Any],
                  frame: Dict[str, Any], is_draggable: bool):
         super(EditObject, self).__init__()
+        self.float_accuracy = 5
         self.info = {"types": {}}
         self.layer_name = layer_name
         self.info_send = {"name": name, "layer_name": layer_name,
@@ -79,7 +80,10 @@ class EditObject(QDialog):
             edit = QLineEdit(self)
             self.info[key] = edit
             self.info["types"][key] = type(config[key])
-            edit.setText(str(config[key]))
+            if not isinstance(config[key], float):
+                edit.setText(str(config[key]))
+            else:
+                edit.setText(f'{config[key]:.{self.float_accuracy}f}')
             # tile identifiers must not be changed
             if self.layer_name == "tiles" and (key == "i" or key == "j"):
                 edit.setDisabled(True)
@@ -100,7 +104,10 @@ class EditObject(QDialog):
                     val = frame[frame_key][frame_val]
                 self.info["types"][row_name] = type(val)
                 self.info[row_name] = edit
-                edit.setText(str(val))
+                if not isinstance(val, float):
+                    edit.setText(str(val))
+                else:
+                    edit.setText(f'{val:.{self.float_accuracy}f}')
                 # cannot edit frames of non-draggable objects
                 if not self.is_draggable:
                     edit.setDisabled(True)
