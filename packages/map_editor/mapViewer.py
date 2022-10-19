@@ -392,7 +392,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.parentWidget().parent().view_info_form("Error",
                                                         "Invalid values entered!")
 
-
     def check_layer_config(self, layer_name: str, new_config: Dict[str, Any]):
         return self.handlers.handle(CheckConfigCommand(layer_name, new_config))
 
@@ -524,7 +523,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             if not self.is_move_mode():
                 self.select_tiles()
                 self.select_objects()
-            self.parentWidget().parent().selectionUpdate()
+                self.parentWidget().parent().selectionUpdate()
             self.scene_update()
             self.parentWidget().mousePressEvent(event)
         else:
