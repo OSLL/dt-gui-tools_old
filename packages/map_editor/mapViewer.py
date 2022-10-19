@@ -62,7 +62,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         QtWidgets.QGraphicsView.__init__(self)
         self.setScene(QtWidgets.QGraphicsScene())
         # load default map
-        self.map = default_map_storage(f"{work_dir}/map1")
+        self.map = default_map_storage(f"{work_dir}/maps/empty_map")
         self.init_handlers()
         self.set_map_viewer_sizes()
         self.coordinates_transformer = CoordinatesTransformer(self.scale,

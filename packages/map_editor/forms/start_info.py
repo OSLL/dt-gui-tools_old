@@ -24,7 +24,7 @@ class NewMapInfoForm(QDialog):
         self.nameMap = QLineEdit(self)
         self.nameMap.setText("map_1")
         self.nameDirEdit = QLineEdit(self)
-        self.nameDirEdit.setText(f"{map_dir}/map1")
+        self.nameDirEdit.setText(f"{map_dir}/maps/map1")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.get_info)
         self.buttonBox.rejected.connect(self.reject)
