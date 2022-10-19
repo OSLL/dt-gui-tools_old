@@ -496,11 +496,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                            QtGui.QMouseEvent]) -> None:
         # cursor on object
         x, y, event = self.get_event_coordinates(event)
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == QtCore.Qt.LeftButton or event.buttons() == QtCore.Qt.MiddleButton:
             self.lmbPressed = True
             self.set_offset()
             self.mouse_cur_x = self.mouse_start_x = x
             self.mouse_cur_y = self.mouse_start_y = y
+            self.parentWidget().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: Union[Tuple[float, float], QtGui.QMouseEvent]) -> None:
         # cursor on object
@@ -517,7 +518,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.update_debug_info((self.mouse_cur_x, self.mouse_cur_y))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
-        if event.button() == QtCore.Qt.LeftButton:
+        if event.button() == QtCore.Qt.LeftButton or event.buttons() == QtCore.Qt.MiddleButton:
             self.lmbPressed = False
             self.set_offset()
             if not self.is_move_mode():
@@ -525,6 +526,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.select_objects()
             self.parentWidget().parent().selectionUpdate()
             self.scene_update()
+            self.parentWidget().mousePressEvent(event)
         else:
             self.rmbPressed = False
 

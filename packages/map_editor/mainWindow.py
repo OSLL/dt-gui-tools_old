@@ -1,7 +1,7 @@
 import functools
 import json
 import codecs
-from PyQt5.QtGui import QResizeEvent, QKeyEvent
+from PyQt5.QtGui import QResizeEvent, QKeyEvent, QMouseEvent
 from mapAPI import MapAPI
 from mapViewer import MapViewer
 from utils.debug import DebugLine
@@ -372,6 +372,9 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
         self.map_api.key_release_event(event)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        self.map_api.mouse_press_event(event)
 
     def rotate_selected_tiles(self) -> None:
         self.map_api.rotate_selected_tiles()

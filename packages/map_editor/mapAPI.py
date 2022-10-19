@@ -1,5 +1,5 @@
 import logging
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QMessageBox
 from editorState import EditorState
@@ -242,6 +242,13 @@ class MapAPI:
     def key_press_event(self, event: QKeyEvent) -> None:
         if event.key() == CTRL and not self._editor_state.is_move:
             self.set_move_mode(True)
+
+    def mouse_press_event(self, event: QtGui.QMouseEvent):
+        if event.buttons() == QtCore.Qt.MiddleButton:
+            if not self._editor_state.is_move:
+                self.set_move_mode(True)
+            else:
+                self.set_move_mode(False)
 
     def key_release_event(self, event: QKeyEvent) -> None:
         if event.key() == CTRL:
