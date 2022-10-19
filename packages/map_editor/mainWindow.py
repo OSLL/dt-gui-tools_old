@@ -131,6 +131,10 @@ class DuckWindow(QtWidgets.QMainWindow):
         a3 = QtWidgets.QAction(QtGui.QIcon("img/icons/save.png"), _translate("MainWindow", "Save map (Ctrl+S)"), self)
         a4 = QtWidgets.QAction(QtGui.QIcon("img/icons/save_as.png"), _translate("MainWindow", "Save map as (Ctrl+Alt+S)"), self)
         a5 = QtWidgets.QAction(QtGui.QIcon("img/icons/png.png"), _translate("MainWindow", "Export to PNG (Ctrl+P)"), self)
+        a6 = QtWidgets.QAction(QtGui.QIcon("img/icons/leftup.png"),
+                               _translate("MainWindow",
+                                          "To the corner of the map (Ctrl+M)"), self)
+        a6.setShortcut("Ctrl+M")
 
         # TODO
         '''
@@ -147,11 +151,11 @@ class DuckWindow(QtWidgets.QMainWindow):
         '''
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
+        c1.setShortcut("Ctrl+R")
 
         # TODO
         #c2 = QtWidgets.QAction(QtGui.QIcon("img/icons/trim.png"),
         #                       _translate("MainWindow", "Delete extreme empty blocks"), self)
-        c1.setShortcut("Ctrl+R")
         #c2.setShortcut("Ctrl+F")
 
         self.brush_button.setIcon(QtGui.QIcon("img/icons/brush.png"))
@@ -164,6 +168,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         a3.triggered.connect(self.save_map_triggered)
         a4.triggered.connect(self.save_map_as_triggered)
         a5.triggered.connect(self.save_map_as_png)
+        a6.triggered.connect(self.to_the_map_corner)
 
         # TODO
         '''
@@ -188,6 +193,7 @@ class DuckWindow(QtWidgets.QMainWindow):
             tool_bar.addSeparator()
         tool_bar.addWidget(self.brush_button)
         tool_bar.addAction(c1)
+        tool_bar.addAction(a6)
         # TODO
         #tool_bar.addAction(c2)
 
@@ -233,6 +239,10 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     def center(self):
         pass
+
+    def to_the_map_corner(self) -> None:
+        print("press")
+        self.map_api.to_the_map_corner()
 
     #  Create a new map
     def open_map_triggered(self) -> None:

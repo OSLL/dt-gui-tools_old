@@ -79,6 +79,9 @@ class MapAPI:
             except OSError as err:
                 logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
+    def to_the_map_corner(self):
+        self._map_viewer.to_the_corner()
+
     def create_region(self):
         print('create_region')
 

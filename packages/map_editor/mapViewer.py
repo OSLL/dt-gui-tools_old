@@ -451,6 +451,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         else:
             self.scale *= sf
         self.coordinates_transformer.set_scale(self.scale)
+        self.set_offset()
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.scene_update()
 
@@ -471,6 +472,15 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                      y - self.mouse_cur_y)
         self.change_object_handler(self.move_obj,
                                    {"delta_coordinates": delta_pos})
+
+    def to_the_corner(self) -> None:
+        left_upper_tile = self.get_object(
+            f"{self.tile_map}/tile_0_{self.map_height - 1}")
+        delta_pos = (-left_upper_tile.pos().x(),
+                     -left_upper_tile.pos().y())
+        self.change_object_handler(self.move_obj,
+                                   {"delta_coordinates": delta_pos})
+        self.set_offset()
 
     def get_event_coordinates(self, event: Union[Tuple[float, float], QtGui.QMouseEvent]) -> \
             [float, float, QtGui.QMouseEvent]:
