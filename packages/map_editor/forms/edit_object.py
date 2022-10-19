@@ -13,6 +13,7 @@ class EditObject(QDialog):
                  frame: Dict[str, Any], is_draggable: bool):
         super(EditObject, self).__init__()
         self.info = {"types": {}}
+        self.layer_name = layer_name
         self.info_send = {"name": name, "layer_name": layer_name,
                           "new_config": {}, "is_draggable": is_draggable,
                           "frame": {},
@@ -79,6 +80,9 @@ class EditObject(QDialog):
             self.info[key] = edit
             self.info["types"][key] = type(config[key])
             edit.setText(str(config[key]))
+            # tile identifiers must not be changed
+            if self.layer_name == "tiles" and (key == "i" or key == "j"):
+                edit.setDisabled(True)
             layout.addRow(QLabel(key), edit)
         layout.addWidget(QHLine())
         for frame_key in frame:
@@ -97,6 +101,7 @@ class EditObject(QDialog):
                 self.info["types"][row_name] = type(val)
                 self.info[row_name] = edit
                 edit.setText(str(val))
+                # cannot edit frames of non-draggable objects
                 if not self.is_draggable:
                     edit.setDisabled(True)
                 layout.addRow(QLabel(row_name), edit)
