@@ -1,3 +1,5 @@
+import json
+
 from PyQt5 import QtCore
 from typing import Dict, Any
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, QVBoxLayout, \
@@ -42,7 +44,6 @@ class EditObject(QDialog):
 
     def send_info(self) -> None:
         try:
-            #TODO
             for frame_key in self.info_send["frame"]:
                 if frame_key == "relative_to":
                     list_for_edit = [frame_key]
@@ -58,8 +59,14 @@ class EditObject(QDialog):
                             self.info["types"][frame_key])(
                             self.info[frame_key].text())
             for key in self.info_send["new_config"]:
-                self.info_send["new_config"][key] = (self.info["types"][key])(self.info[key].text())
+                if self.info["types"][key] == dict or self.info["types"][key] == list:
+                    val = eval(self.info[key].text())
+                else:
+                    val = (self.info["types"][key])(self.info[key].text())
+                self.info_send["new_config"][key] = val
         except ValueError:
+            self.info_send["is_valid"] = False
+        except SyntaxError:
             self.info_send["is_valid"] = False
         self.get_info.emit(self.info_send)
         self.close()
@@ -74,7 +81,6 @@ class EditObject(QDialog):
             edit.setText(str(config[key]))
             layout.addRow(QLabel(key), edit)
         layout.addWidget(QHLine())
-        # TODO
         for frame_key in frame:
             if frame_key == "relative_to":
                 list_for_edit = [frame_key]

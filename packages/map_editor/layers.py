@@ -1,12 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
-from utils.constants import TILES, TILE_SIZE, TILE_MAPS, WATCHTOWERS, \
-    FRAMES, TRAFFIC_SIGNS, GROUND_TAGS, VEHICLES, CITIZENS
+from utils.constants import TILE_SIZE
 from mapStorage import MapStorage
-from classes.layers import AbstractLayer
-from classes.basic.command import Command
-from classes.basic.chain import AbstractHandler
+from classes.layers import BasicLayerHandler
 from classes.MapDescription import MapDescription
 from classes.Commands.GetLayerCommand import GetLayerCommand
 from dt_maps.types.watchtowers import WatchtowerType
@@ -16,172 +13,71 @@ from dt_maps.types.citizens import CitizenType
 from dt_maps.types.vehicles import VehicleType, ColorType
 
 
-class TileLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TileLayerHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return TILES
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {'i': 0, 'j': 0, 'type': 'floor'}
+class TilesLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {'i': 0, 'j': 0, 'type': 'floor'}
+        super(TilesLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and config.get("type") \
                in [t.value for t in TileType]
 
 
-class WatchtowersLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(WatchtowersLayerHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return WATCHTOWERS
-
-    def default_conf(self) -> Dict[str, str]:
-        return {'configuration': 'WT18', 'id': ""}
+class WatchtowersLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {'configuration': 'WT18', 'id': ""}
+        super(WatchtowersLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and config.get("configuration") \
                in [t.value for t in WatchtowerType]
 
 
-class FramesLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(FramesLayerHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return FRAMES
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {'pose': {'x': 1.0, 'y': 1.0, 'z': 0.0, 'yaw': 0.0, 'roll': 0.0,
-                         'pitch': 0.0}, 'relative_to': ""}
+class FramesLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {
+            'pose': {'x': 1.0, 'y': 1.0, 'z': 0.0, 'yaw': 0.0, 'roll': 0.0,
+                     'pitch': 0.0}, 'relative_to': ""}
+        super(FramesLayerHandler, self).__init__(**kwargs)
 
 
-class TileMapsLayerHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TileMapsLayerHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf())
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return TILE_MAPS
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {TILE_SIZE: {'x': 0.585, 'y': 0.585}}
+class TileMapsLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {TILE_SIZE: {'x': 0.585, 'y': 0.585}}
+        super(TileMapsLayerHandler, self).__init__(**kwargs)
 
 
-class TrafficSignsHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(TrafficSignsHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return TRAFFIC_SIGNS
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {"type": "stop", "id": 0, "family": "36h11"}
+class TrafficSignsLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {"type": "stop", "id": 0, "family": "36h11"}
+        super(TrafficSignsLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and \
                config.get("type") in [t.value for t in TrafficSignType]
 
 
-class GroundTagsHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(GroundTagsHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return GROUND_TAGS
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {"size": 0.15, "id": 0, "family": "36h11"}
+class GroundTagsLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {"size": 0.15, "id": 0, "family": "36h11"}
+        super(GroundTagsLayerHandler, self).__init__(**kwargs)
 
 
-class CitizensHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(CitizensHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return CITIZENS
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {"color": "yellow"}
+class CitizensLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {"color": "yellow"}
+        super(CitizensLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and \
                config.get("color") in [t.value for t in CitizenType]
 
 
-class VehiclesHandler(AbstractHandler, AbstractLayer):
-    def __init__(self, *kwargs) -> None:
-        super(VehiclesHandler, self).__init__(*kwargs)
-
-    def handle(self, command: Command) -> Any:
-        response = command.execute(self.dm, self.data, self.layer_name(),
-                                   self.default_conf(),
-                                   check_config=self.check_config)
-        if response:
-            return response
-        return super().handle(command)
-
-    def layer_name(self) -> str:
-        return VEHICLES
-
-    def default_conf(self) -> Dict[str, Any]:
-        return {"color": "blue", "configuration": "DB18", "id": ""}
+class VehiclesLayerHandler(BasicLayerHandler):
+    def __init__(self, **kwargs) -> None:
+        kwargs["default_conf"] = {"color": "blue", "configuration": "DB18",
+                                  "id": ""}
+        super(VehiclesLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and \
@@ -191,7 +87,7 @@ class VehiclesHandler(AbstractHandler, AbstractLayer):
 
 if __name__ == '__main__':
     MapStorage(MapDescription(Path("./maps/tm1"), "map_1"))
-    tile_layer = TileLayerHandler()
+    tile_layer = TilesLayerHandler()
     watchtower_layer = WatchtowersLayerHandler()
     tile_layer.set_next(watchtower_layer)
     layer = tile_layer

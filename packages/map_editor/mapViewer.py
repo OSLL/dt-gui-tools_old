@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
+from importlib import import_module
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QKeyEvent
@@ -12,11 +14,9 @@ from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
 from classes.Commands.GetDefaultLayerConf import GetDefaultLayerConf
 from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
+from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
-from layers import TileLayerHandler, WatchtowersLayerHandler, \
-    FramesLayerHandler, TileMapsLayerHandler, CitizensHandler, \
-    TrafficSignsHandler, GroundTagsHandler, VehiclesHandler
 from coordinatesTransformer import CoordinatesTransformer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
@@ -24,12 +24,13 @@ from classes.Commands.RotateObjCommand import RotateCommand
 from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
 from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
-    REGISTER, change_map_name
+    change_map_name, convert_layer_name_to_class_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, \
-    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG
+    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, KNOWN_LAYERS
 from classes.MapDescription import MapDescription
 from pathlib import Path
+from dt_maps.Map import REGISTER
 
 
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
@@ -61,7 +62,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         QtWidgets.QGraphicsView.__init__(self)
         self.setScene(QtWidgets.QGraphicsScene())
         # load default map
-        self.map = default_map_storage(f"{work_dir}/map1")
+        self.map = default_map_storage(f"{work_dir}/maps/empty_map")
         self.init_handlers()
         self.set_map_viewer_sizes()
         self.coordinates_transformer = CoordinatesTransformer(self.scale,
@@ -76,34 +77,59 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
+        frames = self.get_layer("frames")
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
-            if layer_name not in LAYERS_WITH_TYPES and \
-            layer_name not in OBJECTS_TYPES or not layer:
-                continue
-            for object_name in layer:
-                layer_object = layer[object_name]
-                self.add_obj_image(layer_name, object_name, layer_object)
+            if layer and layer_name != "frames":
+                for object_name in layer:
+                    layer_object = layer[object_name]
+                    if not object_name in frames:
+                        self.add_frame_on_map(object_name)
+                    self.add_obj_image(layer_name, object_name, layer_object)
 
     def init_handlers(self) -> None:
-        self.tiles = TileLayerHandler()
-        watchtowers = WatchtowersLayerHandler()
-        frames = FramesLayerHandler()
-        tile_maps = TileMapsLayerHandler()
-        citizens = CitizensHandler()
-        traffic_signs = TrafficSignsHandler()
-        ground_tags = GroundTagsHandler()
-        vehicles = VehiclesHandler()
-        # self.decorations = DecorationsHandler()
-
-        handlers_list = [self.tiles, watchtowers, frames,
-                         tile_maps, citizens, traffic_signs,
-                         vehicles, ground_tags]
+        # import handlers for module layers
+        handlers_list = []
+        module = import_module("layers")
+        register_layers = REGISTER.keys()
+        layers_names = list(self.map.map.layers.__dict__.keys())
+        for key in register_layers:
+            if key not in layers_names:
+                layers_names.append(key)
+        for layer_name in layers_names:
+            if layer_name in KNOWN_LAYERS:
+                # dynamically import handlers for known layers
+                class_name = convert_layer_name_to_class_name(layer_name)
+                handler_layer_name = f"{class_name}LayerHandler"
+                attribute = getattr(module, handler_layer_name)
+                handlers_list.append(
+                    attribute(layer_name=layer_name))
+            else:
+                # get unknown layer config from .yaml
+                try:
+                    keys = list(self.map.map.layers[layer_name].keys())
+                except KeyError:
+                    continue
+                conf = {}
+                if len(keys) > 0:
+                    # set default conf with empty values
+                    conf = deepcopy(self.map.map.layers[layer_name][keys[0]])
+                # create dynamic layer
+                dynamic_layer = DynamicLayer(conf=conf,
+                                             layer_name=layer_name,
+                                             map=self.map.map)
+                # register new dynamic layer in map.layers
+                REGISTER[layer_name] = dynamic_layer
+                # added basic layer handler
+                handler = BasicLayerHandler(default_conf=conf,
+                                            layer_name=layer_name)
+                handlers_list.append(handler)
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
-        self.handlers = self.tiles
+        self.handlers = handlers_list[0]
 
-    def set_map_viewer_sizes(self, tile_width: float = 0, tile_height: float = 0) -> None:
+    def set_map_viewer_sizes(self, tile_width: float = 0,
+                             tile_height: float = 0) -> None:
         if not (tile_width and tile_height):
             try:
                 tile_map_obj = self.get_layer(TILE_MAPS)[self.tile_map]
@@ -142,7 +168,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                       layer_object=None, item_name: str = None) -> None:
         new_obj = None
         img_name = layer_name
-        if layer_name in LAYERS_WITH_TYPES and layer_object:
+        if layer_name in self.map.map.layers and layer_name not in KNOWN_LAYERS:
+            new_obj = DraggableImage(f"./img/objects/unknown.png", self,
+                                     object_name, layer_name)
+        elif layer_name in LAYERS_WITH_TYPES and layer_object:
             img_name = layer_object.type.value
         elif item_name:
             img_name = item_name
@@ -167,7 +196,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.move_obj(new_obj, {"new_coordinates": new_coordinates})
             self.objects[object_name] = new_obj
             if new_obj.layer_name in LAYERS_WITH_TYPES:
-                self.handlers.handle(ChangeTypeCommand(new_obj.layer_name, object_name, img_name))
+                self.handlers.handle(ChangeTypeCommand(new_obj.layer_name,
+                                                       object_name, img_name))
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
 
     def add_obj_on_map(self, layer_name: str, object_name: str) -> None:
@@ -186,7 +216,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(MoveTileCommand(tile_name, tile_id))
 
     def set_tile_size_command(self, tile_map: str,
-                      tile_size: Tuple[float, float]) -> None:
+                              tile_size: Tuple[float, float]) -> None:
         self.handlers.handle(SetTileSizeCommand(tile_map, tile_size))
 
     def delete_objects(self):
@@ -204,7 +234,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             obj.move_object((obj.pos().x() + delta_coord[0],
                              obj.pos().y() + delta_coord[1]))
 
-    def set_obj_map_pos(self, obj: ImageObject, new_pos: Tuple[float, float]) -> None:
+    def set_obj_map_pos(self, obj: ImageObject,
+                        new_pos: Tuple[float, float]) -> None:
         obj.set_obj_map_pos(new_pos)
 
     def move_obj_on_map(self, frame_name: str,
@@ -292,9 +323,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         return self.handlers.handle(GetDefaultLayerConf(layer_name))
 
     def get_object_conf(self, layer_name: str, name: str) -> Dict[str, Any]:
-        layer = self.get_layer(layer_name)
+        layer = self.get_layer(layer_name).copy()
         obj = layer[name]
-        default_layer_conf = self.get_default_layer_conf(layer_name)
+        default_layer_conf = self.get_default_layer_conf(layer_name).copy()
+        if not default_layer_conf:
+            default_layer_conf = {}
         for key in default_layer_conf:
             try:
                 default_layer_conf[key] = obj[key].value
@@ -307,7 +340,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.parentWidget().parent().change_obj_info(layer_name, obj_name,
                                                      self.get_object_conf(layer_name, obj_name),
                                                      self.get_object_conf(FRAMES, obj.name), obj.is_draggable())
-    
+
     def change_obj_from_info(self, conf: Dict[str, Any]) -> None:
         print(conf)
         obj = self.get_object(conf["name"])
@@ -358,6 +391,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         else:
             self.parentWidget().parent().view_info_form("Error",
                                                         "Invalid values entered!")
+
 
     def check_layer_config(self, layer_name: str, new_config: Dict[str, Any]):
         return self.handlers.handle(CheckConfigCommand(layer_name, new_config))
@@ -478,6 +512,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.set_offset()
             if not self.is_move_mode():
                 self.select_tiles()
+                self.select_objects()
             self.parentWidget().parent().selectionUpdate()
             self.scene_update()
         else:
@@ -506,10 +541,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                       {"painter": painter})
         self.scene_update()
 
-    def select_tiles(self) -> None:
-        raw_selection = [
-            self.get_x_from_view(
-                min(self.mouse_start_x, self.mouse_cur_x), offset=self.offset_x),
+    def get_raw_selection(self):
+        return [self.get_x_from_view(
+            min(self.mouse_start_x, self.mouse_cur_x), offset=self.offset_x),
             self.get_y_from_view(
                 min(self.mouse_start_y, self.mouse_cur_y), offset=self.offset_y),
             self.get_x_from_view(
@@ -518,11 +552,27 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 max(self.mouse_start_y, self.mouse_cur_y), offset=self.offset_y),
         ]
 
+    def select_tiles(self) -> None:
+        raw_selection = self.get_raw_selection()
         if self.get_layer(TILES):
             self.tile_selection = [
                 v
                 for i, v in enumerate(raw_selection)
             ]
+
+    def select_objects(self) -> None:
+        raw_selection = [
+                min(self.mouse_start_x, self.mouse_cur_x),
+                min(self.mouse_start_y, self.mouse_cur_y),
+                max(self.mouse_start_x, self.mouse_cur_x),
+                max(self.mouse_start_y, self.mouse_cur_y)
+        ]
+        for map_object in self.objects:
+            map_object = self.objects[map_object]
+            map_object.is_select = False
+            if map_object.is_draggable() and raw_selection[0] <= map_object.x() <= raw_selection[2] and \
+                    raw_selection[1] <= map_object.y() <= raw_selection[3]:
+                map_object.is_select = True
 
     def save_to_png(self, file_name: str) -> None:
         self.coordinates_transformer.set_scale(1)

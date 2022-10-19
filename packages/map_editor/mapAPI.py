@@ -7,7 +7,7 @@ from forms.quit import quit_message_box
 from forms.default_forms import form_yes
 from forms.start_info import NewMapInfoForm
 from forms.edit_object import EditObject
-from utils.maps import change_map_directory, change_map_name
+from utils.maps import change_map_directory
 from utils.qtWindowAPI import QtWindowAPI
 from mapStorage import MapStorage
 from mapViewer import MapViewer
@@ -16,6 +16,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
+from utils.constants import REQUIRED_LAYERS
 
 
 TILE_TYPES = ('block', 'road')
@@ -43,7 +44,19 @@ class MapAPI:
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
         path = self._qt_api.get_dir(parent, "open")
         if path:
-            self._map_viewer.open_map(Path(path), self._map_storage.map.name)
+            dir_content = os.listdir(path)
+            if len(dir_content):
+                status = True
+                for file_name in REQUIRED_LAYERS:
+                    if file_name not in dir_content:
+                        self.view_info_form("Info",
+                                            f"Can't open directory, no file {file_name}")
+                        status = False
+                        break
+                if status:
+                    self._map_viewer.open_map(Path(path), self._map_storage.map.name)
+            else:
+                self.view_info_form("Info", "Can't open empty directory")
         self.set_move_mode(False)
 
     def import_old_format(self):
@@ -62,6 +75,7 @@ class MapAPI:
                     shutil.rmtree(path)
                 os.makedirs(path)
                 self._map_viewer.create_new_map(info, path)
+                self.save_map_triggered()
             except OSError as err:
                 logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
