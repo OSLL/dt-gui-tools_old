@@ -202,7 +202,6 @@ class DuckWindow(QtWidgets.QMainWindow):
 
         #  Customize the Map Editor menu
         default_fill = self.ui.default_fill
-        delete_fill = self.ui.delete_fill
 
         #  Fill out the list
         categories = self.info_json['categories']
@@ -226,14 +225,8 @@ class DuckWindow(QtWidgets.QMainWindow):
                 if group['id'] in ("road", "block"):
                     default_fill.addItem(QtGui.QIcon(information[elem_id]['icon']),
                                          self.get_translation(information[elem_id])['name'], elem_id)
-                    delete_fill.addItem(QtGui.QIcon(information[elem_id]['icon']),
-                                        self.get_translation(information[elem_id])['name'], elem_id)
 
         default_fill.setCurrentText(self.get_translation(information["grass"])['name'])
-        delete_fill.setCurrentText(self.get_translation(information["grass"])['name'])
-
-        set_fill = self.ui.set_fill
-        set_fill.clicked.connect(self.set_default_fill)
 
     def change_env(self):
         pass
