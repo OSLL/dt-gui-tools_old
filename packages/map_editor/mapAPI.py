@@ -254,8 +254,9 @@ class MapAPI:
         if event.key() == CTRL:
             self.set_move_mode(False)
 
-    def rotate_selected_tiles(self) -> None:
+    def rotate_selected_objects(self) -> None:
         self._map_viewer.rotate_tiles()
+        self._map_viewer.rotate_objects()
 
     def set_debug_mode(self, debug_line: DebugLine) -> None:
         self._editor_state.debug_mode = True

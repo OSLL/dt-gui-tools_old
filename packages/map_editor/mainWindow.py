@@ -377,7 +377,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.map_api.mouse_press_event(event)
 
     def rotate_selected_tiles(self) -> None:
-        self.map_api.rotate_selected_tiles()
+        self.map_api.rotate_selected_objects()
 
     def update_debug_info(self, event: Dict[str, Any]) -> None:
         self.map_api.update_debug_info(event)

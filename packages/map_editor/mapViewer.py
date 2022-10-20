@@ -424,6 +424,15 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
 
+    def rotate_object_with_button(self, obj: ImageObject, args: Dict[str, Any]) -> None:
+        if obj.is_draggable() and obj.is_select:
+            new_angle = obj.yaw + 90
+            self.rotate_obj(obj, new_angle)
+            self.rotate_obj_on_map(obj.name, new_angle)
+
+    def rotate_objects(self) -> None:
+        self.change_object_handler(self.rotate_object_with_button, {})
+
     def highlight_select_tile(self, args: Dict[str, Any]):
         tile = self.get_object(args["tile_name"])
         self.painter.draw_rect((tile.pos().x() - 1, tile.pos().y() - 1),
