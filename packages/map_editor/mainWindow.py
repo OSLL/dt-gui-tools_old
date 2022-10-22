@@ -2,6 +2,8 @@ import functools
 import json
 import codecs
 from PyQt5.QtGui import QResizeEvent, QKeyEvent, QMouseEvent
+
+from history import Memento
 from mapAPI import MapAPI
 from mapViewer import MapViewer
 from utils.debug import DebugLine
@@ -346,13 +348,16 @@ class DuckWindow(QtWidgets.QMainWindow):
     def delete_button_clicked(self):
         pass
 
-    def undo_button_clicked(self):
+    def undo_button_clicked(self) -> None:
         print(1)
-        pass
+        self.map_api.undo_button_clicked()
 
-    def shift_undo_button_clicked(self):
+    def shift_undo_button_clicked(self) -> None:
         print(2)
-        pass
+        self.map_api.shift_button_clicked()
+
+    def push_state(self, m: Memento) -> None:
+        self.map_api.push_state(m)
 
     #  Brush mode
     def brush_mode(self) -> None:

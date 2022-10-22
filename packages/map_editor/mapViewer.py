@@ -34,6 +34,15 @@ from pathlib import Path
 from dt_maps.Map import REGISTER
 
 
+def need_save_state(func):
+    def save(*args, **kwargs):
+        self = args[0]
+        m = self.save_state()
+        self.parentWidget().parent().push_state(m)
+        return func(*args, **kwargs)
+    return save
+
+
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     map = None
     map_height = 10
@@ -146,7 +155,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
+    @need_save_state
     def add_obj(self, type_of_element: str, item_name: str = None) -> None:
+        print(self.map.map.layers)
         i = 1
         layer_name = f"{type_of_element}s"
         while True:
@@ -159,6 +170,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                 {'scale': self.scale})
                 break
             i += 1
+        print(self.get_layer("tiles")["map_1/tile_0_0"])
+        print(deepcopy(self.get_layer("tiles")["map_1/tile_0_0"]))
 
     def add_obj_image(self, layer_name: str, object_name: str,
                       layer_object=None, item_name: str = None) -> None:
@@ -337,6 +350,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                                      self.get_object_conf(layer_name, obj_name),
                                                      self.get_object_conf(FRAMES, obj.name), obj.is_draggable())
 
+    #@need_save_state
     def change_obj_from_info(self, conf: Dict[str, Any]) -> None:
         print(conf)
         obj = self.get_object(conf["name"])
@@ -396,6 +410,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(ChangeObjCommand(layer_name, obj_name,
                                               new_config))
 
+    @need_save_state
     def delete_object(self, obj: ImageObject) -> None:
         self.delete_obj_on_map(obj)
         self.objects.__delitem__(obj.name)
@@ -404,6 +419,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         tiles = self.get_layer(TILES)
         for tile_name in tiles:
             tile = tiles[tile_name]
+            print(tile.__dict__, tile.__str__(), dir(tile))
             if self.is_selected_tile(tile):
                 args["tile_name"] = tile_name
                 args["tile"] = tile
@@ -663,15 +679,18 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scene_update()
 
     def save_state(self) -> Memento:
-        return Memento({"map": deepcopy(self.map), "map_height": self.map_height,
-                        "objects": deepcopy(self.objects), "handlers": deepcopy(self.handlers),
+        return Memento({"map": deepcopy(self.map.map), "map_height": self.map_height,
+                        "objects": self.objects.copy(), "handlers": deepcopy(self.handlers),
                         "tile_width": self.tile_width, "tile_height": self.tile_height,
                         "grid_scale": self.grid_scale, "grid_height": self.grid_height,
                         "grid_width": self.grid_width, "tile_map": self.tile_map})
 
     def restore_state(self, m: Memento) -> None:
+        print("ok")
         state = m.get_state()
-        self.map = state["map"]
+
+        self.map.map = state["map"]
+        print(self.map.map.layers)
         self.map_height = state["map_height"]
         self.objects = state["objects"]
         self.handlers = state["handlers"]

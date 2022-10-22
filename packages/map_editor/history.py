@@ -15,7 +15,7 @@ class Memento:
 
 class EditorHistory:
     buffer: [Memento] = []
-    current_state_index: int = 0
+    current_state_index: int = -1
 
     def delete(self, start_index: int) -> None:
         """
@@ -32,22 +32,27 @@ class EditorHistory:
             self.delete(self.current_state_index)
         self.buffer.append(m)
         self.current_state_index += 1
+        print("push", self.buffer)
 
     def undo(self) -> Optional[Memento]:
         """
         Return state from history at index current_state_index - 1.
         """
+        print("undo", self.current_state_index, self.buffer)
         if self.current_state_index >= 0 and len(self.buffer) > 0:
             self.current_state_index -= 1
             return self.buffer[self.current_state_index]
         else:
             return None
 
-    def shift_undo(self) -> Memento:
+    def shift_undo(self) -> Optional[Memento]:
         """
         Return state from history at index current_state_index + 1.
         """
+        print("shift undo", self.current_state_index)
         if self.current_state_index < MAX_BUFFER_LENGTH and \
                 len(self.buffer) > self.current_state_index + 1:
             self.current_state_index += 1
-        return self.buffer[self.current_state_index]
+            return self.buffer[self.current_state_index]
+        else:
+            return None

@@ -11,6 +11,7 @@ from utils.maps import change_map_directory
 from utils.qtWindowAPI import QtWindowAPI
 from mapStorage import MapStorage
 from mapViewer import MapViewer
+from history import Memento, EditorHistory
 from utils.debug import DebugLine
 from typing import Dict, Any
 from pathlib import Path
@@ -30,6 +31,7 @@ class MapAPI:
     _map_viewer: MapViewer = None
     _editor_state: EditorState = None
     _debug_line: DebugLine = None
+    _history: EditorHistory = None
 
     def __init__(self, info_json: dict, map_viewer: MapViewer, args) -> None:
         self._map_storage = MapStorage()
@@ -37,6 +39,7 @@ class MapAPI:
         self.info_json = info_json
         self._map_viewer = map_viewer
         self._editor_state = EditorState()
+        self._history = EditorHistory()
         self.change_obj_info_form = None
         self.init_info_form = NewMapInfoForm(args.wkdir)
         self.init_info_form.send_info.connect(self.create_map_triggered)
@@ -222,8 +225,18 @@ class MapAPI:
         pass
 
     #  Undo
-    def undo_button_clicked(self):
-        pass
+    def undo_button_clicked(self) -> None:
+        m = self._history.undo()
+        if m:
+            self._map_viewer.restore_state(m)
+
+    def shift_button_clicked(self) -> None:
+        m = self._history.shift_undo()
+        if m:
+            self._map_viewer.restore_state(m)
+
+    def push_state(self, m: Memento) -> None:
+        self._history.push(m)
 
     #  Brush mode
     def brush_mode(self, brush_button_is_checked: bool) -> None:
