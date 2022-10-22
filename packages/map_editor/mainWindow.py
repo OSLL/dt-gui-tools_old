@@ -61,7 +61,6 @@ class DuckWindow(QtWidgets.QMainWindow):
             return elem['lang']['en']
 
     def init_ui(self):
-        self.center()
         self.show()
 
         #  Initialize button objects
@@ -131,10 +130,13 @@ class DuckWindow(QtWidgets.QMainWindow):
         a3 = QtWidgets.QAction(QtGui.QIcon("img/icons/save.png"), _translate("MainWindow", "Save map (Ctrl+S)"), self)
         a4 = QtWidgets.QAction(QtGui.QIcon("img/icons/save_as.png"), _translate("MainWindow", "Save map as (Ctrl+Alt+S)"), self)
         a5 = QtWidgets.QAction(QtGui.QIcon("img/icons/png.png"), _translate("MainWindow", "Export to PNG (Ctrl+P)"), self)
-        a6 = QtWidgets.QAction(QtGui.QIcon("img/icons/leftup.png"),
-                               _translate("MainWindow",
-                                          "To the corner of the map (Ctrl+M)"), self)
+        a6 = QtWidgets.QAction(QtGui.QIcon("img/icons/leftup.png"), _translate("MainWindow", "To the corner of the map (Ctrl+M)"), self)
+        a7 = QtWidgets.QAction(QtGui.QIcon("img/icons/undo.png"), _translate("MainWindow", "Undo (Ctrl+Z)"), self)
+        a8 = QtWidgets.QAction(QtGui.QIcon("img/icons/shift_undo.png"), _translate("MainWindow", "Shift undo (Ctrl+Shift+Z)"), self)
         a6.setShortcut("Ctrl+M")
+        a7.setShortcut("Ctrl+Z")
+        a8.setShortcut("Ctrl+Shift+Z")
+
 
         # TODO
         '''
@@ -142,12 +144,10 @@ class DuckWindow(QtWidgets.QMainWindow):
         b2 = QtWidgets.QAction(QtGui.QIcon("img/icons/cut.png"), _translate("MainWindow", "Cut"), self)
         b3 = QtWidgets.QAction(QtGui.QIcon("img/icons/insert.png"), _translate("MainWindow", "Paste"), self)
         b4 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"), _translate("MainWindow", "Delete"), self)
-        b5 = QtWidgets.QAction(QtGui.QIcon("img/icons/undo.png"), _translate("MainWindow", "Undo"), self)
         b1.setShortcut("Ctrl+C")
         b2.setShortcut("Ctrl+X")
         b3.setShortcut("Ctrl+V")
         b4.setShortcut("Delete")
-        b5.setShortcut("Ctrl+Z")
         '''
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
@@ -169,6 +169,8 @@ class DuckWindow(QtWidgets.QMainWindow):
         a4.triggered.connect(self.save_map_as_triggered)
         a5.triggered.connect(self.save_map_as_png)
         a6.triggered.connect(self.to_the_map_corner)
+        a7.triggered.connect(self.undo_button_clicked)
+        a8.triggered.connect(self.shift_undo_button_clicked)
 
         # TODO
         '''
@@ -191,9 +193,12 @@ class DuckWindow(QtWidgets.QMainWindow):
             for act in elem:
                 tool_bar.addAction(act)
             tool_bar.addSeparator()
+        tool_bar.addAction(a7)
+        tool_bar.addAction(a8)
         tool_bar.addWidget(self.brush_button)
         tool_bar.addAction(c1)
         tool_bar.addAction(a6)
+
         # TODO
         #tool_bar.addAction(c2)
 
@@ -234,12 +239,6 @@ class DuckWindow(QtWidgets.QMainWindow):
 
         default_fill.setCurrentText(self.get_translation(information["grass"])['name'])
 
-    def change_env(self):
-        pass
-
-    def center(self):
-        pass
-
     def to_the_map_corner(self) -> None:
         self.map_api.to_the_map_corner()
 
@@ -253,12 +252,6 @@ class DuckWindow(QtWidgets.QMainWindow):
     #  Open map
     def create_map_triggered(self) -> None:
         self.map_api.create_map_form()
-
-    def create_region(self):
-        pass
-
-    def change_distortion_view_triggered(self):
-        pass
 
     #  Save map
     def save_map_triggered(self):
@@ -353,8 +346,12 @@ class DuckWindow(QtWidgets.QMainWindow):
     def delete_button_clicked(self):
         pass
 
-    #  Undo
     def undo_button_clicked(self):
+        print(1)
+        pass
+
+    def shift_undo_button_clicked(self):
+        print(2)
         pass
 
     #  Brush mode

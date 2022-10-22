@@ -18,6 +18,7 @@ from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from coordinatesTransformer import CoordinatesTransformer
+from history import Memento
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
 from classes.Commands.RotateObjCommand import RotateCommand
@@ -35,21 +36,16 @@ from dt_maps.Map import REGISTER
 
 class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     map = None
-    tile_sprites: Dict[str, QtGui.QImage] = {'empty': QtGui.QImage()}
-    tiles = None
     map_height = 10
     objects = {}
     handlers = None
     scale = 1
     tile_selection = [0] * 4
-    rmbPressed = False
     lmbPressed = False
-    rmbPrevPos = [0, 0]
     mouse_start_x, mouse_start_y = 0, 0
     mouse_cur_x, mouse_cur_y = 0, 0
     offset_x = 0
     offset_y = 0
-    lmbClicked = QtCore.pyqtSignal(int, int)  # click coordinates as an index of the clicked tile
     is_to_png = False
     tile_width: float = 0.585
     tile_height: float = 0.585
@@ -83,7 +79,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             if layer and layer_name != "frames":
                 for object_name in layer:
                     layer_object = layer[object_name]
-                    if not object_name in frames:
+                    if object_name not in frames:
                         self.add_frame_on_map(object_name)
                     self.add_obj_image(layer_name, object_name, layer_object)
 
@@ -424,7 +420,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
 
-    def rotate_object_with_button(self, obj: ImageObject, args: Dict[str, Any]) -> None:
+    def rotate_object_with_button(self, obj: ImageObject,
+                                      args: Dict[str, Any]) -> None:
         if obj.is_draggable() and obj.is_select:
             new_angle = obj.yaw + 90
             self.rotate_obj(obj, new_angle)
@@ -511,7 +508,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.mouse_cur_y = self.mouse_start_y = y
             self.parentWidget().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event: Union[Tuple[float, float], QtGui.QMouseEvent]) -> None:
+    def mouseMoveEvent(self, event: Union[
+            Tuple[float, float], QtGui.QMouseEvent]) -> None:
         # cursor on object
         x, y, event = self.get_event_coordinates(event)
         if self.lmbPressed:
@@ -535,8 +533,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.parentWidget().parent().selectionUpdate()
             self.scene_update()
             self.parentWidget().mousePressEvent(event)
-        else:
-            self.rmbPressed = False
 
     def set_offset(self) -> None:
         left_upper_tile = self.get_object(f"{self.tile_map}/tile_0_{self.map_height - 1}")
@@ -664,4 +660,25 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.init_objects()
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
+        self.scene_update()
+
+    def save_state(self) -> Memento:
+        return Memento({"map": deepcopy(self.map), "map_height": self.map_height,
+                        "objects": deepcopy(self.objects), "handlers": deepcopy(self.handlers),
+                        "tile_width": self.tile_width, "tile_height": self.tile_height,
+                        "grid_scale": self.grid_scale, "grid_height": self.grid_height,
+                        "grid_width": self.grid_width, "tile_map": self.tile_map})
+
+    def restore_state(self, m: Memento) -> None:
+        state = m.get_state()
+        self.map = state["map"]
+        self.map_height = state["map_height"]
+        self.objects = state["objects"]
+        self.handlers = state["handlers"]
+        self.tile_width = state["tile_width"]
+        self.tile_height = state["tile_height"]
+        self.grid_scale = state["grid_scale"]
+        self.grid_height = state["grid_height"]
+        self.grid_width = state["grid_width"]
+        self.tile_map = state["tile_map"]
         self.scene_update()
