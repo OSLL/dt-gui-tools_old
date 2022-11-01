@@ -109,7 +109,7 @@ class EditObject(QDialog):
                 if not isinstance(val, float):
                     edit.setText(str(val))
                 else:
-                    edit.setText(f'{val:.{self.float_accuracy}f}')
+                    edit.setText(f'{val:.{self.float_formatting}f}')
                 # cannot edit frames of non-draggable objects
                 if not self.is_draggable:
                     edit.setDisabled(True)
