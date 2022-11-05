@@ -83,7 +83,7 @@ class MapAPI:
         self._map_viewer.to_the_corner()
 
     def delete_selected_objects(self) -> None:
-        pass
+        self._map_viewer.delete_selected_objects()
 
     def create_region(self):
         print('create_region')
@@ -190,7 +190,7 @@ class MapAPI:
 
     #  Double click initiates as single click action
     def item_list_double_clicked(self, window: QtWidgets.QMainWindow, item_name: str, item_type: str) -> None:
-        #print(item_name, item_type)
+        # print(item_name, item_type)
         if item_name == "separator":
             pass
         elif item_type in TILE_TYPES:
@@ -235,9 +235,6 @@ class MapAPI:
             self._editor_state.drawState = 'brush'
         else:
             self._editor_state.drawState = ''
-
-    def trimClicked(self):
-        pass
 
     def selection_update(self, default_fill: str) -> None:
         if self._editor_state.drawState == 'brush':
@@ -290,4 +287,3 @@ class MapAPI:
                                                frame, is_draggable)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()
-

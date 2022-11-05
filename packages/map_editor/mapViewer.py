@@ -83,7 +83,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             if layer and layer_name != "frames":
                 for object_name in layer:
                     layer_object = layer[object_name]
-                    if not object_name in frames:
+                    if object_name not in frames:
                         self.add_frame_on_map(object_name)
                     self.add_obj_image(layer_name, object_name, layer_object)
 
@@ -597,6 +597,16 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             if map_object.is_draggable() and raw_selection[0] <= map_object.x() <= raw_selection[2] and \
                     raw_selection[1] <= map_object.y() <= raw_selection[3]:
                 map_object.is_select = True
+
+    def delete_selected_objects(self) -> None:
+        delete_list = []
+        for map_object in self.objects:
+            map_object = self.objects[map_object]
+            if map_object.is_draggable() and map_object.is_select:
+                delete_list.append(map_object)
+        for obj in delete_list:
+            self.delete_object(obj)
+            obj.delete_object()
 
     def save_to_png(self, file_name: str) -> None:
         # add smoothing and scaling of objects
