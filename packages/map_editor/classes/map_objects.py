@@ -144,20 +144,3 @@ class DraggableImage(ImageObject):
         else:
             painter = QtGui.QPainter(self)
             painter.drawPixmap(self.rect(), self.pixmap)
-
-
-if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    win = QtWidgets.QWidget()
-    win.mainLayout = QtWidgets.QHBoxLayout()
-    win.setLayout(win.mainLayout)
-    win.setFixedSize(1000, 1000)
-    win.img_list = [
-        "../img/objects/watchtowers.png", "../img/objects/watchtowers.png"
-    ]
-    for img in win.img_list:
-        draggable_image = DraggableImage(img, win)
-        win.mainLayout.addWidget(draggable_image)
-    win.show()
-    sys.exit(app.exec_())

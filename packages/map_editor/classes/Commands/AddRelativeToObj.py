@@ -7,7 +7,7 @@ class AddRelativeToObj(Command):
     _object_name: str
     _relative_to: str
 
-    def __init__(self, object_name: str, relative_to: str):
+    def __init__(self, object_name: str, relative_to: str) -> None:
         self._object_name = object_name
         self._relative_to = relative_to
 
