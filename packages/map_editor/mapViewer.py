@@ -484,8 +484,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def to_the_corner(self) -> None:
         left_upper_tile = self.get_object(
             f"{self.tile_map}/tile_0_{self.map_height - 1}")
-        delta_pos = (-left_upper_tile.pos().x(),
-                     -left_upper_tile.pos().y())
+        delta_pos = (-left_upper_tile.pos().x() + 2,
+                     -left_upper_tile.pos().y() + 2)
         self.change_object_handler(self.move_obj,
                                    {"delta_coordinates": delta_pos})
         self.set_offset()
@@ -598,10 +598,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.coordinates_transformer.set_scale(1)
         self.change_object_handler(self.scaled_obj, {"scale": 1})
         self.is_to_png = True
+        self.select_objects()
         self.scene_update()
-        pixmap = self.grab(QRect(QPoint(self.offset_x, self.offset_y),
-                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x,
-                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y)))
+        pixmap = self.grab(QRect(QPoint(self.offset_x - 1, self.offset_y - 1),
+                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x - 1,
+                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y - 1)))
         pixmap.save(f"{file_name}.png")
         self.is_to_png = False
         self.coordinates_transformer.set_scale(self.scale)

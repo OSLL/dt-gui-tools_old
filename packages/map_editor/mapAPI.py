@@ -89,6 +89,7 @@ class MapAPI:
         pass
 
     def save_map_as_png(self, parent: QtWidgets.QWidget) -> None:
+        self.to_the_map_corner()
         path = self._qt_api.create_file_name(parent)
         self.set_move_mode(False)
         if path:

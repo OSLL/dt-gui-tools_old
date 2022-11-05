@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
+import os
 
 
 class QtWindowAPI:
@@ -10,4 +11,8 @@ class QtWindowAPI:
                                                           QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
 
     def create_file_name(self, parent: QtWidgets.QWidget, info: str = "filename") -> str:
-        return QFileDialog.getSaveFileName(parent, f"Select {info} to save", self.dir)[0]
+        if "SNAP" in os.environ:
+            return QFileDialog.getSaveFileName(parent, f"Select {info} to save", self.dir, options=QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        else:
+            return QFileDialog.getSaveFileName(parent, f"Select {info} to save",
+                                               self.dir)[0]
