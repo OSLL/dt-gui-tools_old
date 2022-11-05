@@ -101,7 +101,7 @@ class DuckWindow(QtWidgets.QMainWindow):
                                           "To the corner of the map (Ctrl+M)"), self)
         a6.setShortcut("Ctrl+M")
         a7 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"),
-                               _translate("MainWindow", "Delete"), self)
+                               _translate("MainWindow", "Delete (Ctrl+D or Delete)"), self)
         a7.setShortcuts(["Ctrl+D", "Delete"])
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
