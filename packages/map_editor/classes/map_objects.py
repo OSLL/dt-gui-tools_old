@@ -13,11 +13,12 @@ class ImageObject(QtWidgets.QLabel):
         self.img_path = img_path
         self.name = object_name
         self.layer_name = layer_name
-        self.setParent(parent)
+        self.is_select = False
+        self.is_to_png = False
         self.pixmap = None
+        self.setParent(parent)
         self.change_image(img_path)
         self.setMouseTracking(True)
-        self.is_select = False
 
     def is_draggable(self) -> bool:
         return False
@@ -29,7 +30,7 @@ class ImageObject(QtWidgets.QLabel):
             self.setFixedSize(self.pixmap.height(), self.pixmap.width())
         new_transform = QtGui.QTransform()
         new_transform.rotate(rotate_angle)
-        self.pixmap = self.pixmap.transformed(new_transform, QtCore.Qt.SmoothTransformation)
+        self.pixmap = self.pixmap.transformed(new_transform)
         self.setPixmap(self.pixmap)
 
     def change_image(self, img_path: str) -> None:
@@ -40,7 +41,11 @@ class ImageObject(QtWidgets.QLabel):
 
     def set_size_object(self, new_size: tuple) -> None:
         resize = QtCore.QSize(new_size[0], new_size[1])
-        self.pixmap = self.pixmap.scaled(resize)
+        if self.is_to_png:
+            self.pixmap = self.pixmap.scaled(resize,
+                                             transformMode=QtCore.Qt.SmoothTransformation)
+        else:
+            self.pixmap = self.pixmap.scaled(resize)
         self.setFixedSize(new_size[0], new_size[1])
         self.setPixmap(self.pixmap)
         self.show()
@@ -93,6 +98,9 @@ class ImageObject(QtWidgets.QLabel):
 
     def change_obj(self) -> None:
         self.parentWidget().change_obj_info(self.layer_name, self.name)
+
+    def set_is_to_png(self, val: bool) -> None:
+        self.is_to_png = val
 
 
 class DraggableImage(ImageObject):
