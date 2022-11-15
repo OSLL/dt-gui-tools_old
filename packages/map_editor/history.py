@@ -24,24 +24,27 @@ class EditorHistory:
         """
         del self.buffer[start_index:]
 
+
     def push(self, m: Memento) -> None:
         """
         Add new state to the end of buffer.
         """
-        if self.current_state_index < len(self.buffer) - 1:
-            self.delete(self.current_state_index)
-        self.buffer.append(m)
-        self.current_state_index += 1
-        print("push", self.buffer)
+
+        if self.current_state_index + 1 < MAX_BUFFER_LENGTH:
+            self.buffer.append(m)
+            self.current_state_index = len(self.buffer) - 1
+
 
     def undo(self) -> Optional[Memento]:
         """
         Return state from history at index current_state_index - 1.
         """
-        print("undo", self.current_state_index, self.buffer)
-        if self.current_state_index >= 0 and len(self.buffer) > 0:
+
+        if self.current_state_index - 1 >= 0:
             self.current_state_index -= 1
             return self.buffer[self.current_state_index]
+        elif self.current_state_index == 0:
+            return self.buffer[0]
         else:
             return None
 
@@ -49,9 +52,10 @@ class EditorHistory:
         """
         Return state from history at index current_state_index + 1.
         """
-        print("shift undo", self.current_state_index)
-        if self.current_state_index < MAX_BUFFER_LENGTH and \
-                len(self.buffer) > self.current_state_index + 1:
+
+        if self.current_state_index == len(self.buffer) - 1:
+            return self.buffer[self.current_state_index]
+        elif self.current_state_index + 1 < len(self.buffer):
             self.current_state_index += 1
             return self.buffer[self.current_state_index]
         else:

@@ -37,10 +37,11 @@ from dt_maps.Map import REGISTER
 
 def need_save_state(func):
     def save(*args, **kwargs):
+        func(*args, **kwargs)
         self = args[0]
         m = self.save_state()
         self.parentWidget().parent().push_state(m)
-        return func(*args, **kwargs)
+        #return func(*args, **kwargs)
     return save
 
 
@@ -662,7 +663,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def open_map(self, path: Path, map_name: str, is_new_map: bool = False,
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0)) -> None:
-        t = time.time()
         self.delete_objects()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
@@ -676,7 +676,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
         self.scene_update()
-        print(time.time() - t)
 
     def save_state(self) -> Memento:
         # скопировали слои
@@ -688,26 +687,27 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def restore_state(self, m: Memento) -> None:
         state = m.get_state()
-        layers = state["layers"]
-        self.delete_objects()
-        # removing all elements from the original layers
-        for layer in self.map.map.layers:
-            items = [item for item in self.map.map.layers[layer]]
-            for item in items:
-                del self.map.map.layers[layer][item]
-        # fill the original now empty layers with the copied data
-        for layer_name in layers:
-            layer = layers[layer_name]
-            items = [item for item in layer]
-            for item in items:
-                self.map.map.layers[layer_name][item] = layer[item]
-        # initialize map objects from layers
-        self.init_objects()
-        # restore other settings
-        self.tile_width = state["tile_width"]
-        self.tile_height = state["tile_height"]
-        self.grid_scale = state["grid_scale"]
-        self.grid_height = state["grid_height"]
-        self.grid_width = state["grid_width"]
-        self.tile_map = state["tile_map"]
-        self.scene_update()
+        if state:
+            layers = state["layers"]
+            self.delete_objects()
+            # removing all elements from the original layers
+            for layer in self.map.map.layers:
+                items = [item for item in self.map.map.layers[layer]]
+                for item in items:
+                    del self.map.map.layers[layer][item]
+            # fill the original now empty layers with the copied data
+            for layer_name in layers:
+                layer = layers[layer_name]
+                items = [item for item in layer]
+                for item in items:
+                    self.map.map.layers[layer_name][item] = layer[item]
+            # initialize map objects from layers
+            self.init_objects()
+            # restore other settings
+            self.tile_width = state["tile_width"]
+            self.tile_height = state["tile_height"]
+            self.grid_scale = state["grid_scale"]
+            self.grid_height = state["grid_height"]
+            self.grid_width = state["grid_width"]
+            self.tile_map = state["tile_map"]
+            self.scene_update()
