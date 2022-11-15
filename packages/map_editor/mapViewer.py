@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 from copy import deepcopy
 from importlib import import_module
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -157,7 +158,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     @need_save_state
     def add_obj(self, type_of_element: str, item_name: str = None) -> None:
-        print(self.map.map.layers)
         i = 1
         layer_name = f"{type_of_element}s"
         while True:
@@ -170,8 +170,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                 {'scale': self.scale})
                 break
             i += 1
-        print(self.get_layer("tiles")["map_1/tile_0_0"])
-        print(deepcopy(self.get_layer("tiles")["map_1/tile_0_0"]))
 
     def add_obj_image(self, layer_name: str, object_name: str,
                       layer_object=None, item_name: str = None) -> None:
@@ -419,7 +417,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         tiles = self.get_layer(TILES)
         for tile_name in tiles:
             tile = tiles[tile_name]
-            print(tile.__dict__, tile.__str__(), dir(tile))
+            #print(tile.__dict__, tile.__str__(), dir(tile))
             if self.is_selected_tile(tile):
                 args["tile_name"] = tile_name
                 args["tile"] = tile
@@ -664,6 +662,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def open_map(self, path: Path, map_name: str, is_new_map: bool = False,
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0)) -> None:
+        t = time.time()
         self.delete_objects()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
@@ -677,23 +676,34 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
         self.scene_update()
+        print(time.time() - t)
 
     def save_state(self) -> Memento:
-        return Memento({"map": deepcopy(self.map.map), "map_height": self.map_height,
-                        "objects": self.objects.copy(), "handlers": deepcopy(self.handlers),
+        # скопировали слои
+        layers = {name: layer.copy() for name, layer in self.map.map.layers.items()}
+        return Memento({"layers": layers, "map_height": self.map_height,
                         "tile_width": self.tile_width, "tile_height": self.tile_height,
                         "grid_scale": self.grid_scale, "grid_height": self.grid_height,
                         "grid_width": self.grid_width, "tile_map": self.tile_map})
 
     def restore_state(self, m: Memento) -> None:
-        print("ok")
         state = m.get_state()
-
-        self.map.map = state["map"]
-        print(self.map.map.layers)
-        self.map_height = state["map_height"]
-        self.objects = state["objects"]
-        self.handlers = state["handlers"]
+        layers = state["layers"]
+        self.delete_objects()
+        # removing all elements from the original layers
+        for layer in self.map.map.layers:
+            items = [item for item in self.map.map.layers[layer]]
+            for item in items:
+                del self.map.map.layers[layer][item]
+        # fill the original now empty layers with the copied data
+        for layer_name in layers:
+            layer = layers[layer_name]
+            items = [item for item in layer]
+            for item in items:
+                self.map.map.layers[layer_name][item] = layer[item]
+        # initialize map objects from layers
+        self.init_objects()
+        # restore other settings
         self.tile_width = state["tile_width"]
         self.tile_height = state["tile_height"]
         self.grid_scale = state["grid_scale"]
