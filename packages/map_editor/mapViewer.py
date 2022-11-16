@@ -9,6 +9,7 @@ from dt_maps.types.tiles import Tile
 from dt_maps import MapLayer
 from classes.Commands.AddObjCommand import AddObjCommand
 from classes.Commands.AddRelativeToObj import AddRelativeToObj
+from classes.Commands.DeepCopyLayerCommand import DeepCopyLayerCommand
 from classes.Commands.DeleteObjCommand import DeleteObjCommand
 from classes.Commands.GetLayerCommand import GetLayerCommand
 from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
@@ -84,6 +85,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
+        print("init objects")
         frames = self.get_layer("frames")
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
@@ -262,6 +264,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                          new_coord: Tuple[float, float]) -> None:
         self.handlers.handle(command=MoveObjCommand(frame_name, new_coord))
 
+    def get_layer_deepcopy(self, layer_name: str) -> Dict[str, Any]:
+        return self.handlers.handle(command=DeepCopyLayerCommand(layer_name))
+
     def rotate_obj(self, obj: ImageObject, new_angle: float) -> None:
         obj.rotate_object(new_angle)
         self.scene_update()
@@ -349,7 +354,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                                      self.get_object_conf(layer_name, obj_name),
                                                      self.get_object_conf(FRAMES, obj.name), obj.is_draggable())
 
-    #@need_save_state
+    @need_save_state
     def change_obj_from_info(self, conf: Dict[str, Any]) -> None:
         print(conf)
         obj = self.get_object(conf["name"])
@@ -428,10 +433,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for obj_name in self.objects:
             handler_func(self.get_object(obj_name), args)
 
+    @need_save_state
     def painting_tiles(self, default_fill: str) -> None:
         self.change_tiles_handler(self.change_tile_type,
                                   {"default_fill": default_fill})
 
+    #@need_save_state
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
 
@@ -442,6 +449,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.rotate_obj(obj, new_angle)
             self.rotate_obj_on_map(obj.name, new_angle)
 
+    #@need_save_state
     def rotate_objects(self) -> None:
         self.change_object_handler(self.rotate_object_with_button, {})
 
@@ -678,8 +686,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scene_update()
 
     def save_state(self) -> Memento:
-        # скопировали слои
-        layers = {name: layer.copy() for name, layer in self.map.map.layers.items()}
+        # custom deepcopy
+        layers = {name: self.get_layer_deepcopy(name) for name in self.map.map.layers}
         return Memento({"layers": layers, "map_height": self.map_height,
                         "tile_width": self.tile_width, "tile_height": self.tile_height,
                         "grid_scale": self.grid_scale, "grid_height": self.grid_height,
@@ -689,6 +697,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         state = m.get_state()
         if state:
             layers = state["layers"]
+            print(layers)
             self.delete_objects()
             # removing all elements from the original layers
             for layer in self.map.map.layers:
@@ -698,6 +707,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             # fill the original now empty layers with the copied data
             for layer_name in layers:
                 layer = layers[layer_name]
+                if not layer:
+                    layer = {}
                 items = [item for item in layer]
                 for item in items:
                     self.map.map.layers[layer_name][item] = layer[item]
