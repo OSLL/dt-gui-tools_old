@@ -75,7 +75,8 @@ class TileMapsLayerHandler(BasicLayerHandler):
     def get_layer_deepcopy(self, layer: MapLayer) -> Optional[Dict[str, Any]]:
         copied_layer = {}
         for name, value in layer.items():
-            copied_layer[name] = {TILE_SIZE: {'x': value["x"], 'y': value["y"]}}
+            copied_layer[name] = {TILE_SIZE: {'x': value[TILE_SIZE]["x"],
+                                              'y': value[TILE_SIZE]["y"]}}
         return copied_layer
 
 
