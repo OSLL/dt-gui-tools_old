@@ -85,7 +85,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setMouseTracking(True)
 
     def init_objects(self) -> None:
-        print("init objects")
         frames = self.get_layer("frames")
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
@@ -248,6 +247,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float]) -> None:
         obj.set_obj_map_pos(new_pos)
 
+    @need_save_state
     def move_obj_on_map(self, frame_name: str,
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
@@ -423,7 +423,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         tiles = self.get_layer(TILES)
         for tile_name in tiles:
             tile = tiles[tile_name]
-            #print(tile.__dict__, tile.__str__(), dir(tile))
             if self.is_selected_tile(tile):
                 args["tile_name"] = tile_name
                 args["tile"] = tile
@@ -599,6 +598,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 for i, v in enumerate(raw_selection)
             ]
 
+    def have_selected_tiles(self) -> bool:
+        tiles = self.get_layer(TILES)
+        for tile_name in tiles:
+            tile = tiles[tile_name]
+            if self.is_selected_tile(tile):
+                return True
+        return False
+
     def select_objects(self) -> None:
         raw_selection = [
                 min(self.mouse_start_x, self.mouse_cur_x),
@@ -697,7 +704,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         state = m.get_state()
         if state:
             layers = state["layers"]
-            print(layers)
+            #print(layers)
             self.delete_objects()
             # removing all elements from the original layers
             for layer in self.map.map.layers:
@@ -706,7 +713,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     del self.map.map.layers[layer][item]
             # fill the original now empty layers with the copied data
             for layer_name in layers:
-                layer = layers[layer_name]
+                layer = deepcopy(layers[layer_name])
                 if not layer:
                     layer = {}
                 items = [item for item in layer]

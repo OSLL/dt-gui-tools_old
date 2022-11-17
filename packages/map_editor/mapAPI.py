@@ -249,7 +249,8 @@ class MapAPI:
         pass
 
     def selection_update(self, default_fill: str) -> None:
-        if self._editor_state.drawState == 'brush':
+        if self._editor_state.drawState == 'brush' and \
+                self._map_viewer.have_selected_tiles():
             self._map_viewer.painting_tiles(default_fill)
 
     def key_press_event(self, event: QKeyEvent) -> None:
