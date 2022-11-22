@@ -42,7 +42,6 @@ def need_save_state(func):
         self = args[0]
         m = self.save_state()
         self.parentWidget().parent().push_state(m)
-        #return func(*args, **kwargs)
     return save
 
 
@@ -135,6 +134,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for i in range(len(handlers_list) - 1):
             handlers_list[i].set_next(handlers_list[i + 1])
         self.handlers = handlers_list[0]
+
+    @need_save_state
+    def save_first_viewer_state(self) -> None:
+        pass
 
     def set_map_viewer_sizes(self, tile_width: float = 0,
                              tile_height: float = 0) -> None:
