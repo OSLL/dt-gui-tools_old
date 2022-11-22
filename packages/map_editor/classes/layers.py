@@ -44,10 +44,16 @@ class AbstractLayer(ABC):
     def set_layer_handler(self, handler: EntityHelper) -> None:
         self._layer_handler = handler
 
-    def get_layer_deepcopy(self, layer: MapLayer) -> Dict[str, Any]:
+    def get_layer_deepcopy(self, layer: MapLayer) -> Optional[Dict[str, Any]]:
         if not len(layer):
             return {}
-        return layer.copy()
+        new_layer = {}
+        for name, item in layer.items():
+            new_item = {}
+            for item_filed in self._default_conf:
+                new_item[item_filed] = deepcopy(layer[name][item_filed])
+            new_layer[name] = new_item
+        return new_layer
 
 
 class BasicLayerHandler(AbstractHandler, AbstractLayer):
