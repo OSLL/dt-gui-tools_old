@@ -359,6 +359,9 @@ class DuckWindow(QtWidgets.QMainWindow):
     def push_state(self, m: Memento) -> None:
         self.map_api.push_state(m)
 
+    def clear_editor_history(self) -> None:
+        self.map_api.clear_editor_history()
+
     #  Brush mode
     def brush_mode(self) -> None:
         self.map_api.brush_mode(self.brush_button.isChecked())

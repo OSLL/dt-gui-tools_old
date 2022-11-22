@@ -24,6 +24,9 @@ class EditorHistory:
         """
         del self.buffer[start_index:]
 
+    def clear_history(self) -> None:
+        self.delete(0)
+
     def push(self, m: Memento) -> None:
         """
         Add new state to the end of buffer.

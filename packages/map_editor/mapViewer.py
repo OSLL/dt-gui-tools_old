@@ -682,6 +682,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0)) -> None:
         self.delete_objects()
+        self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
         self.init_handlers()
@@ -693,6 +694,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.init_objects()
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
+        self.save_first_viewer_state()
         self.scene_update()
 
     def save_state(self) -> Memento:
@@ -707,7 +709,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         state = m.get_state()
         if state:
             layers = state["layers"]
-            #print(layers)
             self.delete_objects()
             # removing all elements from the original layers
             for layer in self.map.map.layers:
@@ -724,11 +725,4 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     self.map.map.layers[layer_name][item] = layer[item]
             # initialize map objects from layers
             self.init_objects()
-            # restore other settings
-            self.tile_width = state["tile_width"]
-            self.tile_height = state["tile_height"]
-            self.grid_scale = state["grid_scale"]
-            self.grid_height = state["grid_height"]
-            self.grid_width = state["grid_width"]
-            self.tile_map = state["tile_map"]
             self.scene_update()

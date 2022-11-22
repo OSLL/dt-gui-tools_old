@@ -238,6 +238,9 @@ class MapAPI:
     def push_state(self, m: Memento) -> None:
         self._history.push(m)
 
+    def clear_editor_history(self) -> None:
+        self._history.clear_history()
+
     #  Brush mode
     def brush_mode(self, brush_button_is_checked: bool) -> None:
         if brush_button_is_checked:
