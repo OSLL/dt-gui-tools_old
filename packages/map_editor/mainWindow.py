@@ -183,7 +183,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         b5.triggered.connect(self.undo_button_clicked)
         '''
 
-        c1.triggered.connect(self.rotate_selected_tiles)
+        c1.triggered.connect(self.rotate_selected_objects)
         # TODO
         #c2.triggered.connect(self.trimClicked)
 
@@ -349,11 +349,9 @@ class DuckWindow(QtWidgets.QMainWindow):
         pass
 
     def undo_button_clicked(self) -> None:
-        print(1)
         self.map_api.undo_button_clicked()
 
     def shift_undo_button_clicked(self) -> None:
-        print(2)
         self.map_api.shift_button_clicked()
 
     def push_state(self, m: Memento) -> None:
@@ -381,7 +379,7 @@ class DuckWindow(QtWidgets.QMainWindow):
     def mousePressEvent(self, event: QMouseEvent):
         self.map_api.mouse_press_event(event)
 
-    def rotate_selected_tiles(self) -> None:
+    def rotate_selected_objects(self) -> None:
         self.map_api.rotate_selected_objects()
 
     def update_debug_info(self, event: Dict[str, Any]) -> None:
