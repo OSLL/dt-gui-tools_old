@@ -36,7 +36,7 @@ from pathlib import Path
 from dt_maps.Map import REGISTER
 
 
-def need_save_state(func):
+def needsavestate(func):
     def save(*args, **kwargs):
         func(*args, **kwargs)
         self = args[0]
@@ -135,7 +135,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             handlers_list[i].set_next(handlers_list[i + 1])
         self.handlers = handlers_list[0]
 
-    @need_save_state
+    @needsavestate
     def save_first_viewer_state(self) -> None:
         pass
 
@@ -161,7 +161,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
-    @need_save_state
+    @needsavestate
     def add_obj(self, type_of_element: str, item_name: str = None) -> None:
         i = 1
         layer_name = f"{type_of_element}s"
@@ -250,7 +250,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float]) -> None:
         obj.set_obj_map_pos(new_pos)
 
-    @need_save_state
+    @needsavestate
     def move_obj_on_map(self, frame_name: str,
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
@@ -274,6 +274,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         obj.rotate_object(new_angle)
         self.scene_update()
 
+    #@needsavestate
     def rotate_obj_on_map(self, frame_name: str, new_angle: float) -> None:
         self.handlers.handle(command=RotateCommand(frame_name, new_angle))
 
@@ -357,13 +358,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                                      self.get_object_conf(layer_name, obj_name),
                                                      self.get_object_conf(FRAMES, obj.name), obj.is_draggable())
 
-    @need_save_state
+    @needsavestate
     def change_obj_from_info(self, conf: Dict[str, Any]) -> None:
         print(conf)
         obj = self.get_object(conf["name"])
         if conf["is_valid"]:
             if conf["remove"]:
-                self.delete_object(obj)
+                self.delete_obj_on_map(obj)
+                self.objects.__delitem__(obj.name)
                 obj.delete_object()
             else:
                 if self.check_layer_config(FRAMES,
@@ -386,9 +388,16 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                             conf[FRAME]["pose"]["y"],
                             obj.height()) + self.offset_y
                         self.move_obj(obj, {"new_coordinates": (pos_x, pos_y)})
-                        self.move_obj_on_map(obj.name, (pos_x, pos_y),
-                                             obj_width=obj.width(),
-                                             obj_height=obj.height())
+                        # move obj on map
+                        map_x = self.get_x_from_view((pos_x, pos_y)[0],
+                                                     obj_width=obj.width(),
+                                                     offset=self.offset_x)
+                        map_y = self.get_y_from_view((pos_x, pos_y)[1],
+                                                     obj_height=obj.height(),
+                                                     offset=self.offset_y)
+                        obj = self.get_object(obj.name)
+                        self.set_obj_map_pos(obj, (map_x, map_y))
+                        self.move_obj_command(obj.name, (map_x, map_y))
                 else:
                     self.parentWidget().parent().view_info_form("Error",
                                                                 "Invalid object frame values entered!")
@@ -417,7 +426,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(ChangeObjCommand(layer_name, obj_name,
                                               new_config))
 
-    @need_save_state
+    @needsavestate
     def delete_object(self, obj: ImageObject) -> None:
         self.delete_obj_on_map(obj)
         self.objects.__delitem__(obj.name)
@@ -435,7 +444,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for obj_name in self.objects:
             handler_func(self.get_object(obj_name), args)
 
-    @need_save_state
+    @needsavestate
     def painting_tiles(self, default_fill: str) -> None:
         self.change_tiles_handler(self.change_tile_type,
                                   {"default_fill": default_fill})
