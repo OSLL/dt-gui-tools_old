@@ -136,7 +136,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers = handlers_list[0]
 
     @needsavestate
-    def save_first_viewer_state(self) -> None:
+    def save_viewer_state(self) -> None:
         pass
 
     def set_map_viewer_sizes(self, tile_width: float = 0,
@@ -274,7 +274,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         obj.rotate_object(new_angle)
         self.scene_update()
 
-    #@needsavestate
     def rotate_obj_on_map(self, frame_name: str, new_angle: float) -> None:
         self.handlers.handle(command=RotateCommand(frame_name, new_angle))
 
@@ -449,7 +448,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.change_tiles_handler(self.change_tile_type,
                                   {"default_fill": default_fill})
 
-    #@need_save_state
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
 
@@ -460,7 +458,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.rotate_obj(obj, new_angle)
             self.rotate_obj_on_map(obj.name, new_angle)
 
-    #@need_save_state
     def rotate_objects(self) -> None:
         self.change_object_handler(self.rotate_object_with_button, {})
 
@@ -703,7 +700,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.init_objects()
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
-        self.save_first_viewer_state()
+        self.save_viewer_state()
         self.scene_update()
 
     def save_state(self) -> Memento:
