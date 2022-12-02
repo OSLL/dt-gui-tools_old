@@ -2,7 +2,6 @@ import functools
 import json
 import codecs
 from PyQt5.QtGui import QResizeEvent, QKeyEvent, QMouseEvent
-
 from history import Memento
 from mapAPI import MapAPI
 from mapViewer import MapViewer
@@ -50,7 +49,7 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     def get_translation(self, elem):
         """Gets info about the element based on self.locale
-        If local doesn't exist, return locale='en'
+        If local doesn't exist, return locale='en'.
 
         :param self
         :param elem: dict, information about elements (or category), that contains translation
@@ -71,56 +70,21 @@ class DuckWindow(QtWidgets.QMainWindow):
         save_map = self.ui.save_map
         save_map_as = self.ui.save_map_as
         export_png = self.ui.export_png
-        # TODO
-        #calc_param = self.ui.calc_param
-        #about_author = self.ui.about_author
         exit = self.ui.exit
-        # TODO
-        '''     
-        change_blocks = self.ui.change_blocks
-        change_info = self.ui.change_info TODO
-        change_map = self.ui.change_map
-        change_layer = self.ui.change_layer TODO
-        distortion_view = self.ui.distortion_view
-        create_region = self.ui.region_create
-        import_old_format = self.ui.import_old_format
-        environment = self.ui.env'''
 
         #  Initialize floating blocks
         block_widget = self.ui.block_widget
-        # TODO
         info_widget = self.ui.info_widget
-        #map_info_widget = self.ui.map_info_widget
-        #layer_info_widget = self.ui.layer_info_widget
-
         #  Assign actions to buttons
         create_map.triggered.connect(self.create_map_triggered)
         open_map.triggered.connect(self.open_map_triggered)
         save_map.triggered.connect(self.save_map_triggered)
         save_map_as.triggered.connect(self.save_map_as_triggered)
         export_png.triggered.connect(self.save_map_as_png)
-        '''
-        calc_param.triggered.connect(self.calc_param_triggered)
-        about_author.triggered.connect(self.about_author_triggered)
-        distortion_view.triggered.connect(self.change_distortion_view_triggered)
-        create_region.triggered.connect(self.create_region)
-        import_old_format.triggered.connect(self.import_old_format)
-        environment.triggered.connect(self.change_env)
-        '''
         exit.triggered.connect(self.exit_triggered)
-
-        # TODO
-        '''
-        change_blocks.toggled.connect(self.change_blocks_toggled)
-        change_info.toggled.connect(self.change_info_toggled)
-        change_map.toggled.connect(self.change_map_toggled)
-        change_layer.toggled.connect(self.toggle_layer_window)
-        '''
 
         block_widget.closeEvent = functools.partial(self.blocks_event)
         info_widget.closeEvent = functools.partial(self.info_event)
-        #map_info_widget.closeEvent = functools.partial(self.map_event)
-        #layer_info_widget.closeEvent = functools.partial(self.close_layer_window_event)
 
         self.ui.info_browser.setText(self.info_json["description"])
 
@@ -189,8 +153,6 @@ class DuckWindow(QtWidgets.QMainWindow):
 
         self.brush_button.clicked.connect(self.brush_mode)
 
-        # TODO
-        #for elem in [[a1, a2, a3, a4, a5], [b1, b2, b3, b4, b5]]:
         for elem in [[a1, a2, a3, a4, a5]]:
             for act in elem:
                 tool_bar.addAction(act)
@@ -240,6 +202,9 @@ class DuckWindow(QtWidgets.QMainWindow):
                                          self.get_translation(information[elem_id])['name'], elem_id)
 
         default_fill.setCurrentText(self.get_translation(information["grass"])['name'])
+
+    def to_the_map_corner(self) -> None:
+        self.map_api.to_the_map_corner()
 
     def to_the_map_corner(self) -> None:
         self.map_api.to_the_map_corner()
@@ -344,9 +309,8 @@ class DuckWindow(QtWidgets.QMainWindow):
     def insert_button_clicked(self):
         pass
 
-    #  Delete
-    def delete_button_clicked(self):
-        pass
+    def delete_selected_objects(self) -> None:
+        self.map_api.delete_selected_objects()
 
     def undo_button_clicked(self) -> None:
         self.map_api.undo_button_clicked()

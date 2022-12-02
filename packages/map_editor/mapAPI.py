@@ -82,8 +82,11 @@ class MapAPI:
             except OSError as err:
                 logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
-    def to_the_map_corner(self):
+    def to_the_map_corner(self) -> None:
         self._map_viewer.to_the_corner()
+
+    def delete_selected_objects(self) -> None:
+        self._map_viewer.delete_selected_objects()
 
     def create_region(self):
         print('create_region')
@@ -92,6 +95,7 @@ class MapAPI:
         pass
 
     def save_map_as_png(self, parent: QtWidgets.QWidget) -> None:
+        self.to_the_map_corner()
         path = self._qt_api.create_file_name(parent)
         self.set_move_mode(False)
         if path:
@@ -189,7 +193,7 @@ class MapAPI:
 
     #  Double click initiates as single click action
     def item_list_double_clicked(self, window: QtWidgets.QMainWindow, item_name: str, item_type: str) -> None:
-        #print(item_name, item_type)
+        # print(item_name, item_type)
         if item_name == "separator":
             pass
         elif item_type in TILE_TYPES:
@@ -248,9 +252,6 @@ class MapAPI:
         else:
             self._editor_state.drawState = ''
 
-    def trimClicked(self):
-        pass
-
     def selection_update(self, default_fill: str) -> None:
         if self._editor_state.drawState == 'brush' and \
                 self._map_viewer.have_selected_tiles():
@@ -304,4 +305,3 @@ class MapAPI:
                                                frame, is_draggable)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()
-

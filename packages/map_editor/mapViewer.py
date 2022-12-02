@@ -65,7 +65,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     grid_width: float = tile_width * grid_scale
     tile_map: str = "map_1"
 
-    def __init__(self, work_dir: str):
+    def __init__(self, work_dir: str) -> None:
         QtWidgets.QGraphicsView.__init__(self)
         self.setScene(QtWidgets.QGraphicsScene())
         # load default map
@@ -153,11 +153,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.grid_width = self.tile_width * self.grid_scale
         self.grid_height = self.tile_height * self.grid_scale
 
-    def set_tile_map(self):
+    def set_tile_map(self) -> None:
         tile_maps = self.get_layer(TILE_MAPS)
         self.tile_map = [elem for elem in tile_maps][0]
 
-    def set_relative_to(self, object_name: str, value: str):
+    def set_relative_to(self, object_name: str, value: str) -> None:
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
@@ -231,7 +231,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                               tile_size: Tuple[float, float]) -> None:
         self.handlers.handle(SetTileSizeCommand(tile_map, tile_size))
 
-    def delete_objects(self):
+    def delete_objects(self) -> None:
         for obj_name in self.objects:
             obj = self.get_object(obj_name)
             obj.delete_object()
@@ -294,6 +294,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     obj.obj_map_pos[1]) + self.offset_y)
         self.move_obj(obj, {"new_coordinates": new_coordinates})
 
+    def set_png_mode(self, obj: ImageObject, args: Dict[str, Any]) -> None:
+        mode = args["mode"]
+        obj.set_is_to_png(mode)
+
     def set_map_size(self, height: int = 0) -> None:
         if not height:
             self.map_height = get_map_height(self.get_layer(TILES))
@@ -313,18 +317,18 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 (tile.j + 1) * self.tile_height >= self.tile_selection[3] and
                 tile.j * self.tile_height <= self.tile_selection[1])
 
-    def get_x_to_view(self, x: float, obj_width: float = 0):
+    def get_x_to_view(self, x: float, obj_width: float = 0) -> float:
         return self.coordinates_transformer.get_x_to_view(x, obj_width)
 
-    def get_y_to_view(self, y: float, obj_height: float = 0):
+    def get_y_to_view(self, y: float, obj_height: float = 0) -> float:
         return self.coordinates_transformer.get_y_to_view(y, obj_height)
 
-    def get_x_from_view(self, x: float, obj_width: float = 0, offset: float = 0):
+    def get_x_from_view(self, x: float, obj_width: float = 0, offset: float = 0) -> float:
         return self.coordinates_transformer.get_x_from_view(x,
                                                             obj_width=obj_width,
                                                             offset_x=offset)
 
-    def get_y_from_view(self, y: float, obj_height: float = 0, offset: float = 0):
+    def get_y_from_view(self, y: float, obj_height: float = 0, offset: float = 0) -> float:
         return self.coordinates_transformer.get_y_from_view(y,
                                                             obj_height=obj_height,
                                                             offset_y=offset)
@@ -417,11 +421,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.parentWidget().parent().view_info_form("Error",
                                                         "Invalid values entered!")
 
-    def check_layer_config(self, layer_name: str, new_config: Dict[str, Any]):
+    def check_layer_config(self, layer_name: str, new_config: Dict[str, Any]) -> bool:
         return self.handlers.handle(CheckConfigCommand(layer_name, new_config))
 
     def change_obj_from_config(self, layer_name: str, obj_name: str,
-                               new_config: Dict[str, Any]):
+                               new_config: Dict[str, Any]) -> None:
         self.handlers.handle(ChangeObjCommand(layer_name, obj_name,
                                               new_config))
 
@@ -450,7 +454,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
-
+        
     def rotate_object_with_button(self, obj: ImageObject,
                                       args: Dict[str, Any]) -> None:
         if obj.is_draggable() and obj.is_select:
@@ -461,7 +465,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def rotate_objects(self) -> None:
         self.change_object_handler(self.rotate_object_with_button, {})
 
-    def highlight_select_tile(self, args: Dict[str, Any]):
+    def highlight_select_tile(self, args: Dict[str, Any]) -> None:
         tile = self.get_object(args["tile_name"])
         self.painter.draw_rect((tile.pos().x() - 1, tile.pos().y() - 1),
                                self.scale, args["painter"],
@@ -512,8 +516,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def to_the_corner(self) -> None:
         left_upper_tile = self.get_object(
             f"{self.tile_map}/tile_0_{self.map_height - 1}")
-        delta_pos = (-left_upper_tile.pos().x(),
-                     -left_upper_tile.pos().y())
+        delta_pos = (-left_upper_tile.pos().x() + 2,
+                     -left_upper_tile.pos().y() + 2)
         self.change_object_handler(self.move_obj,
                                    {"delta_coordinates": delta_pos})
         self.set_offset()
@@ -564,6 +568,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.parentWidget().parent().selectionUpdate()
             self.scene_update()
             self.parentWidget().mousePressEvent(event)
+        else:
+            self.rmbPressed = False
 
     def set_offset(self) -> None:
         left_upper_tile = self.get_object(f"{self.tile_map}/tile_0_{self.map_height - 1}")
@@ -629,17 +635,36 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     raw_selection[1] <= map_object.y() <= raw_selection[3]:
                 map_object.is_select = True
 
+    def delete_selected_objects(self) -> None:
+        delete_list = []
+        for map_object in self.objects:
+            map_object = self.objects[map_object]
+            if map_object.is_draggable() and map_object.is_select:
+                delete_list.append(map_object)
+        for obj in delete_list:
+            self.delete_object(obj)
+            obj.delete_object()
+
     def save_to_png(self, file_name: str) -> None:
+        # add smoothing and scaling of objects
         self.coordinates_transformer.set_scale(1)
+        self.change_object_handler(self.set_png_mode, {"mode": True})
         self.change_object_handler(self.scaled_obj, {"scale": 1})
         self.is_to_png = True
+        # delete selection on objects
+        self.mouse_cur_x = self.mouse_start_x = 0
+        self.mouse_cur_y = self.mouse_start_y = 0
+        self.select_objects()
         self.scene_update()
-        pixmap = self.grab(QRect(QPoint(self.offset_x, self.offset_y),
-                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x,
-                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y)))
+        # save in png
+        pixmap = self.grab(QRect(QPoint(self.offset_x - 1, self.offset_y - 1),
+                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x - 1,
+                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y - 1)))
         pixmap.save(f"{file_name}.png")
         self.is_to_png = False
+        # remove smoothing and scaling of objects
         self.coordinates_transformer.set_scale(self.scale)
+        self.change_object_handler(self.set_png_mode, {"mode": False})
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.scene_update()
 
@@ -657,7 +682,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                       (tile_width, tile_height))
         self.set_coordinates_transformer_data()
 
-    def set_coordinates_transformer_data(self):
+    def set_coordinates_transformer_data(self) -> None:
         self.coordinates_transformer.set_scale(self.scale)
         self.coordinates_transformer.set_grid_size(
             (self.grid_width, self.grid_height))

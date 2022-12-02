@@ -10,7 +10,7 @@ class ChangeObjCommand(Command):
     _new_config: Dict[str, Any]
 
     def __init__(self, layer_name: str, object_name: str,
-                 new_config: Dict[str, Any]):
+                 new_config: Dict[str, Any]) -> None:
         self._layer_name = layer_name
         self._object_name = object_name
         self._new_config = new_config

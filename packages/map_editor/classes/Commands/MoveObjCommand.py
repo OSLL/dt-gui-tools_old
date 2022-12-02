@@ -7,7 +7,7 @@ class MoveObjCommand(Command):
     _new_position: tuple = (0, 0)
     _frame_name: str
 
-    def __init__(self, frame_name: str, new_position: tuple):
+    def __init__(self, frame_name: str, new_position: tuple) -> None:
         self._frame_name = frame_name
         self._new_position = new_position
 

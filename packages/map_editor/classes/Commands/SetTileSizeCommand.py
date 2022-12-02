@@ -7,7 +7,7 @@ class SetTileSizeCommand(Command):
     _new_size: tuple = (0.0, 0.0)
     _tile_map_name: str
 
-    def __init__(self, tile_map_name: str, new_size: tuple):
+    def __init__(self, tile_map_name: str, new_size: tuple) -> None:
         self._tile_map_name = tile_map_name
         self._new_size = new_size
 
