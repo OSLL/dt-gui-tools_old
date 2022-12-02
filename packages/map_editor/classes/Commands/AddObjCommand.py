@@ -7,7 +7,7 @@ class AddObjCommand(Command):
     _layer_name: str
     _object_name: str
 
-    def __init__(self, layer_name: str, object_name: str):
+    def __init__(self, layer_name: str, object_name: str) -> None:
         self._layer_name = layer_name
         self._object_name = object_name
 

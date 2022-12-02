@@ -7,7 +7,7 @@ class RotateCommand(Command):
     _new_angle: float = 0.0
     _frame_name: str
 
-    def __init__(self, frame_name: str, new_angle: float):
+    def __init__(self, frame_name: str, new_angle: float) -> None:
         self._frame_name = frame_name
         self._new_angle = new_angle
 

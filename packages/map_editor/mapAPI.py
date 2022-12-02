@@ -1,5 +1,5 @@
 import logging
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QMessageBox
 from editorState import EditorState
@@ -79,6 +79,12 @@ class MapAPI:
             except OSError as err:
                 logging.error(f"Cannot create path {path} for new map. {err.strerror}")
 
+    def to_the_map_corner(self) -> None:
+        self._map_viewer.to_the_corner()
+
+    def delete_selected_objects(self) -> None:
+        self._map_viewer.delete_selected_objects()
+
     def create_region(self):
         print('create_region')
 
@@ -86,6 +92,7 @@ class MapAPI:
         pass
 
     def save_map_as_png(self, parent: QtWidgets.QWidget) -> None:
+        self.to_the_map_corner()
         path = self._qt_api.create_file_name(parent)
         self.set_move_mode(False)
         if path:
@@ -183,7 +190,7 @@ class MapAPI:
 
     #  Double click initiates as single click action
     def item_list_double_clicked(self, window: QtWidgets.QMainWindow, item_name: str, item_type: str) -> None:
-        #print(item_name, item_type)
+        # print(item_name, item_type)
         if item_name == "separator":
             pass
         elif item_type in TILE_TYPES:
@@ -229,9 +236,6 @@ class MapAPI:
         else:
             self._editor_state.drawState = ''
 
-    def trimClicked(self):
-        pass
-
     def selection_update(self, default_fill: str) -> None:
         if self._editor_state.drawState == 'brush':
             self._map_viewer.painting_tiles(default_fill)
@@ -240,12 +244,20 @@ class MapAPI:
         if event.key() == CTRL and not self._editor_state.is_move:
             self.set_move_mode(True)
 
+    def mouse_press_event(self, event: QtGui.QMouseEvent):
+        if event.buttons() == QtCore.Qt.MiddleButton:
+            if not self._editor_state.is_move:
+                self.set_move_mode(True)
+            else:
+                self.set_move_mode(False)
+
     def key_release_event(self, event: QKeyEvent) -> None:
         if event.key() == CTRL:
             self.set_move_mode(False)
 
-    def rotate_selected_tiles(self) -> None:
+    def rotate_selected_objects(self) -> None:
         self._map_viewer.rotate_tiles()
+        self._map_viewer.rotate_objects()
 
     def set_debug_mode(self, debug_line: DebugLine) -> None:
         self._editor_state.debug_mode = True
@@ -275,4 +287,3 @@ class MapAPI:
                                                frame, is_draggable)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()
-

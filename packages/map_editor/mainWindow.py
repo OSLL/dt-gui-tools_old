@@ -1,7 +1,7 @@
 import functools
 import json
 import codecs
-from PyQt5.QtGui import QResizeEvent, QKeyEvent
+from PyQt5.QtGui import QResizeEvent, QKeyEvent, QMouseEvent
 from mapAPI import MapAPI
 from mapViewer import MapViewer
 from utils.debug import DebugLine
@@ -48,7 +48,7 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     def get_translation(self, elem):
         """Gets info about the element based on self.locale
-        If local doesn't exist, return locale='en'
+        If local doesn't exist, return locale='en'.
 
         :param self
         :param elem: dict, information about elements (or category), that contains translation
@@ -70,56 +70,21 @@ class DuckWindow(QtWidgets.QMainWindow):
         save_map = self.ui.save_map
         save_map_as = self.ui.save_map_as
         export_png = self.ui.export_png
-        # TODO
-        #calc_param = self.ui.calc_param
-        #about_author = self.ui.about_author
         exit = self.ui.exit
-        # TODO
-        '''     
-        change_blocks = self.ui.change_blocks
-        change_info = self.ui.change_info TODO
-        change_map = self.ui.change_map
-        change_layer = self.ui.change_layer TODO
-        distortion_view = self.ui.distortion_view
-        create_region = self.ui.region_create
-        import_old_format = self.ui.import_old_format
-        environment = self.ui.env'''
 
         #  Initialize floating blocks
         block_widget = self.ui.block_widget
-        # TODO
         info_widget = self.ui.info_widget
-        #map_info_widget = self.ui.map_info_widget
-        #layer_info_widget = self.ui.layer_info_widget
-
         #  Assign actions to buttons
         create_map.triggered.connect(self.create_map_triggered)
         open_map.triggered.connect(self.open_map_triggered)
         save_map.triggered.connect(self.save_map_triggered)
         save_map_as.triggered.connect(self.save_map_as_triggered)
         export_png.triggered.connect(self.save_map_as_png)
-        '''
-        calc_param.triggered.connect(self.calc_param_triggered)
-        about_author.triggered.connect(self.about_author_triggered)
-        distortion_view.triggered.connect(self.change_distortion_view_triggered)
-        create_region.triggered.connect(self.create_region)
-        import_old_format.triggered.connect(self.import_old_format)
-        environment.triggered.connect(self.change_env)
-        '''
         exit.triggered.connect(self.exit_triggered)
-
-        # TODO
-        '''
-        change_blocks.toggled.connect(self.change_blocks_toggled)
-        change_info.toggled.connect(self.change_info_toggled)
-        change_map.toggled.connect(self.change_map_toggled)
-        change_layer.toggled.connect(self.toggle_layer_window)
-        '''
 
         block_widget.closeEvent = functools.partial(self.blocks_event)
         info_widget.closeEvent = functools.partial(self.info_event)
-        #map_info_widget.closeEvent = functools.partial(self.map_event)
-        #layer_info_widget.closeEvent = functools.partial(self.close_layer_window_event)
 
         self.ui.info_browser.setText(self.info_json["description"])
 
@@ -131,28 +96,16 @@ class DuckWindow(QtWidgets.QMainWindow):
         a3 = QtWidgets.QAction(QtGui.QIcon("img/icons/save.png"), _translate("MainWindow", "Save map (Ctrl+S)"), self)
         a4 = QtWidgets.QAction(QtGui.QIcon("img/icons/save_as.png"), _translate("MainWindow", "Save map as (Ctrl+Alt+S)"), self)
         a5 = QtWidgets.QAction(QtGui.QIcon("img/icons/png.png"), _translate("MainWindow", "Export to PNG (Ctrl+P)"), self)
-
-        # TODO
-        '''
-        b1 = QtWidgets.QAction(QtGui.QIcon("img/icons/copy.png"), _translate("MainWindow", "Copy"), self)
-        b2 = QtWidgets.QAction(QtGui.QIcon("img/icons/cut.png"), _translate("MainWindow", "Cut"), self)
-        b3 = QtWidgets.QAction(QtGui.QIcon("img/icons/insert.png"), _translate("MainWindow", "Paste"), self)
-        b4 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"), _translate("MainWindow", "Delete"), self)
-        b5 = QtWidgets.QAction(QtGui.QIcon("img/icons/undo.png"), _translate("MainWindow", "Undo"), self)
-        b1.setShortcut("Ctrl+C")
-        b2.setShortcut("Ctrl+X")
-        b3.setShortcut("Ctrl+V")
-        b4.setShortcut("Delete")
-        b5.setShortcut("Ctrl+Z")
-        '''
+        a6 = QtWidgets.QAction(QtGui.QIcon("img/icons/leftup.png"),
+                               _translate("MainWindow",
+                                          "To the corner of the map (Ctrl+M)"), self)
+        a6.setShortcut("Ctrl+M")
+        a7 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"),
+                               _translate("MainWindow", "Delete (Ctrl+D or Delete)"), self)
+        a7.setShortcuts(["Ctrl+D", "Delete"])
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
-
-        # TODO
-        #c2 = QtWidgets.QAction(QtGui.QIcon("img/icons/trim.png"),
-        #                       _translate("MainWindow", "Delete extreme empty blocks"), self)
         c1.setShortcut("Ctrl+R")
-        #c2.setShortcut("Ctrl+F")
 
         self.brush_button.setIcon(QtGui.QIcon("img/icons/brush.png"))
         self.brush_button.setCheckable(True)
@@ -164,36 +117,21 @@ class DuckWindow(QtWidgets.QMainWindow):
         a3.triggered.connect(self.save_map_triggered)
         a4.triggered.connect(self.save_map_as_triggered)
         a5.triggered.connect(self.save_map_as_png)
-
-        # TODO
-        '''
-        b1.triggered.connect(self.copy_button_clicked)
-        b2.triggered.connect(self.cut_button_clicked)
-        b3.triggered.connect(self.insert_button_clicked)
-        b4.triggered.connect(self.delete_button_clicked)
-        b5.triggered.connect(self.undo_button_clicked)
-        '''
+        a6.triggered.connect(self.to_the_map_corner)
+        a7.triggered.connect(self.delete_selected_objects)
 
         c1.triggered.connect(self.rotate_selected_tiles)
-        # TODO
-        #c2.triggered.connect(self.trimClicked)
 
         self.brush_button.clicked.connect(self.brush_mode)
 
-        # TODO
-        #for elem in [[a1, a2, a3, a4, a5], [b1, b2, b3, b4, b5]]:
         for elem in [[a1, a2, a3, a4, a5]]:
             for act in elem:
                 tool_bar.addAction(act)
             tool_bar.addSeparator()
+        tool_bar.addAction(a7)
         tool_bar.addWidget(self.brush_button)
         tool_bar.addAction(c1)
-        # TODO
-        #tool_bar.addAction(c2)
-
-        # TODO
-        # Setup Layer Tree menu
-        #self.ui.layer_tree.setModel(QtGui.QStandardItemModel())  # set item model for tree
+        tool_bar.addAction(a6)
 
         #  Customize the Blocks menu
         block_list_widget = self.ui.block_list
@@ -202,7 +140,6 @@ class DuckWindow(QtWidgets.QMainWindow):
 
         #  Customize the Map Editor menu
         default_fill = self.ui.default_fill
-        delete_fill = self.ui.delete_fill
 
         #  Fill out the list
         categories = self.info_json['categories']
@@ -226,20 +163,17 @@ class DuckWindow(QtWidgets.QMainWindow):
                 if group['id'] in ("road", "block"):
                     default_fill.addItem(QtGui.QIcon(information[elem_id]['icon']),
                                          self.get_translation(information[elem_id])['name'], elem_id)
-                    delete_fill.addItem(QtGui.QIcon(information[elem_id]['icon']),
-                                        self.get_translation(information[elem_id])['name'], elem_id)
 
         default_fill.setCurrentText(self.get_translation(information["grass"])['name'])
-        delete_fill.setCurrentText(self.get_translation(information["grass"])['name'])
-
-        set_fill = self.ui.set_fill
-        set_fill.clicked.connect(self.set_default_fill)
 
     def change_env(self):
         pass
 
     def center(self):
         pass
+
+    def to_the_map_corner(self) -> None:
+        self.map_api.to_the_map_corner()
 
     #  Create a new map
     def open_map_triggered(self) -> None:
@@ -347,9 +281,8 @@ class DuckWindow(QtWidgets.QMainWindow):
     def insert_button_clicked(self):
         pass
 
-    #  Delete
-    def delete_button_clicked(self):
-        pass
+    def delete_selected_objects(self) -> None:
+        self.map_api.delete_selected_objects()
 
     #  Undo
     def undo_button_clicked(self):
@@ -371,8 +304,11 @@ class DuckWindow(QtWidgets.QMainWindow):
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
         self.map_api.key_release_event(event)
 
+    def mousePressEvent(self, event: QMouseEvent):
+        self.map_api.mouse_press_event(event)
+
     def rotate_selected_tiles(self) -> None:
-        self.map_api.rotate_selected_tiles()
+        self.map_api.rotate_selected_objects()
 
     def update_debug_info(self, event: Dict[str, Any]) -> None:
         self.map_api.update_debug_info(event)
