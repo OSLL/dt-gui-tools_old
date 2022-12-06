@@ -429,7 +429,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(ChangeObjCommand(layer_name, obj_name,
                                               new_config))
 
-    @needsavestate
     def delete_object(self, obj: ImageObject) -> None:
         self.delete_obj_on_map(obj)
         self.objects.__delitem__(obj.name)
@@ -635,6 +634,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     raw_selection[1] <= map_object.y() <= raw_selection[3]:
                 map_object.is_select = True
 
+    @needsavestate
     def delete_selected_objects(self) -> None:
         delete_list = []
         for map_object in self.objects:

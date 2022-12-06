@@ -99,6 +99,10 @@ class DuckWindow(QtWidgets.QMainWindow):
         a6 = QtWidgets.QAction(QtGui.QIcon("img/icons/leftup.png"), _translate("MainWindow", "To the corner of the map (Ctrl+M)"), self)
         a7 = QtWidgets.QAction(QtGui.QIcon("img/icons/undo.png"), _translate("MainWindow", "Undo (Ctrl+Z)"), self)
         a8 = QtWidgets.QAction(QtGui.QIcon("img/icons/shift_undo.png"), _translate("MainWindow", "Shift undo (Ctrl+Shift+Z)"), self)
+        a9 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"),
+                               _translate("MainWindow",
+                                          "Delete (Ctrl+D or Delete)"), self)
+        a9.setShortcuts(["Ctrl+D", "Delete"])
         a6.setShortcut("Ctrl+M")
         a7.setShortcut("Ctrl+Z")
         a8.setShortcut("Ctrl+Shift+Z")
@@ -137,6 +141,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         a6.triggered.connect(self.to_the_map_corner)
         a7.triggered.connect(self.undo_button_clicked)
         a8.triggered.connect(self.shift_undo_button_clicked)
+        a9.triggered.connect(self.delete_selected_objects)
 
         # TODO
         '''
@@ -157,6 +162,7 @@ class DuckWindow(QtWidgets.QMainWindow):
             for act in elem:
                 tool_bar.addAction(act)
             tool_bar.addSeparator()
+        tool_bar.addAction(a9)
         tool_bar.addAction(a7)
         tool_bar.addAction(a8)
         tool_bar.addWidget(self.brush_button)
@@ -202,9 +208,6 @@ class DuckWindow(QtWidgets.QMainWindow):
                                          self.get_translation(information[elem_id])['name'], elem_id)
 
         default_fill.setCurrentText(self.get_translation(information["grass"])['name'])
-
-    def to_the_map_corner(self) -> None:
-        self.map_api.to_the_map_corner()
 
     def to_the_map_corner(self) -> None:
         self.map_api.to_the_map_corner()
