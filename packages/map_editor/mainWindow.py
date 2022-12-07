@@ -107,26 +107,15 @@ class DuckWindow(QtWidgets.QMainWindow):
         a7.setShortcut("Ctrl+Z")
         a8.setShortcut("Ctrl+Shift+Z")
 
-
-        # TODO
-        '''
-        b1 = QtWidgets.QAction(QtGui.QIcon("img/icons/copy.png"), _translate("MainWindow", "Copy"), self)
-        b2 = QtWidgets.QAction(QtGui.QIcon("img/icons/cut.png"), _translate("MainWindow", "Cut"), self)
-        b3 = QtWidgets.QAction(QtGui.QIcon("img/icons/insert.png"), _translate("MainWindow", "Paste"), self)
-        b4 = QtWidgets.QAction(QtGui.QIcon("img/icons/delete.png"), _translate("MainWindow", "Delete"), self)
+        b1 = QtWidgets.QAction(QtGui.QIcon("img/icons/copy.png"), _translate("MainWindow", "Copy (Ctrl+C)"), self)
+        b2 = QtWidgets.QAction(QtGui.QIcon("img/icons/cut.png"), _translate("MainWindow", "Cut (Ctrl+X)"), self)
+        b3 = QtWidgets.QAction(QtGui.QIcon("img/icons/insert.png"), _translate("MainWindow", "Paste (Ctrl+V)"), self)
         b1.setShortcut("Ctrl+C")
         b2.setShortcut("Ctrl+X")
         b3.setShortcut("Ctrl+V")
-        b4.setShortcut("Delete")
-        '''
 
         c1 = QtWidgets.QAction(QtGui.QIcon("img/icons/rotate.png"), _translate("MainWindow", "Rotate (Ctrl+R)"), self)
         c1.setShortcut("Ctrl+R")
-
-        # TODO
-        #c2 = QtWidgets.QAction(QtGui.QIcon("img/icons/trim.png"),
-        #                       _translate("MainWindow", "Delete extreme empty blocks"), self)
-        #c2.setShortcut("Ctrl+F")
 
         self.brush_button.setIcon(QtGui.QIcon("img/icons/brush.png"))
         self.brush_button.setCheckable(True)
@@ -142,39 +131,20 @@ class DuckWindow(QtWidgets.QMainWindow):
         a7.triggered.connect(self.undo_button_clicked)
         a8.triggered.connect(self.shift_undo_button_clicked)
         a9.triggered.connect(self.delete_selected_objects)
-
-        # TODO
-        '''
         b1.triggered.connect(self.copy_button_clicked)
         b2.triggered.connect(self.cut_button_clicked)
         b3.triggered.connect(self.insert_button_clicked)
-        b4.triggered.connect(self.delete_button_clicked)
-        b5.triggered.connect(self.undo_button_clicked)
-        '''
-
         c1.triggered.connect(self.rotate_selected_objects)
-        # TODO
-        #c2.triggered.connect(self.trimClicked)
+
 
         self.brush_button.clicked.connect(self.brush_mode)
 
-        for elem in [[a1, a2, a3, a4, a5]]:
+        for elem in [[a1, a2, a3, a4, a5],[a9, a7, a8, c1, a6, b1, b2, b3]]:
             for act in elem:
                 tool_bar.addAction(act)
             tool_bar.addSeparator()
-        tool_bar.addAction(a9)
-        tool_bar.addAction(a7)
-        tool_bar.addAction(a8)
         tool_bar.addWidget(self.brush_button)
-        tool_bar.addAction(c1)
-        tool_bar.addAction(a6)
 
-        # TODO
-        #tool_bar.addAction(c2)
-
-        # TODO
-        # Setup Layer Tree menu
-        #self.ui.layer_tree.setModel(QtGui.QStandardItemModel())  # set item model for tree
 
         #  Customize the Blocks menu
         block_list_widget = self.ui.block_list

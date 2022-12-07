@@ -757,3 +757,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             # initialize map objects from layers
             self.init_objects()
             self.scene_update()
+
+    def copy(self):
+        pass
+
+    def paste(self):
+        pass
+
+    def cut_out(self):
+        pass
