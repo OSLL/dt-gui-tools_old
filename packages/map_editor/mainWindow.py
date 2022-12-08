@@ -272,22 +272,25 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     #  Copy
     def copy_button_clicked(self):
-        pass
+        self.map_api.copy_button_clicked()
 
     #  Cut
     def cut_button_clicked(self):
-        pass
+        self.map_api.cut_button_clicked()
 
     #  Paste
     def insert_button_clicked(self):
-        pass
+        self.map_api.insert_button_clicked()
 
+    # Delete
     def delete_selected_objects(self) -> None:
         self.map_api.delete_selected_objects()
 
+    # Undo
     def undo_button_clicked(self) -> None:
         self.map_api.undo_button_clicked()
 
+    # Shift undo
     def shift_undo_button_clicked(self) -> None:
         self.map_api.shift_button_clicked()
 

@@ -85,8 +85,10 @@ class MapAPI:
     def to_the_map_corner(self) -> None:
         self._map_viewer.to_the_corner()
 
+    # Delete
     def delete_selected_objects(self) -> None:
         self._map_viewer.delete_selected_objects()
+        self._map_viewer.save_viewer_state()
 
     def create_region(self):
         print('create_region')
@@ -214,19 +216,15 @@ class MapAPI:
 
     #  Copy
     def copy_button_clicked(self):
-        pass
+        self._map_viewer.copy()
 
     #  Cut
     def cut_button_clicked(self):
-        pass
+        self._map_viewer.cut_out()
 
     #  Paste
     def insert_button_clicked(self):
-        pass
-
-    #  Delete
-    def delete_button_clicked(self):
-        pass
+        self._map_viewer.paste(1,1)
 
     #  Undo
     def undo_button_clicked(self) -> None:
@@ -256,6 +254,7 @@ class MapAPI:
         if self._editor_state.drawState == 'brush' and \
                 self._map_viewer.have_selected_tiles():
             self._map_viewer.painting_tiles(default_fill)
+            self._map_viewer.save_viewer_state()
 
     def key_press_event(self, event: QKeyEvent) -> None:
         if event.key() == CTRL and not self._editor_state.is_move:

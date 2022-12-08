@@ -21,6 +21,7 @@ from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from coordinatesTransformer import CoordinatesTransformer
 from history import Memento
+from buffer import Buffer
 from painter import Painter
 from classes.Commands.MoveObjCommand import MoveObjCommand
 from classes.Commands.RotateObjCommand import RotateCommand
@@ -64,6 +65,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     grid_height: float = tile_height * grid_scale
     grid_width: float = tile_width * grid_scale
     tile_map: str = "map_1"
+    buffer: Buffer = None
 
     def __init__(self, work_dir: str) -> None:
         QtWidgets.QGraphicsView.__init__(self)
@@ -79,11 +81,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                                               self.tile_width,
                                                               self.tile_height)
         self.painter = Painter()
-        self.init_objects()
+        self.init_all_map_objects()
         self.set_map_size()
         self.setMouseTracking(True)
+        self.buffer = Buffer()
 
-    def init_objects(self) -> None:
+    def init_all_map_objects(self) -> None:
         frames = self.get_layer("frames")
         for layer_name in REGISTER:
             layer = self.get_layer(layer_name)
@@ -311,11 +314,17 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.rotate_obj(obj, obj.yaw + 90)
         self.rotate_obj_on_map(tile_name, obj.yaw)
 
-    def is_selected_tile(self, tile: Tile) -> bool:
-        return ((tile.i + 1) * self.tile_width >= self.tile_selection[0] and
-                tile.i * self.tile_width <= self.tile_selection[2] and
-                (tile.j + 1) * self.tile_height >= self.tile_selection[3] and
-                tile.j * self.tile_height <= self.tile_selection[1])
+    def is_selected_tile(self, tile: Tile, is_dict: bool = False) -> bool:
+        if not is_dict:
+            tile_i = tile.i
+            tile_j = tile.j
+        else:
+            tile_i = tile["i"]
+            tile_j = tile["j"]
+        return ((tile_i + 1) * self.tile_width >= self.tile_selection[0] and
+                tile_i * self.tile_width <= self.tile_selection[2] and
+                (tile_j + 1) * self.tile_height >= self.tile_selection[3] and
+                tile_j * self.tile_height <= self.tile_selection[1])
 
     def get_x_to_view(self, x: float, obj_width: float = 0) -> float:
         return self.coordinates_transformer.get_x_to_view(x, obj_width)
@@ -446,7 +455,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for obj_name in self.objects:
             handler_func(self.get_object(obj_name), args)
 
-    @needsavestate
     def painting_tiles(self, default_fill: str) -> None:
         self.change_tiles_handler(self.change_tile_type,
                                   {"default_fill": default_fill})
@@ -634,7 +642,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     raw_selection[1] <= map_object.y() <= raw_selection[3]:
                 map_object.is_select = True
 
-    @needsavestate
     def delete_selected_objects(self) -> None:
         delete_list = []
         for map_object in self.objects:
@@ -722,7 +729,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         else:
             self.set_map_viewer_sizes()
         self.set_coordinates_transformer_data()
-        self.init_objects()
+        self.init_all_map_objects()
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
         self.save_viewer_state()
@@ -755,14 +762,66 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 for item in items:
                     self.map.map.layers[layer_name][item] = layer[item]
             # initialize map objects from layers
-            self.init_objects()
+            self.init_all_map_objects()
             self.scene_update()
+    def copy(self) -> None:
+        # save layer name, map object from him layer and save him frame
+        copied_objects = {}
+        layers = {name: self.get_layer_deepcopy(name) for name in
+                  self.map.map.layers}
+        for map_object in self.objects.values():
+            #print(map_object)
+            #print(map_object.name, map_object.is_select)
+            if map_object.is_select or (map_object.layer_name == TILES and self.is_selected_tile(layers[map_object.layer_name][map_object.name], is_dict=True)):
+                layer_object = layers[map_object.layer_name][map_object.name]
+                object_frame = layers[FRAMES][map_object.name]
+                copied_objects[map_object.name] = [map_object.layer_name,
+                                                   layer_object, object_frame]
+        #print(copied_objects)
+        self.buffer.save_buffer(copied_objects)
 
-    def copy(self):
-        pass
+    def find_left_low_tile(self, objects: Dict[str, Tuple[str, Any, Any]]) -> Tuple[int, int]:
+        j = self.map_height
+        i = get_map_width(self.get_layer(TILES))
+        for map_object_info in objects.values():
+            if map_object_info[0] == TILES:
+                if map_object_info[1]["i"] <= i and map_object_info[1]["j"] <= j:
+                    i = map_object_info[1]["i"]
+                    j = map_object_info[1]["j"]
+        return i, j
 
-    def paste(self):
-        pass
+    @needsavestate
+    def paste(self, pressed_tile_i, pressed_tile_j,
+              pressed_i_coord=0, pressed_j_coord=0) -> None:
+        objects = self.buffer.get_buffer()
+        print(objects)
+        if objects and len(objects.keys()):
+            # find left low tile
+            i, j = (self.find_left_low_tile(objects))
+            map_width = get_map_width(self.get_layer(TILES))
+            diff_i = pressed_tile_i - i
+            diff_j = pressed_tile_j - j
+            # restore objects
+            for obj_name, map_object_info in objects.items():
+                # restore tiles
+                #print("try restore", map_object_info[0] == TILES, map_object_info[0], map_object_info)
+                if map_object_info[0] == TILES:# and j < self.map_height and i < map_width:
+                    #
+                    tile = map_object_info[1]
+                    print("tiiiiile", tile["type"], str(tile["type"]))
+                    #if not (0 <= tile["i"] - diff_i < map_width and 0 <= tile["j"] - diff_j < self.map_height):
+                    #    continue
+                    changeable_tile = f"{self.map.map.name}/tile_{tile['i'] - diff_i}_{tile['j'] - diff_j}"
+                    print(changeable_tile, diff_i, diff_j)
+                    self.change_tile_type({"default_fill": tile["type"].value, "tile_name": changeable_tile})
 
-    def cut_out(self):
-        pass
+                else:
+                    pass
+
+    @needsavestate
+    def cut_out(self) -> None:
+        self.copy()
+        # brushing selected tiles on asphalt type
+        self.painting_tiles("asphalt")
+        # delete selected_objects
+        self.delete_selected_objects()
