@@ -780,15 +780,24 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         #print(copied_objects)
         self.buffer.save_buffer(copied_objects)
 
-    def find_left_low_tile(self, objects: Dict[str, Tuple[str, Any, Any]]) -> Tuple[int, int]:
+    def find_left_low_tile(self, objects: list) -> Tuple[int, int]:
         j = self.map_height
         i = get_map_width(self.get_layer(TILES))
-        for map_object_info in objects.values():
-            if map_object_info[0] == TILES:
-                if map_object_info[1]["i"] <= i and map_object_info[1]["j"] <= j:
-                    i = map_object_info[1]["i"]
-                    j = map_object_info[1]["j"]
+        for map_object_info in objects:
+            if map_object_info["i"] <= i and map_object_info["j"] <= j:
+                i = map_object_info["i"]
+                j = map_object_info["j"]
         return i, j
+
+    def find_selected_tiles(self):
+        tiles = self.get_layer(TILES)
+        selected_tiles = []
+        for tile_name in tiles:
+            tile = tiles[tile_name]
+            if self.is_selected_tile(tile):
+                selected_tiles.append(tile)
+        return selected_tiles
+
 
     @needsavestate
     def paste(self, pressed_tile_i, pressed_tile_j,
@@ -796,25 +805,26 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         objects = self.buffer.get_buffer()
         print(objects)
         if objects and len(objects.keys()):
+            # find the bottom left tile to figure out where to paste
+            # the copied objects
+            selected_tiles = self.find_selected_tiles()
+            pressed_tile_i, pressed_tile_j = (self.find_left_low_tile(selected_tiles))
             # find left low tile
-            i, j = (self.find_left_low_tile(objects))
+            tiles = [obj[1] for obj in objects.values()]
+            i, j = (self.find_left_low_tile(tiles))
             map_width = get_map_width(self.get_layer(TILES))
             diff_i = pressed_tile_i - i
             diff_j = pressed_tile_j - j
+            print("diff", diff_i, diff_j)
             # restore objects
             for obj_name, map_object_info in objects.items():
                 # restore tiles
-                #print("try restore", map_object_info[0] == TILES, map_object_info[0], map_object_info)
-                if map_object_info[0] == TILES:# and j < self.map_height and i < map_width:
-                    #
+                if map_object_info[0] == TILES:
                     tile = map_object_info[1]
-                    print("tiiiiile", tile["type"], str(tile["type"]))
-                    #if not (0 <= tile["i"] - diff_i < map_width and 0 <= tile["j"] - diff_j < self.map_height):
-                    #    continue
-                    changeable_tile = f"{self.map.map.name}/tile_{tile['i'] - diff_i}_{tile['j'] - diff_j}"
-                    print(changeable_tile, diff_i, diff_j)
+                    if not (0 <= tile["i"] + diff_i < map_width and 0 <= tile["j"] + diff_j < self.map_height):
+                        continue
+                    changeable_tile = f"{self.map.map.name}/tile_{tile['i'] + diff_i}_{tile['j'] + diff_j}"
                     self.change_tile_type({"default_fill": tile["type"].value, "tile_name": changeable_tile})
-
                 else:
                     pass
 
