@@ -789,6 +789,15 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 j = map_object_info["j"]
         return i, j
 
+    def find_left_low_frame(self, objects: list) -> Tuple[float, float]:
+        j = self.map_height * self.tile_height
+        i = get_map_width(self.get_layer(TILES)) * self.tile_width
+        for map_object_info in objects:
+            if map_object_info["pose"]["x"] <= i and map_object_info["pose"]["y"] <= j:
+                i = map_object_info["pose"]["x"]
+                j = map_object_info["pose"]["y"]
+        return i, j
+
     def find_selected_tiles(self):
         tiles = self.get_layer(TILES)
         selected_tiles = []
@@ -807,15 +816,30 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if objects and len(objects.keys()):
             # find the bottom left tile to figure out where to paste
             # the copied objects
-            selected_tiles = self.find_selected_tiles()
-            pressed_tile_i, pressed_tile_j = (self.find_left_low_tile(selected_tiles))
-            # find left low tile
-            tiles = [obj[1] for obj in objects.values()]
-            i, j = (self.find_left_low_tile(tiles))
+            copied_tiles = []
+            copied_objects = []
+            for obj in objects.values():
+                if obj[0] == TILES:
+                    copied_tiles.append(obj[1])
+                else:
+                    copied_objects.append(obj[2])
+            # find left bottom tile
+            i, j = (self.find_left_low_tile(copied_tiles))
             map_width = get_map_width(self.get_layer(TILES))
+            selected_tiles = self.find_selected_tiles()
+            pressed_tile_i, pressed_tile_j = (
+                self.find_left_low_tile(selected_tiles))
             diff_i = pressed_tile_i - i
             diff_j = pressed_tile_j - j
-            print("diff", diff_i, diff_j)
+
+            # find pasting coordinates for objects
+            pressed_coord_i, pressed_coord_j = (i * self.tile_width, j * self.tile_height)
+            # find left bottom object
+            x, y = (self.find_left_low_frame(copied_objects))
+            diff_x = pressed_coord_i - x
+            diff_y = pressed_coord_j - y
+
+            print("diff", diff_i, diff_j, self.tile_selection)
             # restore objects
             for obj_name, map_object_info in objects.items():
                 # restore tiles
@@ -825,8 +849,22 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         continue
                     changeable_tile = f"{self.map.map.name}/tile_{tile['i'] + diff_i}_{tile['j'] + diff_j}"
                     self.change_tile_type({"default_fill": tile["type"].value, "tile_name": changeable_tile})
+                    self.rotate_obj(self.objects[changeable_tile], map_object_info[2]["pose"]["yaw"])
+                    self.rotate_obj_on_map(changeable_tile, map_object_info[2]["pose"]["yaw"])
                 else:
-                    pass
+                    frame_obj = map_object_info[2]
+                    new_x, new_y = (frame_obj["pose"]["x"], frame_obj["pose"]["y"])
+
+                    # add obj on map
+
+                    # add obj image
+
+                    # move obj
+
+                    # change obj config
+
+
+                    #pass
 
     @needsavestate
     def cut_out(self) -> None:
