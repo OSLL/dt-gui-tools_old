@@ -812,7 +812,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     @needsavestate
     def paste(self) -> None:
         objects = self.buffer.get_buffer()
-        print(objects)
         if objects and len(objects.keys()):
             # find the bottom left tile to figure out where to paste
             # the copied objects
@@ -835,8 +834,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             # find difference  pasting coordinates for objects
             diff_x = pressed_tile_i * self.tile_width - x
             diff_y = pressed_tile_j * self.tile_height - y
-
-            print("diff", diff_i, diff_j, self.tile_selection)
             map_width = get_map_width(self.get_layer(TILES))
             # restore objects
             for obj_name, map_object_info in objects.items():
@@ -856,9 +853,18 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     obj_name = self.generate_object_name(self.tile_map, layer_name)
                     map_object_info[2]["pose"]["x"] += diff_x
                     map_object_info[2]["pose"]["y"] += diff_y
+                    # check and change object coordinates
+                    if map_object_info[2]["pose"]["x"] < 0:
+                        map_object_info[2]["pose"]["x"] = 0
+                    elif map_object_info[2]["pose"]["x"] > map_width * self.tile_width:
+                        map_object_info[2]["pose"]["x"] = map_width * self.tile_width
+                    if map_object_info[2]["pose"]["y"] < 0:
+                        map_object_info[2]["pose"]["y"] = 0
+                    elif map_object_info[2]["pose"]["y"] > self.map_height * self.tile_height:
+                        map_object_info[2]["pose"]["y"] = self.map_height * self.tile_height
                     if layer_name in LAYERS_WITH_TYPES and not isinstance(map_object_info[1]["type"], str):
                         map_object_info[1]["type"] = map_object_info[1]["type"].value
-                        print(layer_name, obj_name, map_object_info[1], map_object_info[1]["type"])
+                    # add object from copied info
                     self.add_obj_on_map(layer_name, obj_name)
                     self.change_obj_from_config(layer_name,
                                                 obj_name,
@@ -866,7 +872,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     self.change_obj_from_config(FRAMES,
                                                 obj_name,
                                                 map_object_info[2])
-                    print(obj_name, map_object_info[2]["pose"]["x"], map_object_info[2]["pose"]["y"])
                     if layer_name in LAYERS_WITH_TYPES:
                         self.add_obj_image(layer_name, obj_name, item_name=map_object_info[1]["type"])
                     else:
