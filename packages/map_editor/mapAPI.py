@@ -224,7 +224,7 @@ class MapAPI:
 
     #  Paste
     def insert_button_clicked(self):
-        self._map_viewer.paste(1,1)
+        self._map_viewer.paste()
 
     #  Undo
     def undo_button_clicked(self) -> None:
