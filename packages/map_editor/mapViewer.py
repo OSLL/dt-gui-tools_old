@@ -768,20 +768,18 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             # initialize map objects from layers
             self.init_all_map_objects()
             self.scene_update()
+
     def copy(self) -> None:
         # save layer name, map object from him layer and save him frame
         copied_objects = {}
         layers = {name: self.get_layer_deepcopy(name) for name in
                   self.map.map.layers}
         for map_object in self.objects.values():
-            #print(map_object)
-            #print(map_object.name, map_object.is_select)
             if map_object.is_select or (map_object.layer_name == TILES and self.is_selected_tile(layers[map_object.layer_name][map_object.name], is_dict=True)):
                 layer_object = layers[map_object.layer_name][map_object.name]
                 object_frame = layers[FRAMES][map_object.name]
                 copied_objects[map_object.name] = [map_object.layer_name,
                                                    layer_object, object_frame]
-        #print(copied_objects)
         self.buffer.save_buffer(copied_objects)
 
     def find_left_low_tile(self, objects: list) -> Tuple[int, int]:
@@ -811,7 +809,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 selected_tiles.append(tile)
         return selected_tiles
 
-
     @needsavestate
     def paste(self) -> None:
         objects = self.buffer.get_buffer()
@@ -824,8 +821,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             for obj in objects.values():
                 if obj[0] == TILES:
                     copied_tiles.append(obj[1])
-                else:
-                    copied_objects.append(obj[2])
+
+                copied_objects.append(obj[2])
             # find left bottom tile
             i, j = (self.find_left_low_tile(copied_tiles))
             selected_tiles = self.find_selected_tiles()
@@ -833,18 +830,17 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 self.find_left_low_tile(selected_tiles))
             diff_i = pressed_tile_i - i
             diff_j = pressed_tile_j - j
-
-            # find pasting coordinates for objects
-            pressed_coord_i, pressed_coord_j = (i * self.tile_width, j * self.tile_height)
-            # find left bottom object
+            # find left bottom object coordinates
             x, y = (self.find_left_low_frame(copied_objects))
-            diff_x = pressed_coord_i - x
-            diff_y = pressed_coord_j - y
+            # find difference  pasting coordinates for objects
+            diff_x = pressed_tile_i * self.tile_width - x
+            diff_y = pressed_tile_j * self.tile_height - y
 
             print("diff", diff_i, diff_j, self.tile_selection)
             map_width = get_map_width(self.get_layer(TILES))
             # restore objects
             for obj_name, map_object_info in objects.items():
+                map_object_info = deepcopy(map_object_info)
                 layer_name = map_object_info[0]
                 # restore tiles
                 if layer_name == TILES:
@@ -855,6 +851,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     self.change_tile_type({"default_fill": tile["type"].value, "tile_name": changeable_tile})
                     self.rotate_obj(self.objects[changeable_tile], map_object_info[2]["pose"]["yaw"])
                     self.rotate_obj_on_map(changeable_tile, map_object_info[2]["pose"]["yaw"])
+                # restore objects
                 else:
                     obj_name = self.generate_object_name(self.tile_map, layer_name)
                     map_object_info[2]["pose"]["x"] += diff_x
@@ -862,18 +859,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     if layer_name in LAYERS_WITH_TYPES and not isinstance(map_object_info[1]["type"], str):
                         map_object_info[1]["type"] = map_object_info[1]["type"].value
                         print(layer_name, obj_name, map_object_info[1], map_object_info[1]["type"])
-                    # add obj on map
-                    #self.add_obj()
-
                     self.add_obj_on_map(layer_name, obj_name)
-
-                    # add obj image
-                    #self.change_obj_from_config(layer_name,
-                    #                            obj_name,
-                    #                            map_object_info[1])
+                    self.change_obj_from_config(layer_name,
+                                                obj_name,
+                                                map_object_info[1])
                     self.change_obj_from_config(FRAMES,
                                                 obj_name,
                                                 map_object_info[2])
+                    print(obj_name, map_object_info[2]["pose"]["x"], map_object_info[2]["pose"]["y"])
                     if layer_name in LAYERS_WITH_TYPES:
                         self.add_obj_image(layer_name, obj_name, item_name=map_object_info[1]["type"])
                     else:
