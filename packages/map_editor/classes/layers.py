@@ -52,8 +52,13 @@ class AbstractLayer(ABC):
             new_item = {}
             for item_filed in self._default_conf:
                 new_item[item_filed] = deepcopy(layer[name][item_filed])
+                if item_filed in self.fields_with_types():
+                    new_item[item_filed] = new_item[item_filed].value
             new_layer[name] = new_item
         return new_layer
+
+    def fields_with_types(self) -> list:
+        return []
 
 
 class BasicLayerHandler(AbstractHandler, AbstractLayer):

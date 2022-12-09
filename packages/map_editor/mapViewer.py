@@ -845,7 +845,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     if not (0 <= tile["i"] + diff_i < map_width and 0 <= tile["j"] + diff_j < self.map_height):
                         continue
                     changeable_tile = f"{self.map.map.name}/tile_{tile['i'] + diff_i}_{tile['j'] + diff_j}"
-                    self.change_tile_type({"default_fill": tile["type"].value, "tile_name": changeable_tile})
+                    self.change_tile_type({"default_fill": tile["type"], "tile_name": changeable_tile})
                     self.rotate_obj(self.objects[changeable_tile], map_object_info[2]["pose"]["yaw"])
                     self.rotate_obj_on_map(changeable_tile, map_object_info[2]["pose"]["yaw"])
                 # restore objects
@@ -862,8 +862,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         map_object_info[2]["pose"]["y"] = 0
                     elif map_object_info[2]["pose"]["y"] > self.map_height * self.tile_height:
                         map_object_info[2]["pose"]["y"] = self.map_height * self.tile_height
-                    if layer_name in LAYERS_WITH_TYPES and not isinstance(map_object_info[1]["type"], str):
-                        map_object_info[1]["type"] = map_object_info[1]["type"].value
                     # add object from copied info
                     self.add_obj_on_map(layer_name, obj_name)
                     self.change_obj_from_config(layer_name,
