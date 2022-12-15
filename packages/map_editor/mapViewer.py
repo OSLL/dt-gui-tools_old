@@ -287,18 +287,13 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def scaled_obj(self, obj: ImageObject, args: Dict[str, Any]) -> None:
         scale = args["scale"]
         obj.scale_object(scale)
-        if obj.is_draggable():
-            new_coordinates = (
-                self.get_x_to_view(
-                    obj.obj_map_pos[0], obj.width()) + self.offset_x,
-                self.get_y_to_view(
-                    obj.obj_map_pos[1], obj.height()) + self.offset_y)
-        else:
-            new_coordinates = (
-                self.get_x_to_view(
-                    obj.obj_map_pos[0]) + self.offset_x,
-                self.get_y_to_view(
-                    obj.obj_map_pos[1]) + self.offset_y)
+        obj_width = obj.width() if obj.is_draggable() else 0
+        obj_height = obj.height() if obj.is_draggable() else 0
+        new_coordinates = (
+            self.get_x_to_view(
+                obj.obj_map_pos[0], obj_width) + self.offset_x,
+            self.get_y_to_view(
+                obj.obj_map_pos[1], obj_height) + self.offset_y)
         self.move_obj(obj, {"new_coordinates": new_coordinates})
 
     def set_png_mode(self, obj: ImageObject, args: Dict[str, Any]) -> None:
@@ -306,10 +301,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         obj.set_is_to_png(mode)
 
     def set_map_size(self, height: int = 0) -> None:
-        if not height:
-            self.map_height = get_map_height(self.get_layer(TILES))
-        else:
-            self.map_height = height
+        self.map_height = height if height else get_map_height(self.get_layer(TILES))
         self.coordinates_transformer.set_size_map(self.map_height)
 
     def rotate_with_button(self, args: Dict[str, Any]) -> None:
@@ -319,12 +311,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.rotate_obj_on_map(tile_name, obj.yaw)
 
     def is_selected_tile(self, tile: Tile, is_dict: bool = False) -> bool:
-        if not is_dict:
-            tile_i = tile.i
-            tile_j = tile.j
-        else:
-            tile_i = tile["i"]
-            tile_j = tile["j"]
+        tile_i, tile_j = (tile["i"], tile["j"]) if is_dict else (tile.i, tile.j)
         return ((tile_i + 1) * self.tile_width >= self.tile_selection[0] and
                 tile_i * self.tile_width <= self.tile_selection[2] and
                 (tile_j + 1) * self.tile_height >= self.tile_selection[3] and
@@ -480,8 +467,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         tile = self.get_object(args["tile_name"])
         self.painter.draw_rect((tile.pos().x() - 1, tile.pos().y() - 1),
                                self.scale, args["painter"],
-                               self.grid_width, self.grid_height,
-                               )
+                               self.grid_width, self.grid_height)
 
     def change_tile_type(self, args: Dict[str, Any]) -> None:
         new_tile_type = args["default_fill"]
@@ -519,8 +505,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         return self.parentWidget().parent().is_move_mode()
 
     def move_map(self, x: float, y: float) -> None:
-        delta_pos = (x - self.mouse_cur_x,
-                     y - self.mouse_cur_y)
+        delta_pos = (x - self.mouse_cur_x, y - self.mouse_cur_y)
         self.change_object_handler(self.move_obj,
                                    {"delta_coordinates": delta_pos})
 
@@ -680,17 +665,14 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scene_update()
 
     def create_new_map(self, info: Dict[str, Any], path: Path) -> None:
-        width, height = int(info['x']), int(info['y'])
-        tile_width = float(info['tile_width'])
-        tile_height = float(info['tile_height'])
         self.tile_map = info["map_name"]
         change_map_name(self.map.map, info["map_name"])
-        self.grid_width = tile_width * self.grid_scale
-        self.grid_height = tile_height * self.grid_scale
+        self.grid_width = float(info['tile_width']) * self.grid_scale
+        self.grid_height = float(info['tile_height']) * self.grid_scale
         self.scale = 1
         self.coordinates_transformer.set_scale(self.scale)
-        self.open_map(path, info["map_name"], True, (width, height),
-                      (tile_width, tile_height))
+        self.open_map(path, info["map_name"], True, ( int(info['x']), int(info['y'])),
+                      (float(info['tile_width']), float(info['tile_height'])))
         self.set_coordinates_transformer_data()
 
     def set_coordinates_transformer_data(self) -> None:
@@ -809,31 +791,34 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 selected_tiles.append(tile)
         return selected_tiles
 
+    def find_diff_for_pasting(self, objects):
+        # find the bottom left tile to figure out where to paste
+        # the copied objects
+        copied_tiles = []
+        copied_objects = []
+        for obj in objects.values():
+            if obj[0] == TILES:
+                copied_tiles.append(obj[1])
+            copied_objects.append(obj[2])
+        # find left bottom tile
+        i, j = (self.find_left_low_tile(copied_tiles))
+        selected_tiles = self.find_selected_tiles()
+        pressed_tile_i, pressed_tile_j = (
+            self.find_left_low_tile(selected_tiles))
+        diff_i = pressed_tile_i - i
+        diff_j = pressed_tile_j - j
+        # find left bottom object coordinates
+        x, y = (self.find_left_low_frame(copied_objects))
+        # find difference  pasting coordinates for objects
+        diff_x = pressed_tile_i * self.tile_width - x
+        diff_y = pressed_tile_j * self.tile_height - y
+        return diff_i, diff_j, diff_x, diff_y
+
     @needsavestate
     def paste(self) -> None:
         objects = self.buffer.get_buffer()
         if objects and len(objects.keys()):
-            # find the bottom left tile to figure out where to paste
-            # the copied objects
-            copied_tiles = []
-            copied_objects = []
-            for obj in objects.values():
-                if obj[0] == TILES:
-                    copied_tiles.append(obj[1])
-
-                copied_objects.append(obj[2])
-            # find left bottom tile
-            i, j = (self.find_left_low_tile(copied_tiles))
-            selected_tiles = self.find_selected_tiles()
-            pressed_tile_i, pressed_tile_j = (
-                self.find_left_low_tile(selected_tiles))
-            diff_i = pressed_tile_i - i
-            diff_j = pressed_tile_j - j
-            # find left bottom object coordinates
-            x, y = (self.find_left_low_frame(copied_objects))
-            # find difference  pasting coordinates for objects
-            diff_x = pressed_tile_i * self.tile_width - x
-            diff_y = pressed_tile_j * self.tile_height - y
+            diff_i, diff_j, diff_x, diff_y = (self.find_diff_for_pasting(objects))
             map_width = get_map_width(self.get_layer(TILES))
             # restore objects
             for obj_name, map_object_info in objects.items():

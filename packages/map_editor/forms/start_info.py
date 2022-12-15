@@ -48,10 +48,10 @@ class NewMapInfoForm(QDialog):
 
     def create_form(self):
         layout = QFormLayout()
-        layout.addRow(QLabel("Width"), self.nameXEdit)
-        layout.addRow(QLabel("Height"), self.nameYEdit)
-        layout.addRow(QLabel("Tile width"), self.nameTileSizeXEdit)
-        layout.addRow(QLabel("Tile height"), self.nameTileSizeYEdit)
-        layout.addRow(QLabel("Map name"), self.nameMap)
-        layout.addRow(QLabel("Folder"), self.nameDirEdit)
+        rows = {"Width": self.nameXEdit, "Height": self.nameYEdit,
+                "Tile width": self.nameTileSizeXEdit,
+                "Tile height": self.nameTileSizeYEdit, "Map name": self.nameMap,
+                "Folder": self.nameDirEdit}
+        for row_name in rows:
+            layout.addRow(QLabel(row_name), rows[row_name])
         self.formGroupBox.setLayout(layout)

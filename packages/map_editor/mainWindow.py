@@ -71,21 +71,19 @@ class DuckWindow(QtWidgets.QMainWindow):
         save_map_as = self.ui.save_map_as
         export_png = self.ui.export_png
         exit = self.ui.exit
-
+        # Assign actions to buttons
+        menu_buttons = [create_map, open_map, save_map, save_map_as, export_png,
+                        exit]
+        menu_functions = [self.create_map_triggered, self.open_map_triggered,
+                         self.save_map_triggered, self.save_map_as_triggered,
+                         self.save_map_as_png, self.exit_triggered]
+        for (button, func) in zip(menu_buttons, menu_functions):
+            button.triggered.connect(func)
         #  Initialize floating blocks
         block_widget = self.ui.block_widget
         info_widget = self.ui.info_widget
-        #  Assign actions to buttons
-        create_map.triggered.connect(self.create_map_triggered)
-        open_map.triggered.connect(self.open_map_triggered)
-        save_map.triggered.connect(self.save_map_triggered)
-        save_map_as.triggered.connect(self.save_map_as_triggered)
-        export_png.triggered.connect(self.save_map_as_png)
-        exit.triggered.connect(self.exit_triggered)
-
         block_widget.closeEvent = functools.partial(self.blocks_event)
         info_widget.closeEvent = functools.partial(self.info_event)
-
         self.ui.info_browser.setText(self.info_json["description"])
 
         #  QToolBar setting
@@ -121,22 +119,17 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.brush_button.setCheckable(True)
         self.brush_button.setToolTip("Brush tool (Ctrl+B)")
         self.brush_button.setShortcut("Ctrl+B")
-
-        a1.triggered.connect(self.create_map_triggered)
-        a2.triggered.connect(self.open_map_triggered)
-        a3.triggered.connect(self.save_map_triggered)
-        a4.triggered.connect(self.save_map_as_triggered)
-        a5.triggered.connect(self.save_map_as_png)
-        a6.triggered.connect(self.to_the_map_corner)
-        a7.triggered.connect(self.undo_button_clicked)
-        a8.triggered.connect(self.shift_undo_button_clicked)
-        a9.triggered.connect(self.delete_selected_objects)
-        b1.triggered.connect(self.copy_button_clicked)
-        b2.triggered.connect(self.cut_button_clicked)
-        b3.triggered.connect(self.insert_button_clicked)
-        c1.triggered.connect(self.rotate_selected_objects)
-
-
+        # Assign actions to buttons
+        buttons = [a1, a2, a3, a4, a5, a6, a7, a8, a9, b1, b2, b3, c1]
+        functions = [self.create_map_triggered, self.open_map_triggered,
+                     self.save_map_triggered, self.save_map_as_triggered,
+                     self.save_map_as_png, self.to_the_map_corner,
+                     self.undo_button_clicked, self.shift_undo_button_clicked,
+                     self.delete_selected_objects, self.copy_button_clicked,
+                     self.cut_button_clicked, self.insert_button_clicked,
+                     self.rotate_selected_objects]
+        for (button, func) in zip(buttons, functions):
+            button.triggered.connect(func)
         self.brush_button.clicked.connect(self.brush_mode)
 
         for elem in [[a1, a2, a3, a4, a5],[a9, a7, a8, c1, a6, b1, b2, b3]]:
@@ -144,7 +137,6 @@ class DuckWindow(QtWidgets.QMainWindow):
                 tool_bar.addAction(act)
             tool_bar.addSeparator()
         tool_bar.addWidget(self.brush_button)
-
 
         #  Customize the Blocks menu
         block_list_widget = self.ui.block_list
@@ -187,7 +179,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.map_api.open_map_triggered(self)
 
     def import_old_format(self):
-        self.map_api.import_old_format()
+        pass
 
     #  Open map
     def create_map_triggered(self) -> None:

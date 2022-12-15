@@ -17,3 +17,6 @@ CITIZENS = "citizens"
 NEW_CONFIG = "new_config"
 RELATIVE_TO = "relative_to"
 LAYER_NAME = "layer_name"
+
+TILE_TYPES = ('block', 'road')
+CTRL = 16777249

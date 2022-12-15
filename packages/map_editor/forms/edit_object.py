@@ -1,10 +1,7 @@
-import json
-
 from PyQt5 import QtCore
 from typing import Dict, Any
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, QVBoxLayout, \
     QLineEdit, QLabel, QFrame
-
 from utils.constants import TILES, RELATIVE_TO, FRAME
 
 
@@ -49,10 +46,7 @@ class EditObject(QDialog):
     def send_info(self) -> None:
         try:
             for frame_key in self.info_send[FRAME]:
-                if frame_key == RELATIVE_TO:
-                    list_for_edit = [frame_key]
-                else:
-                    list_for_edit = self.info_send[FRAME][frame_key]
+                list_for_edit = [frame_key]  if frame_key == RELATIVE_TO else self.info_send[FRAME][frame_key]
                 for frame_val in list_for_edit:
                     if isinstance(self.info_send[FRAME][frame_key], dict):
                         row_name = f"{frame_key}.{frame_val}"

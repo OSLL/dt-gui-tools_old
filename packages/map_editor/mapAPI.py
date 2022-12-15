@@ -17,11 +17,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
-from utils.constants import REQUIRED_LAYERS
-
-
-TILE_TYPES = ('block', 'road')
-CTRL = 16777249
+from utils.constants import REQUIRED_LAYERS, TILE_TYPES, CTRL
 
 
 class MapAPI:
@@ -62,9 +58,6 @@ class MapAPI:
                 self.view_info_form("Info", "Can't open empty directory")
         self.set_move_mode(False)
 
-    def import_old_format(self):
-        print('import old format')
-
     def create_map_form(self) -> None:
         self.init_info_form.show()
         self.set_move_mode(False)
@@ -90,12 +83,6 @@ class MapAPI:
         self._map_viewer.delete_selected_objects()
         self._map_viewer.save_viewer_state()
 
-    def create_region(self):
-        print('create_region')
-
-    def change_distortion_view_triggered(self):
-        pass
-
     def save_map_as_png(self, parent: QtWidgets.QWidget) -> None:
         self.to_the_map_corner()
         path = self._qt_api.create_file_name(parent)
@@ -117,14 +104,6 @@ class MapAPI:
             return True
         return False
 
-    #  Calculate map characteristics
-    def calc_param_triggered(self):
-        print('calc_param_triggered')
-
-    #  Help: About
-    def about_author_triggered(self):
-        print('about_author_triggered')
-
     #  Exit
     def exit_triggered(self, _translate, window: QtWidgets.QMainWindow) -> None:
         if self.save_before_exit(_translate, window):
@@ -144,55 +123,6 @@ class MapAPI:
                 return self.save_map_as_triggered(window)
         return True
 
-    #  Hide Block menu
-    def change_blocks_toggled(self):
-        pass
-
-    #  Change button state
-    def blocks_event(self, event):
-        pass
-
-    #  Hide information menu
-    def change_info_toggled(self):
-        pass
-
-    #  Change button state
-    def info_event(self, event):
-        pass
-
-    #  Hide the menu about map properties
-    def change_map_toggled(self):
-        pass
-
-    #  Change button state
-    def map_event(self, event):
-        pass
-
-    # Layer window
-
-    def toggle_layer_window(self):
-        pass
-
-    def close_layer_window_event(self, event):
-        pass
-
-    def layer_tree_clicked(self):
-        pass
-
-    def layer_tree_double_clicked(self):
-        pass
-
-    def update_layer_tree(self):
-        pass
-
-    #  Program exit event
-    def quit_program_event(self, event):
-        pass
-
-    #  Handle a click on an item from a list to a list
-    def item_list_clicked(self):
-        pass
-
     #  Double click initiates as single click action
     def item_list_double_clicked(self, window: QtWidgets.QMainWindow, item_name: str, item_type: str) -> None:
         # print(item_name, item_type)
@@ -210,10 +140,6 @@ class MapAPI:
     def view_info_form(self, header: str, info: str) -> None:
         form_yes(self._map_viewer, header, info)
 
-    #  Reset to default values
-    def set_default_fill(self):
-        pass
-
     #  Copy
     def copy_button_clicked(self):
         self._map_viewer.copy()
@@ -229,7 +155,7 @@ class MapAPI:
     #  Undo
     def undo_button_clicked(self) -> None:
         m = self._history.undo()
-        if m:
+        if self._history.undo():
             self._map_viewer.restore_state(m)
 
     def shift_button_clicked(self) -> None:
@@ -245,10 +171,7 @@ class MapAPI:
 
     #  Brush mode
     def brush_mode(self, brush_button_is_checked: bool) -> None:
-        if brush_button_is_checked:
-            self._editor_state.drawState = 'brush'
-        else:
-            self._editor_state.drawState = ''
+        self._editor_state.drawState = 'brush' if brush_button_is_checked else ''
 
     def selection_update(self, default_fill: str) -> None:
         if self._editor_state.drawState == 'brush' and \
