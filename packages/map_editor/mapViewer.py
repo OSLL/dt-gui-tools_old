@@ -590,7 +590,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                       {"painter": painter})
         self.scene_update()
 
-    def get_raw_selection(self):
+    def get_raw_selection(self) -> [float, float, float, float]:
         return [self.get_x_from_view(
             min(self.mouse_start_x, self.mouse_cur_x), offset=self.offset_x),
             self.get_y_from_view(
@@ -791,7 +791,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 selected_tiles.append(tile)
         return selected_tiles
 
-    def find_diff_for_pasting(self, objects):
+    def find_diff_for_pasting(self, objects: dict):
         # find the bottom left tile to figure out where to paste
         # the copied objects
         copied_tiles = []

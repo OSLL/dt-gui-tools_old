@@ -1,10 +1,8 @@
-# TODO add types
-
 class Buffer:
-    _objects = None
+    _objects: dict = None
 
-    def save_buffer(self, buffer) -> None:
+    def save_buffer(self, buffer: dict) -> None:
         self._objects = buffer
 
-    def get_buffer(self):
+    def get_buffer(self) -> dict:
         return self._objects
