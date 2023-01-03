@@ -120,7 +120,7 @@ class DraggableImage(ImageObject):
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.drag_start_pos = event.pos()
-            #self.pose_before_drag = self.pos()
+            self.pose_before_drag = self.pos()
             self.raise_()
             self.is_select = True
         elif event.button() == QtCore.Qt.RightButton:
@@ -129,21 +129,15 @@ class DraggableImage(ImageObject):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.drag_start_pos is not None:
             new_pos = self.pos() + event.pos() - self.drag_start_pos
-            #print(self.pos().x() != new_pos.x() or self.pos().y() != new_pos.y(), self.pos().x(), new_pos.x(), self.pos().y(), new_pos.y(), self.drag_start_pos)
-
             self.move_object((new_pos.x(), new_pos.y()))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ArrowCursor)
             new_pos = self.pos() + event.pos() - self.drag_start_pos
-            #print(id(new_pos.x()), id(self.pos().x()))
-            #print(self.pos().x() != new_pos.x(), self.pos().y() != new_pos.y(), self.pos().x(), new_pos.x(), self.pos().y(), new_pos.y(), self.drag_start_pos)
-            #if self.pose_before_drag.x() != new_pos.x() or self.pose_before_drag.y() != new_pos.y():
-            #    self.change_position((new_pos.x(), new_pos.y()))
-            #    self.move_in_map((new_pos.x(), new_pos.y()))
-            self.change_position((new_pos.x(), new_pos.y()))
-            self.move_in_map((new_pos.x(), new_pos.y()))
+            if self.pose_before_drag.x() != new_pos.x() or self.pose_before_drag.y() != new_pos.y():
+                self.change_position((new_pos.x(), new_pos.y()))
+                self.move_in_map((new_pos.x(), new_pos.y()))
             self.drag_start_pos = None
             self.parentWidget().scene_update()
 
