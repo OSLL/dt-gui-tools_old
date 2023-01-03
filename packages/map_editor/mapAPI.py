@@ -155,7 +155,7 @@ class MapAPI:
     #  Undo
     def undo_button_clicked(self) -> None:
         m = self._history.undo()
-        if self._history.undo():
+        if m:
             self._map_viewer.restore_state(m)
 
     def shift_button_clicked(self) -> None:

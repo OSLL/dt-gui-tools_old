@@ -262,7 +262,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
                         obj_height: float = 0) -> None:
-        print("move", new_pos)
         map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
                                      offset=self.offset_x)
         map_y = self.get_y_from_view(new_pos[1], obj_height=obj_height,
@@ -720,6 +719,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
         self.set_map_size()
         self.save_viewer_state()
+        self.parentWidget().parent().to_the_map_corner()
         self.scene_update()
 
     def save_state(self) -> Memento:
