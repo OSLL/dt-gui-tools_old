@@ -22,7 +22,7 @@ You will see:
 
 ## How to create a new map?
 
-You should specify sizes(width, height) of the map, the size of tiles(width, height), map name and folder for saving map.
+You should specify sizes(width, height) of the map, the size of tiles(width, height), map name and folder for saving map.  
 Default map size: (**5**, **5**)  
 Default tile size: (**0.585**, **0.585**)  
 Default map name: **map_1**  
