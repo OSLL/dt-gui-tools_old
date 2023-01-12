@@ -79,7 +79,7 @@ class EditObject(QDialog):
             if not isinstance(config[key], float):
                 edit.setText(str(config[key]))
             else:
-                edit.setText(f'{config[key]:.{self.float_accuracy}f}')
+                edit.setText(f'{config[key]:.{self.float_formatting}f}')
             # tile identifiers must not be changed
             if self.layer_name == TILES and (key == "i" or key == "j"):
                 edit.setDisabled(True)
