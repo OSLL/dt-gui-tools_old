@@ -93,21 +93,13 @@
                     "name": "Городские объекты"
                 },
                 "en": {
-                    "name": "City object"
+                    "name": "City objects"
                 }
             },
             "id": "objects",
             "elements": [
-                "trafficlight",
-                "barrier",
-                "cone",
                 "citizens",
-                "vehicles",
-                "tree",
-                "house",
-                "truck",
-                "bus",
-                "building"
+                "vehicles"
             ]
         },
         {
@@ -136,6 +128,27 @@
             "id": "ground_tags",
             "elements": [
                 "ground_tags"
+            ]
+        },
+         {
+            "lang": {
+                "ru": {
+                    "name": "В планах"
+                },
+                "en": {
+                    "name": "Coming soon"
+                }
+            },
+            "id": "coming_soon",
+            "elements": [
+                "trafficlight",
+                "barrier",
+                "cone",
+                "tree",
+                "house",
+                "truck",
+                "bus",
+                "building"
             ]
         }
     ],
