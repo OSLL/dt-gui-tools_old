@@ -1,8 +1,9 @@
 from PyQt5 import QtCore
 from typing import Dict, Any
-from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, QVBoxLayout, \
-    QLineEdit, QLabel, QFrame
-from utils.constants import TILES, RELATIVE_TO, FRAME
+from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, \
+    QVBoxLayout, \
+    QLineEdit, QLabel, QFrame, QComboBox
+from utils.constants import TILES, RELATIVE_TO, FRAME, FORM_DICT
 
 
 class EditObject(QDialog):
@@ -59,6 +60,8 @@ class EditObject(QDialog):
             for key in self.info_send["new_config"]:
                 if self.info["types"][key] == dict or self.info["types"][key] == list:
                     val = eval(self.info[key].text())
+                elif isinstance(self.info[key], QComboBox):
+                    val = self.info[key].currentText()
                 else:
                     val = (self.info["types"][key])(self.info[key].text())
                 self.info_send["new_config"][key] = val
@@ -72,18 +75,28 @@ class EditObject(QDialog):
     def create_form(self, config: Dict[str, Any], frame: Dict[str, Any]) -> None:
         layout = QFormLayout()
         for key in config:
-            # tree level
-            edit = QLineEdit(self)
-            self.info[key] = edit
-            self.info["types"][key] = type(config[key])
-            if not isinstance(config[key], float):
-                edit.setText(str(config[key]))
+            # dropdown lists of types
+            if self.layer_name in FORM_DICT and key in FORM_DICT[self.layer_name].keys():
+                combobox = QComboBox()
+                combobox.addItems(FORM_DICT[self.layer_name][key])
+                combobox.setCurrentText(config[key])
+                self.info[key] = combobox
+                self.info["types"][key] = type(config[key])
+                layout.addRow(QLabel(key), combobox)
             else:
-                edit.setText(f'{config[key]:.{self.float_formatting}f}')
-            # tile identifiers must not be changed
-            if self.layer_name == TILES and (key == "i" or key == "j"):
-                edit.setDisabled(True)
-            layout.addRow(QLabel(key), edit)
+                # other types
+                edit = QLineEdit(self)
+                self.info[key] = edit
+                self.info["types"][key] = type(config[key])
+                # set digit accuracy
+                if not isinstance(config[key], float):
+                    edit.setText(str(config[key]))
+                else:
+                    edit.setText(f'{config[key]:.{self.float_formatting}f}')
+                # tile identifiers must not be changed
+                if self.layer_name == TILES and (key == "i" or key == "j"):
+                    edit.setDisabled(True)
+                layout.addRow(QLabel(key), edit)
         layout.addWidget(QHLine())
         for frame_key in frame:
             if frame_key == RELATIVE_TO:

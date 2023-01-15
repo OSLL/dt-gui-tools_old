@@ -17,7 +17,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
-from utils.constants import REQUIRED_LAYERS, TILE_TYPES, CTRL
+from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL
 
 
 class MapAPI:
@@ -128,7 +128,7 @@ class MapAPI:
         # print(item_name, item_type)
         if item_name == "separator":
             pass
-        elif item_type in TILE_TYPES:
+        elif item_type in TILE_KIND:
             window.set_default_fill(item_name)
         else:
             type_of_element = self.info_json['info'][item_name]['type']
