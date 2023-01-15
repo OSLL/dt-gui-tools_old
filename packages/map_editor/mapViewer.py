@@ -16,6 +16,11 @@ from classes.Commands.SetTileSizeCommand import SetTileSizeCommand
 from classes.Commands.GetDefaultLayerConf import GetDefaultLayerConf
 from classes.Commands.ChangeObjCommand import ChangeObjCommand
 from classes.Commands.CheckConfigCommand import CheckConfigCommand
+from classes.Commands.MoveObjCommand import MoveObjCommand
+from classes.Commands.RotateObjCommand import RotateCommand
+from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
+from classes.Commands.MoveTileCommand import MoveTileCommand
+from classes.Commands.ChangeIDCommand import ChangeIDCommand
 from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
@@ -23,15 +28,11 @@ from coordinatesTransformer import CoordinatesTransformer
 from history import Memento
 from buffer import Buffer
 from painter import Painter
-from classes.Commands.MoveObjCommand import MoveObjCommand
-from classes.Commands.RotateObjCommand import RotateCommand
-from classes.Commands.ChangeTypeCommand import ChangeTypeCommand
-from classes.Commands.MoveTileCommand import MoveTileCommand
 from utils.maps import default_map_storage, get_map_height, get_map_width, \
     change_map_name, convert_layer_name_to_class_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
-    TILES, \
-    TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, KNOWN_LAYERS
+    TILES, TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, \
+    KNOWN_LAYERS, FORM_DICT
 from classes.MapDescription import MapDescription
 from pathlib import Path
 from dt_maps.Map import REGISTER
@@ -164,24 +165,31 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
+    def set_object_id(self, layer_name: str, object_name: str, obj_id: int) -> None:
+        if layer_name in ("watchtowers", "vehicles"):
+            obj_id = str(obj_id)
+        self.handlers.handle(
+            command=ChangeIDCommand(layer_name, object_name, obj_id))
+
     @needsavestate
     def add_obj(self, type_of_element: str, item_name: str = None) -> None:
         layer_name = f"{type_of_element}s"
-        object_name = self.generate_object_name(self.tile_map, layer_name)
+        object_name, obj_id = self.generate_object_name_and_id(self.tile_map, layer_name)
         self.add_obj_on_map(layer_name, object_name)
         self.set_relative_to(object_name, self.map.map.name)
+        self.set_object_id(layer_name, object_name, obj_id)
         self.add_obj_image(layer_name, object_name, item_name=item_name)
         self.scaled_obj(self.get_object(object_name),
                         {'scale': self.scale})
 
-    def generate_object_name(self, map_name: str, layer_name: str) -> str:
+    def generate_object_name_and_id(self, map_name: str, layer_name: str) -> Tuple[str, int]:
         i = 1
         while True:
             object_name: str = f"{map_name}/{layer_name[:-1]}{i}"
             if object_name not in self.objects:
                 break
             i += 1
-        return object_name
+        return object_name, i
 
     def add_obj_image(self, layer_name: str, object_name: str,
                       layer_object=None, item_name: str = None) -> None:

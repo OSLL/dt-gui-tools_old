@@ -18,6 +18,7 @@ from pathlib import Path
 import os
 import shutil
 from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL
+from utils.window import get_id_by_type
 
 
 class MapAPI:
