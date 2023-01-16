@@ -14,5 +14,4 @@ class ChangeIDCommand(Command):
     def execute(self, layer: MapLayer, layer_name: str, *args,
                 **kwargs) -> None:
         if layer_name == self._layer_name:
-            print(type(self._new_id))
             layer[self._name].id = self._new_id

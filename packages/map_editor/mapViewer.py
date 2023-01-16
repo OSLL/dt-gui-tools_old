@@ -32,7 +32,8 @@ from utils.maps import default_map_storage, get_map_height, get_map_width, \
     change_map_name, convert_layer_name_to_class_name
 from utils.constants import LAYERS_WITH_TYPES, OBJECTS_TYPES, FRAMES, FRAME, \
     TILES, TILE_MAPS, TILE_SIZE, NOT_DRAGGABLE, LAYER_NAME, NEW_CONFIG, \
-    KNOWN_LAYERS, FORM_DICT
+    KNOWN_LAYERS
+from utils.window import get_id_by_type
 from classes.MapDescription import MapDescription
 from pathlib import Path
 from dt_maps.Map import REGISTER
@@ -165,9 +166,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
-    def set_object_id(self, layer_name: str, object_name: str, obj_id: int) -> None:
+    def set_object_id(self, layer_name: str, object_name: str, obj_id: int, obj_type: str) -> None:
         if layer_name in ("watchtowers", "vehicles"):
             obj_id = str(obj_id)
+        elif layer_name == "traffic_signs":
+            traffic_signs_ids = [sign.id for sign in self.get_layer("traffic_signs").values()]
+            obj_id = get_id_by_type(obj_type, traffic_signs_ids)
         self.handlers.handle(
             command=ChangeIDCommand(layer_name, object_name, obj_id))
 
@@ -177,7 +181,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         object_name, obj_id = self.generate_object_name_and_id(self.tile_map, layer_name)
         self.add_obj_on_map(layer_name, object_name)
         self.set_relative_to(object_name, self.map.map.name)
-        self.set_object_id(layer_name, object_name, obj_id)
+        self.set_object_id(layer_name, object_name, obj_id, item_name)
         self.add_obj_image(layer_name, object_name, item_name=item_name)
         self.scaled_obj(self.get_object(object_name),
                         {'scale': self.scale})
