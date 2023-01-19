@@ -171,7 +171,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             obj_id = str(obj_id)
         elif layer_name == "traffic_signs":
             traffic_signs_ids = [sign.id for sign in self.get_layer("traffic_signs").values()]
-            obj_id = get_id_by_type(obj_type, traffic_signs_ids)
+            new_id = get_id_by_type(obj_type, traffic_signs_ids)
+            obj_id = new_id if new_id else obj_id
         self.handlers.handle(
             command=ChangeIDCommand(layer_name, object_name, obj_id))
 
