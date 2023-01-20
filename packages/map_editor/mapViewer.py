@@ -240,6 +240,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(command=AddObjCommand(FRAMES, frame_name))
 
     def delete_obj_on_map(self, obj: ImageObject) -> None:
+        # TODO: obj.name == frame_name???
         self.handlers.handle(command=DeleteObjCommand(FRAMES, obj.name))
         self.handlers.handle(command=DeleteObjCommand(obj.layer_name,
                                                       obj.name))
