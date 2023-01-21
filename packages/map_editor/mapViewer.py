@@ -25,6 +25,7 @@ from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from typing import Dict, Any, Optional, Union, Tuple
 from coordinatesTransformer import CoordinatesTransformer
+from frameTree import FrameTreeStorage
 from history import Memento
 from buffer import Buffer
 from painter import Painter
@@ -45,6 +46,7 @@ def needsavestate(func):
         self = args[0]
         m = self.save_state()
         self.parentWidget().parent().push_state(m)
+
     return save
 
 
@@ -74,6 +76,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.setScene(QtWidgets.QGraphicsScene())
         # load default map
         self.map = default_map_storage(f"{work_dir}/maps/empty_map")
+        self.map_frame_tree = FrameTreeStorage()
         self.init_handlers()
         self.set_map_viewer_sizes()
         self.coordinates_transformer = CoordinatesTransformer(self.scale,
@@ -187,6 +190,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scaled_obj(self.get_object(object_name),
                         {'scale': self.scale})
 
+    def update_pos_of_obj(self, obj):
+        # TODO: 1 enter for updating pos on QT..
+        pass
+
     def generate_object_name_and_id(self, map_name: str, layer_name: str) -> Tuple[str, int]:
         i = 1
         while True:
@@ -276,14 +283,37 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
                         obj_height: float = 0) -> None:
+        # TODO:
+        # 1. Получить все фреймы для обновления
+        # 2. Для каждого фрейма получить новый x,y
+        # 3. Обновить
+        #
+        #
+        update_objs = []
+        successors = self.map_frame_tree.tree.all_successors(frame_name)
+
         map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
                                      offset=self.offset_x)
         map_y = self.get_y_from_view(new_pos[1], obj_height=obj_height,
                                      offset=self.offset_y)
-        obj = self.get_object(frame_name)
-        self.set_obj_map_pos(obj, (map_x, map_y))
         self.move_obj_command(frame_name, (map_x, map_y))
 
+        update_objs.append((frame_name, map_x, map_y))
+        for successor in successors:
+            pass
+
+        # obj = self.get_object(frame_name)
+        # self.set_obj_map_pos(obj, (map_x, map_y))
+
+    def get_final_pos(self, frame_name, new_map_x, new_map_y):
+        frame_obj = self.map.map.frames[frame_name]
+        frame_of_pose = frame_obj
+        x, y = new_map_x, new_map_y
+        while frame_of_pose:
+            x += frame_of_pose.pose.x
+            y += frame_of_pose.pose.y
+            frame_of_pose = self.dm.frames[frame_of_pose.relative_to]
+        return frame_of_pose
     def move_obj_command(self, frame_name: str,
                          new_coord: Tuple[float, float]) -> None:
         self.handlers.handle(command=MoveObjCommand(frame_name, new_coord))
@@ -466,9 +496,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def rotate_tiles(self) -> None:
         self.change_tiles_handler(self.rotate_with_button, {})
-        
+
     def rotate_object_with_button(self, obj: ImageObject,
-                                      args: Dict[str, Any]) -> None:
+                                  args: Dict[str, Any]) -> None:
         if obj.is_draggable() and obj.is_select:
             new_angle = obj.yaw + 90
             self.rotate_obj(obj, new_angle)
@@ -543,7 +573,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         return x, y, event
 
     def mousePressEvent(self, event: Union[Tuple[float, float],
-                                           QtGui.QMouseEvent]) -> None:
+    QtGui.QMouseEvent]) -> None:
         # cursor on object
         x, y, event = self.get_event_coordinates(event)
         if event.buttons() == QtCore.Qt.LeftButton or event.buttons() == QtCore.Qt.MiddleButton:
@@ -554,7 +584,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             self.parentWidget().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: Union[
-            Tuple[float, float], QtGui.QMouseEvent]) -> None:
+        Tuple[float, float], QtGui.QMouseEvent]) -> None:
         # cursor on object
         x, y, event = self.get_event_coordinates(event)
         if self.lmbPressed:
@@ -633,10 +663,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def select_objects(self) -> None:
         raw_selection = [
-                min(self.mouse_start_x, self.mouse_cur_x),
-                min(self.mouse_start_y, self.mouse_cur_y),
-                max(self.mouse_start_x, self.mouse_cur_x),
-                max(self.mouse_start_y, self.mouse_cur_y)
+            min(self.mouse_start_x, self.mouse_cur_x),
+            min(self.mouse_start_y, self.mouse_cur_y),
+            max(self.mouse_start_x, self.mouse_cur_x),
+            max(self.mouse_start_y, self.mouse_cur_y)
         ]
         for map_object in self.objects:
             map_object = self.objects[map_object]
@@ -668,8 +698,10 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scene_update()
         # save in png
         pixmap = self.grab(QRect(QPoint(self.offset_x - 1, self.offset_y - 1),
-                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x - 1,
-                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y - 1)))
+                                 QPoint(
+                                     (self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x - 1,
+                                     (self.grid_height + 1) * get_map_height(
+                                         self.get_layer(TILES)) + self.offset_y - 1)))
         pixmap.save(f"{file_name}.png")
         self.is_to_png = False
         # remove smoothing and scaling of objects
@@ -685,7 +717,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.grid_height = float(info['tile_height']) * self.grid_scale
         self.scale = 1
         self.coordinates_transformer.set_scale(self.scale)
-        self.open_map(path, info["map_name"], True, ( int(info['x']), int(info['y'])),
+        self.open_map(path, info["map_name"], True, (int(info['x']), int(info['y'])),
                       (float(info['tile_width']), float(info['tile_height'])))
         self.set_coordinates_transformer_data()
 
@@ -772,7 +804,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         layers = {name: self.get_layer_deepcopy(name) for name in
                   self.map.map.layers}
         for map_object in self.objects.values():
-            if map_object.is_select or (map_object.layer_name == TILES and self.is_selected_tile(layers[map_object.layer_name][map_object.name], is_dict=True)):
+            if map_object.is_select or (map_object.layer_name == TILES and self.is_selected_tile(
+                    layers[map_object.layer_name][map_object.name], is_dict=True)):
                 layer_object = layers[map_object.layer_name][map_object.name]
                 object_frame = layers[FRAMES][map_object.name]
                 copied_objects[map_object.name] = [map_object.layer_name,
