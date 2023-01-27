@@ -165,6 +165,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.tile_map = [elem for elem in tile_maps][0]
 
     def set_relative_to(self, object_name: str, value: str) -> None:
+        self.map_frame_tree.tree.add(object_name, value)
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
@@ -237,6 +238,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             if new_obj.layer_name in LAYERS_WITH_TYPES:
                 self.handlers.handle(ChangeTypeCommand(new_obj.layer_name,
                                                        object_name, img_name))
+            self.map_frame_tree.tree.add(object_name, frame_obj.relative_to)
         self.change_object_handler(self.scaled_obj, {"scale": self.scale})
 
     def get_final_pos(self, frame_name: str, x: int, y: int) -> Tuple[int, int]:
@@ -296,11 +298,31 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.move_obj_command(frame_name, (map_x, map_y))
         # 3) get all children, move it from qt coordinates and store it in dt-maps memory
 
-    def move_relative_objects(self, frame_name: str):
-        # 2) get all children, move it qt coordinates on offset from view
-        update_objs = []
+    def move_relative_objects(self, frame_name: str, qt_offset_x: float,
+                              qt_offset_y: float) -> None:
+        # 2) get all children, move its qt coordinates on offset from view
         successors = self.map_frame_tree.tree.all_successors(frame_name)
+        print(successors)
+        for successor_name in successors:
+            successor = self.objects[successor_name]
+            # TODO use self.move_obj
+            successor.change_position((successor.pos().x() + qt_offset_x,
+                                       successor.pos().y() + qt_offset_y,))
 
+    def move_relative_objects_on_map(self, frame_name: str) -> None:
+        # TODO remove duplication
+        successors = self.map_frame_tree.tree.all_successors(frame_name)
+        print("save!!!!", successors)
+        for successor_name in successors:
+            successor = self.objects[successor_name]
+            map_x = self.get_x_from_view(successor.pos().x(),
+                                         obj_width=successor.width(),
+                                         offset=self.offset_x)
+            map_y = self.get_y_from_view(successor.pos().y(),
+                                         obj_height=successor.height(),
+                                         offset=self.offset_y)
+
+            successor.set_obj_map_pos((map_x, map_y))
 
     def move_obj_command(self, frame_name: str,
                          new_coord: Tuple[float, float]) -> None:

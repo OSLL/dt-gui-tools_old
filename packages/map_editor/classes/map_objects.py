@@ -129,6 +129,12 @@ class DraggableImage(ImageObject):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.drag_start_pos is not None:
             new_pos = self.pos() + event.pos() - self.drag_start_pos
+            print(new_pos, self.pos())
+            diff_x = new_pos.x() - self.pos().x()
+            diff_y = new_pos.y() - self.pos().y()
+            if diff_x or diff_y:
+                self.parentWidget().move_relative_objects(self.name, diff_x,
+                                                          diff_y)
             self.move_object((new_pos.x(), new_pos.y()))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
@@ -138,6 +144,7 @@ class DraggableImage(ImageObject):
             if self.pose_before_drag.x() != new_pos.x() or self.pose_before_drag.y() != new_pos.y():
                 self.change_position((new_pos.x(), new_pos.y()))
                 self.move_in_map((new_pos.x(), new_pos.y()))
+                self.parent().move_relative_objects_on_map(self.name)
             self.drag_start_pos = None
             self.parentWidget().scene_update()
 
