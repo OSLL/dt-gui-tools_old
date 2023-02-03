@@ -23,7 +23,7 @@ from classes.Commands.ChangeIDCommand import ChangeIDCommand
 from classes.layers import BasicLayerHandler, DynamicLayer
 from classes.map_objects import DraggableImage, ImageObject
 from classes.MapDescription import MapDescription
-from typing import Dict, Any, Optional, Union, Tuple
+from typing import Dict, Any, Optional, Union, Tuple, List
 from coordinatesTransformer import CoordinatesTransformer
 from history import Memento
 from buffer import Buffer
@@ -323,6 +323,17 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                          offset=self.offset_y)
 
             successor.set_obj_map_pos((map_x, map_y))
+
+    def get_possible_relative_objects(self, frame_name: str) -> List[str]:
+        objects = self.objects if self.get_object(frame_name).is_draggable else None
+        relative_objects = [self.tile_map]
+        successors = self.map_frame_tree.tree.all_successors(frame_name)
+        if objects:
+            for name in objects:
+                if objects[name].is_draggable() and name != frame_name and \
+                        name not in successors:
+                    relative_objects.append(name)
+        return relative_objects
 
     def move_obj_command(self, frame_name: str,
                          new_coord: Tuple[float, float]) -> None:

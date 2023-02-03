@@ -17,7 +17,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
-from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL
+from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL, FRAMES
 from utils.window import get_id_by_type
 
 
@@ -224,7 +224,9 @@ class MapAPI:
     def change_obj_form(self, layer_name: str, name: str,
                         obj_conf: Dict[str, Any], frame: Dict[str, Any],
                         is_draggable: bool) -> None:
+        possible_relative_objects = self._map_viewer.get_possible_relative_objects(name)
         self.change_obj_info_form = EditObject(layer_name, name, obj_conf,
-                                               frame, is_draggable)
+                                               frame, is_draggable,
+                                               possible_relative_objects)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()

@@ -1,9 +1,3 @@
-OBJECTS_TYPES = ["watchtowers", "citizens", "vehicles", "ground_tags"]
-NOT_DRAGGABLE = ["tiles"]
-LAYERS_WITH_TYPES = ["traffic_signs", "tiles"]
-KNOWN_LAYERS = ["frames", "tiles", "tile_maps", "watchtowers", "citizens",
-                "traffic_signs", "ground_tags", "vehicles"]
-REQUIRED_LAYERS = ["tiles.yaml", "frames.yaml", "tile_maps.yaml"]
 TILES = "tiles"
 FRAMES = "frames"
 FRAME = "frame"
@@ -17,6 +11,12 @@ CITIZENS = "citizens"
 NEW_CONFIG = "new_config"
 RELATIVE_TO = "relative_to"
 LAYER_NAME = "layer_name"
+OBJECTS_TYPES = [WATCHTOWERS, CITIZENS, VEHICLES, GROUND_TAGS]
+NOT_DRAGGABLE = [TILES]
+LAYERS_WITH_TYPES = [TRAFFIC_SIGNS, TILES]
+KNOWN_LAYERS = [FRAMES, TILES, TILE_MAPS, WATCHTOWERS, CITIZENS,
+                TRAFFIC_SIGNS, GROUND_TAGS, VEHICLES]
+REQUIRED_LAYERS = [f"{TILES}.yaml", f"{FRAMES}.yaml", f"{TILE_MAPS}.yaml"]
 TILE_KIND = ('block', 'road')
 TILE_TYPES = ("straight", "curve", "3way", "4way", "asphalt", "grass", "floor")
 TRAFFIC_SIGNS_TYPES = ("stop", "yield", "no_right_turn", "no_left_turn",
@@ -29,10 +29,10 @@ VEHICLES_CONFIGURATION = ("DB18", "DB19", "DB20", "DB21M", "DB21J", "DB21R", "DD
 CITIZENS_COLORS = ("yellow", "red", "green", "grey")
 VEHICLES_COLORS = ("blue", "red", "green", "grey")
 FORM_DICT = {
-    "tiles": {"type": TILE_TYPES},
-    "traffic_signs": {"type": TRAFFIC_SIGNS_TYPES},
-    "citizens": {"color": CITIZENS_COLORS},
-    "vehicles": {"color": VEHICLES_COLORS, "configuration": VEHICLES_CONFIGURATION},
-    "watchtowers": {"configuration": WATCHTOWERS_CONFIGURATION}
+    TILES: {"type": TILE_TYPES},
+    TRAFFIC_SIGNS: {"type": TRAFFIC_SIGNS_TYPES},
+    CITIZENS: {"color": CITIZENS_COLORS},
+    VEHICLES: {"color": VEHICLES_COLORS, "configuration": VEHICLES_CONFIGURATION},
+    WATCHTOWERS: {"configuration": WATCHTOWERS_CONFIGURATION}
 }
 CTRL = 16777249

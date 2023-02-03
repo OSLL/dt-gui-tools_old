@@ -1,8 +1,9 @@
 from PyQt5 import QtCore
-from typing import Dict, Any
+from typing import Dict, Any, List
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, \
     QVBoxLayout, \
     QLineEdit, QLabel, QFrame, QComboBox
+
 from utils.constants import TILES, RELATIVE_TO, FRAME, FORM_DICT
 
 
@@ -10,7 +11,7 @@ class EditObject(QDialog):
     get_info = QtCore.pyqtSignal(object)
 
     def __init__(self, layer_name: str, name: str, config: Dict[str, Any],
-                 frame: Dict[str, Any], is_draggable: bool):
+                 frame: Dict[str, Any], is_draggable: bool, frames: List[str]):
         super(EditObject, self).__init__()
         self.float_formatting = 5
         self.info = {"types": {}}
@@ -25,6 +26,7 @@ class EditObject(QDialog):
         self.is_draggable = is_draggable
         self.info_send["new_config"] = config
         self.info_send[FRAME] = frame
+        self.frames = frames
         self.setWindowTitle("Edit object")
         self.formGroupBox = QGroupBox(f"Object: {name}")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -53,6 +55,8 @@ class EditObject(QDialog):
                         row_name = f"{frame_key}.{frame_val}"
                         self.info_send[FRAME][frame_key][frame_val] = \
                             (self.info["types"][row_name])(self.info[row_name].text())
+                    elif isinstance(self.info[frame_key], QComboBox):
+                        self.info_send[FRAME][frame_key] = self.info[frame_key].currentText()
                     else:
                         self.info_send[FRAME][frame_key] = (
                             self.info["types"][frame_key])(
@@ -74,6 +78,7 @@ class EditObject(QDialog):
 
     def create_form(self, config: Dict[str, Any], frame: Dict[str, Any]) -> None:
         layout = QFormLayout()
+
         for key in config:
             # dropdown lists of types
             if self.layer_name in FORM_DICT and key in FORM_DICT[self.layer_name].keys():
@@ -99,8 +104,18 @@ class EditObject(QDialog):
                 layout.addRow(QLabel(key), edit)
         layout.addWidget(QHLine())
         for frame_key in frame:
+            # dropdown lists of objects names
             if frame_key == RELATIVE_TO:
-                list_for_edit = [frame_key]
+                if self.is_draggable:
+                    combobox = QComboBox()
+                    combobox.addItems(self.frames)
+                    combobox.setCurrentText(frame[frame_key])
+                    self.info[frame_key] = combobox
+                    self.info["types"][frame_key] = type(self.info[frame_key])
+                    layout.addRow(QLabel(frame_key), combobox)
+                    list_for_edit = []
+                else:
+                    list_for_edit = [frame_key]
             else:
                 list_for_edit = frame[frame_key]
             for frame_val in list_for_edit:
