@@ -166,7 +166,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def set_relative_to(self, object_name: str, value: str) -> None:
         # todo check if object in graph
-        self.map_frame_tree.tree.add(object_name, value)
+        #self.map_frame_tree.tree.add(object_name, value)
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
@@ -292,6 +292,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         obj_height: float = 0) -> None:
         # TODO
         obj = self.get_object(frame_name)
+        print(frame_name)
         predcessor = self.map_frame_tree.tree.predecessor(frame_name)
         if predcessor == self.tile_map:
             map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
@@ -452,8 +453,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         obj = self.get_object(conf["name"])
         if conf["is_valid"]:
             if conf["remove"]:
-                self.delete_obj_on_map(obj)
-                self.objects.__delitem__(obj.name)
+                self.delete_object(obj)
                 obj.delete_object()
             else:
                 if self.check_layer_config(FRAMES,
@@ -515,6 +515,21 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                               new_config))
 
     def delete_object(self, obj: ImageObject) -> None:
+        successors = self.map_frame_tree.tree.all_successors(obj.name)
+        frames = self.get_layer(FRAMES)
+        neighbors = []
+        for successor in successors:
+            if frames[successor].relative_to == obj.name:
+                neighbors.append(successor)
+        self.map_frame_tree.tree.remove(obj.name)
+        for neighbour_name in neighbors:
+            neighbour = self.get_object(neighbour_name)
+            rel_coordinates = neighbour.obj_map_pos
+            abs_coordinates = self.get_final_pos(neighbour_name, rel_coordinates[0], rel_coordinates[1])
+            self.set_relative_to(neighbour_name, self.tile_map)
+            self.map_frame_tree.tree.add(neighbour_name, self.tile_map)
+            self.move_obj_command(neighbour_name, abs_coordinates)
+            neighbour.obj_map_pos = abs_coordinates
         self.delete_obj_on_map(obj)
         self.objects.__delitem__(obj.name)
 
@@ -722,6 +737,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 delete_list.append(map_object)
         for obj in delete_list:
             self.delete_object(obj)
+            # TODO delete from graph
             obj.delete_object()
 
     def save_to_png(self, file_name: str) -> None:
