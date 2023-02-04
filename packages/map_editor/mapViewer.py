@@ -165,8 +165,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.tile_map = [elem for elem in tile_maps][0]
 
     def set_relative_to(self, object_name: str, value: str) -> None:
-        # todo check if object in graph
-        #self.map_frame_tree.tree.add(object_name, value)
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
@@ -291,9 +289,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
                         obj_height: float = 0) -> None:
-        # TODO
         obj = self.get_object(frame_name)
-        print(frame_name)
         predcessor = self.map_frame_tree.tree.predecessor(frame_name)
         if predcessor == self.tile_map:
             map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
@@ -310,8 +306,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                          offset=self.offset_y) - real_pose[1]
             map_x = map_obj["pose"]["x"] + diff_x
             map_y = map_obj["pose"]["y"] + diff_y
-            print( map_x, map_y)
-
         obj.set_obj_map_pos((map_x, map_y))
         self.move_obj_command(frame_name, (map_x, map_y))
         # 3) get all children, move it from qt coordinates and store it in dt-maps memory
@@ -320,7 +314,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                               qt_offset_y: float) -> None:
         # 2) get all children, move its qt coordinates on offset from view
         successors = set(self.map_frame_tree.tree.all_successors(frame_name))
-        print(successors)
+        print("move rel!", successors)
         for successor_name in successors:
             successor = self.objects[successor_name]
             successor.change_position((successor.pos().x() + qt_offset_x,
@@ -328,7 +322,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def move_relative_objects_on_map(self, frame_name: str) -> None:
         successors = set(self.map_frame_tree.tree.all_successors(frame_name))
-        print("save!!!!", successors)
         for successor_name in successors:
             successor = self.get_object(successor_name)
             # TODO new function
@@ -740,7 +733,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 delete_list.append(map_object)
         for obj in delete_list:
             self.delete_object(obj)
-            # TODO delete from graph
             obj.delete_object()
 
     def save_to_png(self, file_name: str) -> None:
@@ -838,6 +830,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if state:
             layers = state["layers"]
             self.delete_objects()
+            self.map_frame_tree.tree.clear_graph()
             # removing all elements from the original layers
             for layer in self.map.map.layers:
                 items = [item for item in self.map.map.layers[layer]]
