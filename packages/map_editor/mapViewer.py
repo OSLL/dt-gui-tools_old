@@ -224,16 +224,16 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             frame_obj = self.get_layer(FRAMES)[object_name]
             self.rotate_obj(new_obj, frame_obj.pose.yaw)
             # 1) set relative to coordinates and view its
+            # todo new function
             coordinates = self.get_final_pos(object_name,
                                                  frame_obj.pose.x,
                                                  frame_obj.pose.y)
-            new_coordinates = (
+            view_coordinates = (
                 self.get_x_to_view(coordinates[0], new_obj.width()),
                 self.get_y_to_view(coordinates[1]), new_obj.height()
             )
-
-            new_obj.set_obj_map_pos(coordinates)
-            self.move_obj(new_obj, {"new_coordinates": new_coordinates})
+            new_obj.set_obj_map_pos((frame_obj.pose.x, frame_obj.pose.y))
+            self.move_obj(new_obj, {"new_coordinates": view_coordinates})
             self.objects[object_name] = new_obj
             if new_obj.layer_name in LAYERS_WITH_TYPES:
                 self.handlers.handle(ChangeTypeCommand(new_obj.layer_name,
@@ -289,11 +289,26 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         new_pos: Tuple[float, float],
                         obj_width: float = 0,
                         obj_height: float = 0) -> None:
-        map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
-                                     offset=self.offset_x)
-        map_y = self.get_y_from_view(new_pos[1], obj_height=obj_height,
-                                     offset=self.offset_y)
+        # TODO
         obj = self.get_object(frame_name)
+        predcessor = self.map_frame_tree.tree.predecessor(frame_name)
+        if predcessor == self.tile_map:
+            map_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
+                                         offset=self.offset_x)
+            map_y = self.get_y_from_view(new_pos[1], obj_height=obj_height,
+                                         offset=self.offset_y)
+        else:
+            # TODO new function
+            map_obj = self.get_layer(FRAMES)[frame_name]
+            real_pose = self.get_final_pos(frame_name, map_obj["pose"]["x"], map_obj["pose"]["y"])
+            diff_x = self.get_x_from_view(new_pos[0], obj_width=obj_width,
+                                         offset=self.offset_x) - real_pose[0]
+            diff_y = self.get_y_from_view(new_pos[1], obj_height=obj_height,
+                                         offset=self.offset_y) - real_pose[1]
+            map_x = map_obj["pose"]["x"] + diff_x
+            map_y = map_obj["pose"]["y"] + diff_y
+            print( map_x, map_y)
+
         obj.set_obj_map_pos((map_x, map_y))
         self.move_obj_command(frame_name, (map_x, map_y))
         # 3) get all children, move it from qt coordinates and store it in dt-maps memory
@@ -305,23 +320,26 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         print(successors)
         for successor_name in successors:
             successor = self.objects[successor_name]
-            # TODO use self.move_obj
             successor.change_position((successor.pos().x() + qt_offset_x,
                                        successor.pos().y() + qt_offset_y,))
 
     def move_relative_objects_on_map(self, frame_name: str) -> None:
-        # TODO remove duplication
         successors = self.map_frame_tree.tree.all_successors(frame_name)
         print("save!!!!", successors)
         for successor_name in successors:
-            successor = self.objects[successor_name]
-            map_x = self.get_x_from_view(successor.pos().x(),
-                                         obj_width=successor.width(),
-                                         offset=self.offset_x)
-            map_y = self.get_y_from_view(successor.pos().y(),
-                                         obj_height=successor.height(),
-                                         offset=self.offset_y)
+            successor = self.get_object(successor_name)
+            # TODO new function
 
+            map_obj = self.get_layer(FRAMES)[successor_name]
+            real_pose = self.get_final_pos(successor_name, map_obj["pose"]["x"],
+                                           map_obj["pose"]["y"])
+            diff_x = self.get_x_from_view(successor.pos().x(), successor.width(),
+                                          offset=self.offset_x) - real_pose[0]
+            diff_y = self.get_y_from_view(successor.pos().y(), obj_height=successor.height(),
+                                          offset=self.offset_y) - real_pose[1]
+            map_x = map_obj["pose"]["x"] + diff_x
+            map_y = map_obj["pose"]["y"] + diff_y
+            print(successor_name, map_x, map_y)
             successor.set_obj_map_pos((map_x, map_y))
 
     def get_possible_relative_objects(self, frame_name: str) -> List[str]:
@@ -354,11 +372,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         obj.scale_object(scale)
         obj_width = obj.width() if obj.is_draggable() else 0
         obj_height = obj.height() if obj.is_draggable() else 0
+        view_coord = self.get_final_pos(obj.name, obj.obj_map_pos[0], obj.obj_map_pos[1])
         new_coordinates = (
             self.get_x_to_view(
-                obj.obj_map_pos[0], obj_width) + self.offset_x,
+                view_coord[0], obj_width) + self.offset_x,
             self.get_y_to_view(
-                obj.obj_map_pos[1], obj_height) + self.offset_y)
+                view_coord[1], obj_height) + self.offset_y)
         self.move_obj(obj, {"new_coordinates": new_coordinates})
 
     def set_png_mode(self, obj: ImageObject, args: Dict[str, Any]) -> None:
