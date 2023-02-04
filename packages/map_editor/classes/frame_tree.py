@@ -16,8 +16,9 @@ class FrameTree:
             self.__tree.add(successor=frame_name,
                             predecessor=parent_frame_name)
 
-    def remove(self, frame_name: str):
-        self.__tree.remove(frame_name)
+    def remove_node(self, frame_name: str) -> None:
+        self.__tree.remove_node(frame_name)
+
 
     def predecessor(self, frame_name: str) -> str:
         return list(self.__tree.predecessors(frame_name))[0]

@@ -1,5 +1,4 @@
 from typing import List, TypeVar, Generic
-
 import networkx as nx
 
 T = TypeVar('T')
@@ -22,8 +21,9 @@ class Tree(Generic[T]):
             return False
         return True
 
-    def remove(self, element: T) -> None:
+    def remove_node(self, element: T) -> None:
         self.G.remove_node(element)
+
 
     def successors(self, element: T) -> List[T]:
         try:
