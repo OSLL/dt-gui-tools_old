@@ -1,4 +1,4 @@
-from typing import List, TypeVar, Generic, Optional
+from typing import List, TypeVar, Generic
 
 import networkx as nx
 
@@ -36,3 +36,6 @@ class Tree(Generic[T]):
             return list(self.G.predecessors(element))
         except TypeError:
             return EMPTY
+
+    def clear(self) -> None:
+        self.G.clear()

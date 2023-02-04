@@ -27,3 +27,6 @@ class FrameTree:
         for frame_nm in frame_names:
             frame_names += self.all_successors(frame_nm)
         return frame_names
+
+    def clear_graph(self) -> None:
+        self.__tree.clear()

@@ -165,6 +165,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.tile_map = [elem for elem in tile_maps][0]
 
     def set_relative_to(self, object_name: str, value: str) -> None:
+        # todo check if object in graph
         self.map_frame_tree.tree.add(object_name, value)
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
@@ -788,6 +789,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0)) -> None:
         self.delete_objects()
+        self.map_frame_tree.tree.clear_graph()
         self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
