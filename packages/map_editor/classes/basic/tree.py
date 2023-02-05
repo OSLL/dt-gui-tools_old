@@ -24,7 +24,6 @@ class Tree(Generic[T]):
     def remove_node(self, element: T) -> None:
         self.G.remove_node(element)
 
-
     def successors(self, element: T) -> List[T]:
         try:
             return list(self.G.successors(element))

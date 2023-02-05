@@ -9,7 +9,6 @@ class ImageObject(QtWidgets.QLabel):
         self.init_size = size
         self.scale = 1
         self.yaw = 0
-        self.obj_map_pos = (0, 0)
         self.img_path = img_path
         self.name = object_name
         self.layer_name = layer_name
@@ -85,9 +84,6 @@ class ImageObject(QtWidgets.QLabel):
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         self.parentWidget().wheelEvent(event)
-
-    def set_obj_map_pos(self, pos: tuple) -> None:
-        self.obj_map_pos = (pos[0], pos[1])
 
     def delete_object(self) -> None:
         self.deleteLater()
