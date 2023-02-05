@@ -927,11 +927,13 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 # restore objects
                 else:
                     new_obj_name, _ = self.generate_object_name_and_id(self.tile_map, layer_name)
-                    # TODO fixed coordinates
-                    map_object_info[2]["relative_to"] = self.tile_map
-                    map_object_info[2]["pose"]["x"] += diff_x
-                    map_object_info[2]["pose"]["y"] += diff_y
-
+                    if map_object_info[2]["relative_to"] != self.tile_map:
+                        map_object_info[2]["relative_to"] = self.tile_map
+                        map_object_info[2]["pose"]["x"] = diff_x
+                        map_object_info[2]["pose"]["y"] = diff_y
+                    else:
+                        map_object_info[2]["pose"]["x"] += diff_x
+                        map_object_info[2]["pose"]["y"] += diff_y
                     # check and change object coordinates
                     if map_object_info[2]["pose"]["x"] < 0:
                         map_object_info[2]["pose"]["x"] = 0
