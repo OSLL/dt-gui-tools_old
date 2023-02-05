@@ -171,7 +171,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
     def set_object_id(self, layer_name: str, object_name: str, obj_id: int, obj_type: str) -> None:
         if layer_name in (WATCHTOWERS, VEHICLES):
             obj_id = str(obj_id)
-        elif layer_name == TRAFFIC_SIGNS
+        elif layer_name == TRAFFIC_SIGNS:
             traffic_signs_ids = [sign.id for sign in self.get_layer(TRAFFIC_SIGNS).values()]
             new_id = get_id_by_type(obj_type, traffic_signs_ids)
             obj_id = new_id if new_id else obj_id
@@ -285,6 +285,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             obj = self.get_image_object(obj_name)
             obj.delete_object()
         self.objects.clear()
+        self.map_frame_tree.tree.clear_graph()
 
     def move_obj(self, obj: ImageObject, args: Dict[str, Any]) -> None:
         if "new_coordinates" in args:
@@ -447,7 +448,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if conf["is_valid"]:
             if conf["remove"]:
                 self.delete_object(obj)
-                obj.delete_object()
             else:
                 if self.check_layer_config(FRAMES,
                                            conf[FRAME]):
@@ -519,11 +519,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             abs_coordinates = self.get_final_pos(neighbour_name,
                                                  neighbor_coord["x"],
                                                  neighbor_coord["y"])
+            self.move_obj_command(neighbour_name, abs_coordinates)
             self.set_relative_to(neighbour_name, self.tile_map)
             self.map_frame_tree.tree.add(neighbour_name, self.tile_map)
-            self.move_obj_command(neighbour_name, abs_coordinates)
         self.delete_obj_on_map(obj)
         self.objects.__delitem__(obj.name)
+        obj.delete_object()
 
     def change_tiles_handler(self, handler_func, args: Dict[str, Any]) -> None:
         tiles = self.get_layer(TILES)
@@ -546,7 +547,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.change_tiles_handler(self.rotate_with_button, {})
         
     def rotate_object_with_button(self, obj: ImageObject,
-                                      args: Dict[str, Any]) -> None:
+                                  args: Dict[str, Any]) -> None:
         if obj.is_draggable() and obj.is_select:
             new_angle = obj.yaw + 90
             self.rotate_obj(obj, new_angle)
@@ -729,7 +730,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 delete_list.append(map_object)
         for obj in delete_list:
             self.delete_object(obj)
-            obj.delete_object()
 
     def save_to_png(self, file_name: str) -> None:
         # add smoothing and scaling of objects
@@ -796,7 +796,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0)) -> None:
         self.delete_objects()
-        self.map_frame_tree.tree.clear_graph()
         self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
@@ -826,7 +825,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         if state:
             layers = state["layers"]
             self.delete_objects()
-            self.map_frame_tree.tree.clear_graph()
             # removing all elements from the original layers
             for layer in self.map.map.layers:
                 items = [item for item in self.map.map.layers[layer]]
