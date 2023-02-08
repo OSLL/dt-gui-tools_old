@@ -90,6 +90,7 @@ class MapAPI:
         self.set_move_mode(False)
         if path:
             self._map_viewer.save_to_png(path)
+        form_yes(self._map_viewer, "Info", f"Picture was saved in {os.path.abspath(path)}.png")
 
     #  Save map
     def save_map_triggered(self) -> None:

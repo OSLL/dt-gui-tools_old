@@ -19,7 +19,6 @@ def get_list_dir(dir_path):
         entries = listdir(dir_path)
         return entries
     except FileNotFoundError as e:
-        #logger.warning(e)
         return []
 
 

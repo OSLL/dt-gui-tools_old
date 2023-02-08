@@ -2,7 +2,7 @@ from utils.singletonMeta import SingletonMeta
 
 DEFAULT_TILE_SIZE = 0.585
 
-# TODO is draw state set draw state
+
 class EditorState(metaclass=SingletonMeta):
     drawState = ''
     debug_mode = False
