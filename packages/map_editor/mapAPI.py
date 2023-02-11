@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QMessageBox
 from editorState import EditorState
+from forms.image_form import SaveImageForm
 from forms.quit import quit_message_box
 from forms.default_forms import form_yes
 from forms.start_info import NewMapInfoForm
@@ -17,8 +18,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 import shutil
-from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL, FRAMES
-from utils.window import get_id_by_type
+from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL
 
 
 class MapAPI:
@@ -40,6 +40,8 @@ class MapAPI:
         self.change_obj_info_form = None
         self.init_info_form = NewMapInfoForm(args.wkdir)
         self.init_info_form.send_info.connect(self.create_map_triggered)
+        self.save_map_image_form = SaveImageForm()
+        self.save_map_image_form.send_info.connect(self.save_map_as_png)
 
     def open_map_triggered(self, parent: QtWidgets.QWidget) -> None:
         path = self._qt_api.get_dir(parent, "open")
@@ -84,13 +86,25 @@ class MapAPI:
         self._map_viewer.delete_selected_objects()
         self._map_viewer.save_viewer_state()
 
-    def save_map_as_png(self, parent: QtWidgets.QWidget) -> None:
-        self.to_the_map_corner()
-        path = self._qt_api.create_file_name(parent)
+    def save_image_form(self):
+        self.save_map_image_form.show()
         self.set_move_mode(False)
+
+    def save_map_as_png(self,  info: Dict[str, Any]) -> None:
+        if info["height"] <= 0:
+            self.view_info_form("Info",
+                                "Image height value must be non-negative number")
+            return
+        self.to_the_map_corner()
+        self.set_move_mode(False)
+        path = info["image_name"]
         if path:
-            self._map_viewer.save_to_png(path)
-        form_yes(self._map_viewer, "Info", f"Picture was saved in {os.path.abspath(path)}.png")
+            self._map_viewer.save_to_png(path, info["height"])
+            form_yes(self._map_viewer,
+                     "Info", f"Picture was saved in {os.path.abspath(path)}.png")
+        else:
+            self.view_info_form("Info",
+                                "No image name entered! Image can't save.")
 
     #  Save map
     def save_map_triggered(self) -> None:

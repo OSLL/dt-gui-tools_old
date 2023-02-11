@@ -202,7 +202,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         pass
 
     def save_map_as_png(self):
-        self.map_api.save_map_as_png(self)
+        self.map_api.save_image_form()
 
     #  Exit
     def exit_triggered(self) -> None:

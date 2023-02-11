@@ -731,11 +731,12 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for obj in delete_list:
             self.delete_object(obj)
 
-    def save_to_png(self, file_name: str) -> None:
+    def save_to_png(self, file_name: str, height: int) -> None:
         # add smoothing and scaling of objects
-        self.coordinates_transformer.set_scale(1)
+        temp_scale = height / ((self.grid_height + 1) * get_map_height(self.get_layer(TILES)))
+        self.coordinates_transformer.set_scale(temp_scale)
         self.change_object_handler(self.set_png_mode, {"mode": True})
-        self.change_object_handler(self.scaled_obj, {"scale": 1})
+        self.change_object_handler(self.scaled_obj, {"scale": temp_scale})
         self.is_to_png = True
         # delete selection on objects
         self.mouse_cur_x = self.mouse_start_x = 0
@@ -743,9 +744,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.select_objects()
         self.scene_update()
         # save in png
-        pixmap = self.grab(QRect(QPoint(self.offset_x - 1, self.offset_y - 1),
-                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) + self.offset_x - 1,
-                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) + self.offset_y - 1)))
+        pixmap = self.grab(QRect(QPoint(self.offset_x, self.offset_y),
+                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) * temp_scale + self.offset_x - 1,
+                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) * temp_scale + self.offset_y - 1)))
         pixmap.save(f"{file_name}.png")
         self.is_to_png = False
         # remove smoothing and scaling of objects
