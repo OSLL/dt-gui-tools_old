@@ -84,8 +84,9 @@ class EditObject(QDialog):
         for key in config:
             # dropdown lists of types
             if self.layer_name in FORM_DICT and key in FORM_DICT[self.layer_name].keys():
+                listener = self.update_ids if self.layer_name == TRAFFIC_SIGNS else None
                 self.add_combobox(FORM_DICT[self.layer_name][key], key,
-                                  config[key], layout, self.update_ids)
+                                  config[key], layout, listener)
             elif key == "id" and self.layer_name == TRAFFIC_SIGNS:
                 self.add_combobox(self.get_new_ids(config["type"], int(config[key])), key,
                                   str(config[key]), layout)
