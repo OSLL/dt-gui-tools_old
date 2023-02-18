@@ -14,7 +14,7 @@ class SaveImageForm(QDialog):
         self.formGroupBox = QGroupBox("Init info")
         self.image_name = QLineEdit(self)
         self.height = QLineEdit(self)
-        self.height.setText("200")
+        self.height.setText("400")
         self.height.setValidator(QIntValidator())
         self.width = QLabel("*compute automatically")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)

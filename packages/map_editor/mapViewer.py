@@ -168,6 +168,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.handlers.handle(
             command=AddRelativeToObj(object_name, value))
 
+    def get_ids_by_type(self, type_name: str) -> List[int]:
+        return [sign.id for sign in self.get_layer(TRAFFIC_SIGNS).values() if (sign.type.value == type_name)]
+
     def set_object_id(self, layer_name: str, object_name: str, obj_id: int, obj_type: str) -> None:
         if layer_name in (WATCHTOWERS, VEHICLES):
             obj_id = str(obj_id)
@@ -321,7 +324,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         for successor_name in successors:
             successor = self.get_image_object(successor_name)
             successor.change_position((successor.pos().x() + qt_offset_x,
-                                       successor.pos().y() + qt_offset_y,))
+                                       successor.pos().y() + qt_offset_y))
 
     def move_relative_objects_on_map(self, frame_name: str) -> None:
         successors = set(self.map_frame_tree.tree.all_successors(frame_name))
@@ -451,9 +454,6 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             else:
                 if self.check_layer_config(FRAMES,
                                            conf[FRAME]):
-                    if conf[FRAME]["relative_to"] != self.get_layer(FRAMES)[obj.name]:
-                        if not len(self.map_frame_tree.tree.all_successors(obj.name)):
-                            self.map_frame_tree.tree.remove_node(obj.name)
                     self.change_obj_from_config(FRAMES,
                                                 conf["name"],
                                                 conf[FRAME])
@@ -722,12 +722,16 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                     raw_selection[1] <= map_object.y() <= raw_selection[3]:
                 map_object.is_select = True
 
-    def delete_selected_objects(self) -> None:
-        delete_list = []
+    def get_selected_objects(self) -> List[ImageObject]:
+        objects = []
         for map_object in self.objects:
             map_object = self.objects[map_object]
             if map_object.is_draggable() and map_object.is_select:
-                delete_list.append(map_object)
+                objects.append(map_object)
+        return objects
+
+    def delete_selected_objects(self) -> None:
+        delete_list = self.get_selected_objects()
         for obj in delete_list:
             self.delete_object(obj)
 

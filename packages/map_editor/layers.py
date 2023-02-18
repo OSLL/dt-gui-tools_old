@@ -54,7 +54,7 @@ class TileMapsLayerHandler(BasicLayerHandler):
 
 class TrafficSignsLayerHandler(BasicLayerHandler):
     def __init__(self, **kwargs) -> None:
-        kwargs["default_conf"] = {"type": "stop", "id": 0, "family": "36h11"}
+        kwargs["default_conf"] = {"type": "stop", "id": 1, "family": "36h11"}
         super(TrafficSignsLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:

@@ -1,17 +1,20 @@
 from os import listdir
 from os.path import join
-from typing import Optional, List
-import yaml
-
-CONFIG_PATH = './doc/tagsDB.yaml'
+from typing import List
+from utils.constants import TRAFFIC_SIGNS_TYPES_IDS
 
 
-def get_id_by_type(type_of_obj: str, existing_ids: List[int]) -> Optional[int]:
-    with open(CONFIG_PATH) as file:
-        content = yaml.safe_load(file)
-        for tag in content:
-            if tag['traffic_sign_type'] == type_of_obj and int(tag['tag_id']) not in existing_ids:
-                return int(tag['tag_id'])
+def get_id_by_type(type_of_obj: str, existing_ids: List[int]) -> int:
+    all_ids = TRAFFIC_SIGNS_TYPES_IDS[type_of_obj]
+    free_ids = get_free_ids_by_type(existing_ids, all_ids)
+    if len(free_ids):
+        return free_ids[0]
+    else:
+        return all_ids[-1]
+
+
+def get_free_ids_by_type(existing_ids: List[int], all_ids: List[int] = None) -> List[int]:
+    return [id_ for id_ in all_ids if (id_ not in existing_ids)]
 
 
 def get_list_dir(dir_path):

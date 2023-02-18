@@ -10,15 +10,17 @@ from forms.start_info import NewMapInfoForm
 from forms.edit_object import EditObject
 from utils.maps import change_map_directory
 from utils.qtWindowAPI import QtWindowAPI
+from utils.window import get_free_ids_by_type
 from mapStorage import MapStorage
 from mapViewer import MapViewer
 from history import Memento, EditorHistory
 from utils.debug import DebugLine
-from typing import Dict, Any
+from typing import Dict, Any, List
 from pathlib import Path
 import os
 import shutil
-from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL
+from utils.constants import REQUIRED_LAYERS, TILE_KIND, CTRL, \
+    TRAFFIC_SIGNS_TYPES_IDS
 
 
 class MapAPI:
@@ -242,6 +244,18 @@ class MapAPI:
         possible_relative_objects = self._map_viewer.get_possible_relative_objects(name)
         self.change_obj_info_form = EditObject(layer_name, name, obj_conf,
                                                frame, is_draggable,
-                                               possible_relative_objects)
+                                               possible_relative_objects, self)
+        self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()
+
+    def get_possible_ids_by_type(self, type_name: str) -> List[int]:
+        exist_ids = self._map_viewer.get_ids_by_type(type_name)
+        all_ids = TRAFFIC_SIGNS_TYPES_IDS[type_name]
+        poss_ids = get_free_ids_by_type(exist_ids, all_ids)
+        if len(poss_ids):
+            return poss_ids
+        else:
+            return [all_ids[-1]]
+
+
