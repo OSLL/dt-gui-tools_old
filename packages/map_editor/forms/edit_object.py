@@ -84,26 +84,15 @@ class EditObject(QDialog):
         for key in config:
             # dropdown lists of types
             if self.layer_name in FORM_DICT and key in FORM_DICT[self.layer_name].keys():
-                listener = self.update_ids if self.layer_name == TRAFFIC_SIGNS else None
+                handler = self.update_ids if self.layer_name == TRAFFIC_SIGNS else None
                 self.add_combobox(FORM_DICT[self.layer_name][key], key,
-                                  config[key], layout, listener)
+                                  config[key], layout, handler)
             elif key == "id" and self.layer_name == TRAFFIC_SIGNS:
                 self.add_combobox(self.get_new_ids(config["type"], int(config[key])), key,
                                   str(config[key]), layout)
             else:
                 # other types
-                edit = QLineEdit(self)
-                self.info[key] = edit
-                self.info["types"][key] = type(config[key])
-                # set digit accuracy
-                if isinstance(config[key], float):
-                    edit.setText(f'{config[key]:.{self.float_formatting}f}')
-                else:
-                    edit.setText(str(config[key]))
-                # tile identifiers must not be changed
-                if self.layer_name == TILES and (key == "i" or key == "j"):
-                    edit.setDisabled(True)
-                layout.addRow(QLabel(key), edit)
+                self.get_qline_edit(key, config[key], layout)
         layout.addWidget(QHLine())
         for frame_key in frame:
             # dropdown lists of objects names
@@ -117,34 +106,38 @@ class EditObject(QDialog):
             else:
                 list_for_edit = frame[frame_key]
             for frame_val in list_for_edit:
-                edit = QLineEdit(self)
                 if not isinstance(frame[frame_key], dict):
                     row_name = frame_key
                     val = frame[frame_key]
                 else:
                     row_name = f"{frame_key}.{frame_val}"
                     val = frame[frame_key][frame_val]
-                self.info["types"][row_name] = type(val)
-                self.info[row_name] = edit
-                if isinstance(val, float):
-                    edit.setText(f'{val:.{self.float_formatting}f}')
-                else:
-                    edit.setText(str(val))
-                # cannot edit frames of non-draggable objects
-                if not self.is_draggable:
-                    edit.setDisabled(True)
-                layout.addRow(QLabel(row_name), edit)
+                self.get_qline_edit(row_name, val, layout)
         self.formGroupBox.setLayout(layout)
 
+    def get_qline_edit(self, row_name: str, row_val: Any,
+                       layout: QFormLayout) -> None:
+        edit = QLineEdit(self)
+        self.info["types"][row_name] = type(row_val)
+        self.info[row_name] = edit
+        if isinstance(row_val, float):
+            edit.setText(f'{row_val:.{self.float_formatting}f}')
+        else:
+            edit.setText(str(row_val))
+        if self.layer_name == TILES and (row_name == "i" or row_name == "j")\
+                or not self.is_draggable:
+            edit.setDisabled(True)
+        layout.addRow(QLabel(row_name), edit)
+
     def add_combobox(self, list_items: List[Any], key: str, cur_text: str,
-                     layout: QFormLayout, listener=None) -> None:
+                     layout: QFormLayout, handler=None) -> None:
         self.info["types"][key] = type(list_items[0])
         combobox = QComboBox()
         combobox.addItems(list(map(str, list_items)))
         combobox.setCurrentText(cur_text)
         self.info[key] = combobox
-        if listener:
-            combobox.currentTextChanged.connect(listener)
+        if handler:
+            combobox.currentTextChanged.connect(handler)
         self.comboboxes[key] = combobox
         layout.addRow(QLabel(key), combobox)
 

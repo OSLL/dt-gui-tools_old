@@ -315,27 +315,35 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                                                      obj_width, obj_height)
         self.move_obj_command(frame_name, (map_x, map_y))
 
-    def move_relative_objects(self, frame_name: str, qt_offset_x: float,
-                              qt_offset_y: float) -> None:
-        """
-        Get all successors, move its qt coordinates with offset from view
-        """
-        successors = set(self.map_frame_tree.tree.all_successors(frame_name))
-        for successor_name in successors:
+    def move_selected_objects(self, qt_offset_x: float, qt_offset_y: float) -> None:
+        obj_for_move = set()
+        sel_objects = self.get_selected_objects()
+        for obj in sel_objects:
+            successors = self.map_frame_tree.tree.all_successors(obj.name)
+            successors.append(obj.name)
+            obj_for_move.update(successors)
+        for successor_name in obj_for_move:
             successor = self.get_image_object(successor_name)
             successor.change_position((successor.pos().x() + qt_offset_x,
                                        successor.pos().y() + qt_offset_y))
 
-    def move_relative_objects_on_map(self, frame_name: str) -> None:
-        successors = set(self.map_frame_tree.tree.all_successors(frame_name))
-        for successor_name in successors:
-            successor = self.get_image_object(successor_name)
-            map_x, map_y = self.get_relative_map_pos(successor_name,
-                                                     (successor.pos().x(),
-                                                      successor.pos().y()),
-                                                     successor.width(),
-                                                     successor.height())
-            self.move_obj_command(successor.name, (map_x, map_y))
+    @needsavestate
+    def move_selected_objects_on_map(self, diff_pos) -> None:
+        obj_for_move = []
+        for_move = set([obj.name for obj in self.get_selected_objects()])
+        successors = set()
+        for name in for_move:
+            successors.update(self.map_frame_tree.tree.all_successors(name))
+        for name in for_move:
+            if name not in successors:
+                obj_for_move.append(name)
+        for successor_name in obj_for_move:
+            diff_x = -self.get_x_from_view(diff_pos.x())
+            diff_y = -self.get_y_from_view(diff_pos.y() + self.map_height * (self.grid_height + 1) * self.scale)
+            frame = self.get_frame_object(successor_name)
+            map_x = frame["pose"]["x"] + diff_x
+            map_y = frame["pose"]["y"] + diff_y
+            self.move_obj_command(successor_name, (map_x, map_y))
 
     def get_possible_relative_objects(self, frame_name: str) -> List[str]:
         objects = self.objects if self.get_image_object(frame_name).is_draggable else None
