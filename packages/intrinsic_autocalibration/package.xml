@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>extrinsic_autocalibration</name>
+  <name>intrinsic_autocalibration</name>
   <version>1.0.0</version>
   <description>
     A package for launching extrinsic camera automatic calibration
