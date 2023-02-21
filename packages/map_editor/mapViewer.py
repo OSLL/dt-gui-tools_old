@@ -681,8 +681,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def drawBackground(self, painter: QtGui.QPainter,
                        rect: QtCore.QRectF) -> None:
-
-        self.painter.fill_background(painter, 'lightGray', self.size().width(),
+        self.painter.fill_background(painter, 'Gray', self.size().width(),
                                      self.size().height())
         if not self.is_to_png:
             self.change_tiles_handler(self.highlight_select_tile,
@@ -756,9 +755,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.select_objects()
         self.scene_update()
         # save in png
-        pixmap = self.grab(QRect(QPoint(self.offset_x, self.offset_y),
-                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) * temp_scale + self.offset_x - 1,
-                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) * temp_scale + self.offset_y - 1)))
+        pixmap = self.grab(QRect(QPoint(self.offset_x - 1, self.offset_y - 1),
+                                 QPoint((self.grid_width + 1) * get_map_width(self.get_layer(TILES)) * temp_scale + self.offset_x - 2,
+                                        (self.grid_height + 1) * get_map_height(self.get_layer(TILES)) * temp_scale + self.offset_y - 2)))
         pixmap.save(f"{file_name}.png")
         self.is_to_png = False
         # remove smoothing and scaling of objects

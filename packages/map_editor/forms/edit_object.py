@@ -1,8 +1,7 @@
 from PyQt5 import QtCore
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, \
-    QVBoxLayout, \
-    QLineEdit, QLabel, QFrame, QComboBox
+    QVBoxLayout, QLineEdit, QLabel, QFrame, QComboBox
 from utils.constants import TILES, RELATIVE_TO, FRAME, FORM_DICT, TRAFFIC_SIGNS
 
 

@@ -8,13 +8,13 @@ from forms.default_forms import get_info, create_form
 class SaveImageForm(QDialog):
     send_info = QtCore.pyqtSignal(object)
 
-    def __init__(self):
+    def __init__(self, default_height: int):
         super(SaveImageForm, self).__init__()
         self.setWindowTitle("Info for saving map image")
         self.formGroupBox = QGroupBox("Init info")
         self.image_name = QLineEdit(self)
         self.height = QLineEdit(self)
-        self.height.setText("400")
+        self.height.setText(f"{default_height}")
         self.height.setValidator(QIntValidator())
         self.width = QLabel("*compute automatically")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)

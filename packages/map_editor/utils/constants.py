@@ -25,7 +25,7 @@ TRAFFIC_SIGNS_TYPES = ("stop", "yield", "no_right_turn", "no_left_turn",
                         "left_t_intersect", "t_intersection", "pedestrian",
                         "t_light_ahead", "duck_crossing", "parking")
 WATCHTOWERS_CONFIGURATION = ("WT18", "WT19")
-VEHICLES_CONFIGURATION = ("DB18", "DB19", "DB20", "DB21M", "DB21J", "DB21R", "DD18", "DD21")
+VEHICLES_CONFIGURATION = ("DB18", "DB19", "DB20", "DB21M", "DB21J", "DB21R")
 CITIZENS_COLORS = ("yellow", "red", "green", "grey")
 VEHICLES_COLORS = ("blue", "red", "green", "grey")
 FORM_DICT = {
@@ -36,6 +36,7 @@ FORM_DICT = {
     WATCHTOWERS: {"configuration": WATCHTOWERS_CONFIGURATION}
 }
 CTRL = 16777249
+VIEW_TILE_HEIGHT = 150
 
 TRAFFIC_SIGNS_TYPES_IDS = \
  {'stop': [1, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
