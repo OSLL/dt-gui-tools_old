@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+from pathlib import Path
 import rospy
 from duckietown_msgs.msg import WheelsCmdStamped
 from sensor_msgs.msg import CompressedImage
@@ -17,6 +19,7 @@ obj_points = []  # 3d point in real world space
 img_points = []  # 2d points in image plane.
 BOARDS_NUM = 2
 MAX_DIR_CHANGES = 2
+CALIBRATION_BOT_DIR_PATH = "/data/config/calibrations/camera_intrinsic/"
 
 
 def bgr_from_jpg(data):
@@ -35,23 +38,24 @@ class MyNode:
         rospy.init_node(node_name)
         self.img = None
         self.gray = None
+        self.im_size = None
         self.pub = rospy.Publisher("~wheels_cmd", WheelsCmdStamped,
                                    queue_size=1)
         self.sub_image = rospy.Subscriber("~image/compressed", CompressedImage,
                                           self.process_image, queue_size=1)
 
-    def process_image(self, image_msg):
+    def process_image(self, image_msg) -> None:
         self.img = bgr_from_jpg(image_msg.data)
 
-    def on_shutdown(self):
+    def on_shutdown(self) -> None:
         msg = WheelsCmdStamped()
         msg.vel_left, msg.vel_right = 0.0, 0.0
         self.pub.publish(msg)
 
-    def step(self, cw=True):
+    def step(self, cw=True) -> None:
         msg = WheelsCmdStamped()
         rate = rospy.Rate(10)
-        msg.vel_left, msg.vel_right = -0.2, 0.2
+        msg.vel_left, msg.vel_right = -0.15, 0.15
         if cw:
             msg.vel_left, msg.vel_right = msg.vel_right, msg.vel_left
         rospy.loginfo(f"Publishing message: left {msg.vel_left}, "
@@ -98,7 +102,7 @@ class MyNode:
         }
         return rules[state][0], rules[state][1]
 
-    def run(self):
+    def run(self) -> None:
         cw = True
         rate = rospy.Rate(1.5)
         dir_changes = 0
@@ -107,6 +111,8 @@ class MyNode:
         state = (cw, True, False)
         while not rospy.is_shutdown():
             if self.img is not None:
+                if not self.im_size:
+                    self.im_size = (self.img.shape[1], self.img.shape[0])
                 img = self.img
                 res = self.handle_img(img)
                 is_vis = True if res else False
@@ -121,6 +127,7 @@ class MyNode:
                 cv2.waitKey(500)
                 if dir_changes >= MAX_DIR_CHANGES:
                     break
+        self.on_shutdown()
         cv2.destroyAllWindows()
         self.sub_image.unregister()
         print(f"Samples num: {len(obj_points)}")
@@ -128,10 +135,19 @@ class MyNode:
                                                            img_points,
                                                            self.gray.shape[
                                                            ::-1], None, None)
-        print('cv2.calibrateCamera: ')
-        print('mtx = ', mtx)
-        print('dist = ', dist)
-        # compute error
+        # use monocular camera
+        R = np.identity(3)
+        t = np.zeros((3, 1))
+        Rt = np.concatenate([R, t], axis=-1)  # [R|t]
+        projection_mtx = mtx @ Rt  # A[R|t]
+        autobot_name = os.getenv("VEHICLE_NAME")
+        self.compute_error(rvecs, tvecs, mtx, dist)
+        res = self.get_res(autobot_name, mtx, R, projection_mtx, self.im_size, dist)
+        print("\n", res)
+        self.write_on_a_bot(res, autobot_name)
+        rospy.signal_shutdown('Calibration done!')
+
+    def compute_error(self, rvecs, tvecs, mtx, dist) -> None:
         sum_error = 0
         for i in range(len(obj_points)):
             img_points2, _ = cv2.projectPoints(obj_points[i], rvecs[i],
@@ -140,7 +156,47 @@ class MyNode:
                 img_points2)
             sum_error += error
         print("Total error: ", sum_error / len(obj_points))
-        rospy.signal_shutdown('Calibration done!')
+
+    def get_res(self, name, mtx, R, P, size, d) -> str:
+        def format_mat(x, precision):
+            return ("[%s]" % (
+                np.array2string(x, precision=precision, suppress_small=True, separator=", ")
+                    .replace("[", "").replace("]", "").replace("\n", "")
+            ))
+
+        calmessage = "\n".join([
+            "image_width: %d" % size[0],
+            "image_height: %d" % size[1],
+            "camera_name: " + name,
+            "camera_matrix:",
+            "  rows: 3",
+            "  cols: 3",
+            "  data: " + format_mat(mtx, 5),
+            "distortion_model: plumb_bob",
+            "distortion_coefficients:",
+            "  rows: 1",
+            "  cols: %d" % len(d),
+            "  data: " + format_mat(d, 5),
+            "rectification_matrix:",
+            "  rows: 3",
+            "  cols: 3",
+            "  data: " + format_mat(R, 8),
+            "projection_matrix:",
+            "  rows: 3",
+            "  cols: 4",
+            "  data: " + format_mat(P, 5),
+            ""
+        ])
+        return calmessage
+
+    def write_on_a_bot(self, data, name: str) -> None:
+        # TODO rm _
+        file_name = f'{name}_.yml'
+        file_dir = str(Path(".").absolute())
+        with open(file_name, 'w') as outfile:
+            outfile.write(data)
+        COPY_COMMAND = f'rsync --rsh=\"sshpass -p quackquack ssh -o StrictHostKeyChecking=no -l duckie\" {file_dir}/{file_name} duckie@{name}.local:{CALIBRATION_BOT_DIR_PATH}'
+        os.system(COPY_COMMAND)
 
 
 if __name__ == '__main__':
