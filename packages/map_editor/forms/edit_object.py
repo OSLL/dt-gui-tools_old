@@ -3,6 +3,7 @@ from typing import Dict, Any, List
 from PyQt5.QtWidgets import QDialog, QGroupBox, QDialogButtonBox, QFormLayout, \
     QVBoxLayout, QLineEdit, QLabel, QFrame, QComboBox
 from utils.constants import TILES, RELATIVE_TO, FRAME, FORM_DICT, TRAFFIC_SIGNS
+from utils.qtWindowAPI import add_combobox, update_combobox
 
 
 class EditObject(QDialog):
@@ -84,11 +85,12 @@ class EditObject(QDialog):
             # dropdown lists of types
             if self.layer_name in FORM_DICT and key in FORM_DICT[self.layer_name].keys():
                 handler = self.update_ids if self.layer_name == TRAFFIC_SIGNS else None
-                self.add_combobox(FORM_DICT[self.layer_name][key], key,
+                add_combobox(self, FORM_DICT[self.layer_name][key], key,
                                   config[key], layout, handler)
             elif key == "id" and self.layer_name == TRAFFIC_SIGNS:
-                self.add_combobox(self.get_new_ids(config["type"], int(config[key])), key,
-                                  str(config[key]), layout)
+                add_combobox(self, self.get_new_ids(config["type"],
+                                                    int(config[key])), key,
+                             str(config[key]), layout)
             else:
                 # other types
                 self.get_qline_edit(key, config[key], layout)
@@ -97,7 +99,7 @@ class EditObject(QDialog):
             # dropdown lists of objects names
             if frame_key == RELATIVE_TO:
                 if self.is_draggable:
-                    self.add_combobox(self.frames, frame_key,
+                    add_combobox(self, self.frames, frame_key,
                                       frame[frame_key], layout)
                     list_for_edit = []
                 else:
@@ -128,36 +130,18 @@ class EditObject(QDialog):
             edit.setDisabled(True)
         layout.addRow(QLabel(row_name), edit)
 
-    def add_combobox(self, list_items: List[Any], key: str, cur_text: str,
-                     layout: QFormLayout, handler=None) -> None:
-        self.info["types"][key] = type(list_items[0])
-        combobox = QComboBox()
-        combobox.addItems(list(map(str, list_items)))
-        combobox.setCurrentText(cur_text)
-        self.info[key] = combobox
-        if handler:
-            combobox.currentTextChanged.connect(handler)
-        self.comboboxes[key] = combobox
-        layout.addRow(QLabel(key), combobox)
-
     def update_ids(self):
         combobox = self.comboboxes["id"]
         tags_type = self.comboboxes["type"].currentText()
         possible_ids = list(map(str, self.get_new_ids(tags_type)))
         curr_text = str(self.comboboxes["id"].currentText())
-        self.update_combobox(combobox, possible_ids, curr_text)
+        update_combobox(combobox, possible_ids, curr_text)
 
     def get_new_ids(self, tags_type: str, old_id: int = None) -> List[int]:
         ids = self.map_api.get_possible_ids_by_type(tags_type)
         if old_id and old_id not in ids:
             ids.insert(0, old_id)
         return ids
-
-    def update_combobox(self, combobox: QComboBox, new_items: List[Any],
-                        cur_text: str) -> None:
-        combobox.clear()
-        combobox.addItems(new_items)
-        combobox.setCurrentText(cur_text)
 
 
 class QHLine(QFrame):

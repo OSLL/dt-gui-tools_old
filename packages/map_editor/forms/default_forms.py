@@ -17,8 +17,9 @@ def get_info(widget, info: Dict[str, Any]) -> None:
     widget.close()
 
 
-def create_form(widget, rows: Dict[str, Any]) -> None:
+def create_form(widget, rows: Dict[str, Any]) -> QFormLayout:
     layout = QFormLayout()
     for row_name in rows:
         layout.addRow(QLabel(row_name), rows[row_name])
     widget.formGroupBox.setLayout(layout)
+    return layout

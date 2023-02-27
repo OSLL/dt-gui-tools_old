@@ -425,7 +425,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         return self.handlers.handle(command=GetLayerCommand(layer_name))
 
     def get_image_object(self, obj_name: str) -> Optional[ImageObject]:
-        return self.objects[obj_name]
+        return self.objects.get(obj_name)
 
     def get_frame_object(self, frame_name: str) -> Frame:
         return self.get_layer(FRAMES)[frame_name]
@@ -575,7 +575,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         tile_name = args["tile_name"]
         img_path = f"./img/tiles/{new_tile_type}.png"
         mutable_obj = self.get_image_object(tile_name)
-        mutable_obj.change_image(img_path)
+        if mutable_obj:
+            mutable_obj.change_image(img_path)
         self.handlers.handle(command=ChangeTypeCommand(TILES, tile_name,
                                                        new_tile_type))
         self.rotate_obj_on_map(tile_name, 0)
@@ -774,7 +775,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.scale = 1
         self.coordinates_transformer.set_scale(self.scale)
         self.open_map(path, info["map_name"], True, (int(info['x']), int(info['y'])),
-                      (float(info['tile_width']), float(info['tile_height'])))
+                      (float(info['tile_width']), float(info['tile_height'])),
+                      info["default_fill"])
         self.set_coordinates_transformer_data()
 
     def set_coordinates_transformer_data(self) -> None:
@@ -788,7 +790,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.tile_width, self.tile_height = [tile_width, tile_height]
 
     def create_default_map_content(self, size: Tuple[int, int],
-                                   tile_size: Tuple[float, float]) -> None:
+                                   tile_size: Tuple[float, float],
+                                   default_fill: str) -> None:
         width, height = size
         self.set_map_viewer_sizes(tile_size[0], tile_size[1])
         self.add_frame_on_map(self.tile_map)
@@ -799,6 +802,8 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                 new_tile_name = f"{self.tile_map}/tile_{i}_{j}"
                 self.add_obj_on_map(TILES, new_tile_name)
                 self.set_relative_to(new_tile_name, self.map.map.name)
+                self.change_tile_type({"default_fill": default_fill,
+                                       "tile_name": new_tile_name})
                 self.move_obj_command(new_tile_name,
                                       (float(i) * self.tile_width,
                                        float(j) * self.tile_height))
@@ -806,14 +811,15 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
 
     def open_map(self, path: Path, map_name: str, is_new_map: bool = False,
                  size: Tuple[int, int] = (0, 0),
-                 tile_size: Tuple[float, float] = (0, 0)) -> None:
+                 tile_size: Tuple[float, float] = (0, 0),
+                 default_fill: str = "") -> None:
         self.delete_objects()
         self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
         self.set_tile_map()
         self.init_handlers()
         if is_new_map:
-            self.create_default_map_content(size, tile_size)
+            self.create_default_map_content(size, tile_size, default_fill)
         else:
             self.set_map_viewer_sizes()
         self.set_coordinates_transformer_data()
