@@ -32,7 +32,8 @@ class EditorHistory:
         Add new state to the end of buffer.
         """
         if self.current_state_index + 1 == MAX_BUFFER_LENGTH:
-            self.buffer.pop(0)
+            if len(self.buffer) > 0:
+                self.buffer.pop(0)
             self.current_state_index -= 1
 
         if self.current_state_index + 1 < MAX_BUFFER_LENGTH:
