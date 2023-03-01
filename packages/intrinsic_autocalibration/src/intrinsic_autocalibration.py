@@ -19,7 +19,9 @@ obj_points = []  # 3d point in real world space
 img_points = []  # 2d points in image plane.
 BOARDS_NUM = 2
 MAX_DIR_CHANGES = 2
+NUM_IMAGES_FOR_CALIB = int(os.getenv("IMG_NUM"))
 CALIBRATION_BOT_DIR_PATH = "/data/config/calibrations/camera_intrinsic/"
+vel = float(os.getenv("VELOCITY"))
 
 
 def bgr_from_jpg(data):
@@ -52,10 +54,13 @@ class MyNode:
         msg.vel_left, msg.vel_right = 0.0, 0.0
         self.pub.publish(msg)
 
-    def step(self, cw=True) -> None:
+    def step(self, cw=True, is_vis=True) -> None:
         msg = WheelsCmdStamped()
         rate = rospy.Rate(10)
-        msg.vel_left, msg.vel_right = -0.15, 0.15
+        k = 1
+        if not is_vis:
+            k = 1.5
+        msg.vel_left, msg.vel_right = -1 * vel * k, vel * k
         if cw:
             msg.vel_left, msg.vel_right = msg.vel_right, msg.vel_left
         rospy.loginfo(f"Publishing message: left {msg.vel_left}, "
@@ -71,12 +76,13 @@ class MyNode:
         self.gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, corners = cv2.findChessboardCorners(self.gray, (7, 5), None)
         if ret:
-            all_x = [pair[0][0] for pair in corners]
+            print(f"Collect images: {len(obj_points)}/{NUM_IMAGES_FOR_CALIB}")
             obj_points.append(objp)
-            cv2.cornerSubPix(self.gray, corners, (11, 11), (-1, -1), criteria)
-            img_points.append(corners)
-            cv2.drawChessboardCorners(img, (7, 5), corners, ret)
-            return min(all_x), max(all_x)
+            corners2 = cv2.cornerSubPix(self.gray, corners, (11, 11), (-1, -1), criteria)
+            img_points.append(corners2)
+            cv2.drawChessboardCorners(img, (7, 5), corners2, ret)
+            return True
+        return False
 
     def fsm(self, state, board):
         if board > BOARDS_NUM - 1:
@@ -104,7 +110,6 @@ class MyNode:
 
     def run(self) -> None:
         cw = True
-        rate = rospy.Rate(1.5)
         dir_changes = 0
         board = 0
         # cw, isVis, restor
@@ -114,18 +119,17 @@ class MyNode:
                 if not self.im_size:
                     self.im_size = (self.img.shape[1], self.img.shape[0])
                 img = self.img
-                res = self.handle_img(img)
-                is_vis = True if res else False
+                is_vis = self.handle_img(img)
                 state = (state[0], is_vis, state[2])
                 new_state, board = self.fsm(state, board)
                 if state[0] != new_state[0]:
                     dir_changes += 1
                 state = new_state
-                self.step(state[0])
+                self.step(state[0], is_vis)
                 # show res
                 cv2.imshow('img', img)
                 cv2.waitKey(500)
-                if dir_changes >= MAX_DIR_CHANGES:
+                if len(obj_points) >= NUM_IMAGES_FOR_CALIB:
                     break
         self.on_shutdown()
         cv2.destroyAllWindows()
@@ -135,13 +139,13 @@ class MyNode:
                                                            img_points,
                                                            self.gray.shape[
                                                            ::-1], None, None)
+        self.compute_error(rvecs, tvecs, mtx, dist)
         # use monocular camera
         R = np.identity(3)
         t = np.zeros((3, 1))
         Rt = np.concatenate([R, t], axis=-1)  # [R|t]
         projection_mtx = mtx @ Rt  # A[R|t]
         autobot_name = os.getenv("VEHICLE_NAME")
-        self.compute_error(rvecs, tvecs, mtx, dist)
         res = self.get_res(autobot_name, mtx, R, projection_mtx, self.im_size, dist)
         print("\n", res)
         self.write_on_a_bot(res, autobot_name)
@@ -190,8 +194,7 @@ class MyNode:
         return calmessage
 
     def write_on_a_bot(self, data, name: str) -> None:
-        # TODO rm _
-        file_name = f'{name}_.yml'
+        file_name = f'{name}.yaml'
         file_dir = str(Path(".").absolute())
         with open(file_name, 'w') as outfile:
             outfile.write(data)
@@ -202,6 +205,8 @@ class MyNode:
 if __name__ == '__main__':
     # create the node
     node = MyNode(node_name='intrinsic_autocalibration_node')
+
+
     # run node
     node.run()
     # keep spinning
