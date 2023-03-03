@@ -455,8 +455,8 @@ def print_hint():
     print("         [s]:    Stop lane-following")
     print("         [i]:    Toggle anti-instagram")
     print("         [e]:    Toggle emergency stop")
-    print("         [f]:    Start parking")
-    print("         [g]:    Stop parking")
+    print("         [f]:    Start parking process !")
+    print("         [g]:    Stop parking process !")
     print("\n")
 
 
