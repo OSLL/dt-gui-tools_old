@@ -27,6 +27,8 @@ KEY_S = 's'
 KEY_I = 'i'
 KEY_E = 'e'
 KEY_P = 'p'
+KEY_F = 'f'
+KEY_G = 'g'
 
 Keys = {
     'Key.up': KEY_UP,
@@ -38,7 +40,9 @@ Keys = {
     KEY_S: KEY_S,
     KEY_I: KEY_I,
     KEY_E: KEY_E,
-    KEY_P: KEY_P
+    KEY_P: KEY_P,
+    KEY_F: KEY_F,
+    KEY_G: KEY_G
 }
 
 speed_tang = 1.0
@@ -140,6 +144,12 @@ class ROSManager(QThread):
                 print('Received shutdown request (Event `Q` button down).')
                 self.shutdown()
                 self._parent.shutdown()
+
+            if KEY_F in self.commands:
+                print('Press the F key')
+
+            if KEY_G in self.commands:
+                print('Press the G key')
 
             stands = (sum(map(abs, msg.axes)) == 0 and sum(map(abs, msg.buttons)) == 0)
 
@@ -445,6 +455,8 @@ def print_hint():
     print("         [s]:    Stop lane-following")
     print("         [i]:    Toggle anti-instagram")
     print("         [e]:    Toggle emergency stop")
+    print("         [f]:    Start parking")
+    print("         [g]:    Stop parking")
     print("\n")
 
 
