@@ -1,5 +1,6 @@
 # LIST YOUR PYTHON3 PACKAGES HERE
 numpy
+opencv-python
 
 # Duckietown World
 duckietown-world-daffy
@@ -12,5 +13,4 @@ pynput==1.7.1
 # Jupyter notebook
 jupyterlab
 matplotlib
-numpy
 scipy

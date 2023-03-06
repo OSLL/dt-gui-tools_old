@@ -5,6 +5,8 @@ ros-noetic-rqt-common-plugins
 ros-noetic-rqt-tf-tree
 ros-noetic-image-geometry
 python3-pygame
+rsync
+sshpass
 
 # We are using camera-calibration from source
 # to prevent python2 shebang error
@@ -44,5 +46,4 @@ gnome-themes-standard
 gtk2-engines-pixbuf
 gtk2-engines-murrine
 arc-theme
-
 ffmpeg

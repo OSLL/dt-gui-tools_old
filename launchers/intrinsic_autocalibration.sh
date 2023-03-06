@@ -14,7 +14,7 @@ dt-launchfile-init
 
 # launching app
 
-dt-exec roslaunch --wait intrinsic_autocalibration intrinsic_autocalibration.launch veh:="$VEHICLE_NAME"
+dt-exec roslaunch --wait intrinsic_autocalibration intrinsic_autocalibration.launch veh:="$VEHICLE_NAME" vel:="$VELOCITY"
 
 
 # ----------------------------------------------------------------------------
