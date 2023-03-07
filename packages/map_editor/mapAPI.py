@@ -143,19 +143,24 @@ class MapAPI:
                 return self.save_map_as_triggered(window)
         return True
 
-    #  Double click initiates as single click action
-    def item_list_double_clicked(self, window: QtWidgets.QMainWindow, item_name: str, item_type: str) -> None:
+    def item_list_double_clicked(self,  window: QtWidgets.QMainWindow,
+                                 item_name: str, item_type: str) -> None:
         # print(item_name, item_type)
+        if item_name == "separator":
+            pass
+        elif item_type not in TILE_KIND:
+            type_of_element = self.info_json['info'][item_name]['type']
+            try:
+                self._map_viewer.add_obj(type_of_element, item_name)
+            except:
+                self.view_info_form("Info", "Functional not implemented")
+
+    def item_list_clicked(self, window: QtWidgets.QMainWindow,
+                                 item_name: str, item_type: str) -> None:
         if item_name == "separator":
             pass
         elif item_type in TILE_KIND:
             window.set_default_fill(item_name)
-        else:
-            type_of_element = self.info_json['info'][item_name]['type']
-            try:    
-                self._map_viewer.add_obj(type_of_element, item_name)
-            except KeyError:
-                self.view_info_form("Info", "Functional not implemented")
 
     def view_info_form(self, header: str, info: str) -> None:
         form_yes(self._map_viewer, header, info)

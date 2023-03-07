@@ -2,7 +2,8 @@
 from copy import deepcopy
 from importlib import import_module
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QRect, QPoint
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QRect, QPoint, Qt
 from PyQt5.QtGui import QKeyEvent
 from dt_maps.types.tiles import Tile, Frame
 from dt_maps import MapLayer
@@ -840,6 +841,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                         "grid_width": self.grid_width, "tile_map": self.tile_map})
 
     def restore_state(self, m: Memento) -> None:
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         state = m.get_state()
         if state:
             layers = state["layers"]
@@ -860,6 +862,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
             # initialize map objects from layers
             self.init_all_map_objects()
             self.scene_update()
+        QApplication.restoreOverrideCursor()
 
     def copy(self) -> None:
         # save layer name, map object from him layer and save him frame

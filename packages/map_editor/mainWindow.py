@@ -140,8 +140,10 @@ class DuckWindow(QtWidgets.QMainWindow):
 
         #  Customize the Blocks menu
         block_list_widget = self.ui.block_list
-        block_list_widget.itemClicked.connect(self.item_list_clicked)
-        block_list_widget.itemDoubleClicked.connect(self.item_list_double_clicked)
+        block_list_widget.itemDoubleClicked.connect(
+            self.item_list_double_clicked)
+        block_list_widget.itemClicked.connect(
+            self.item_list_clicked)
 
         #  Customize the Map Editor menu
         default_fill = self.ui.default_fill
@@ -251,16 +253,17 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.exit_triggered()
         event.ignore()
 
-    #  Handle a click on an item from a list to a list
-    def item_list_clicked(self):
-        pass
-
-    #  Double click initiates as single click action
     def item_list_double_clicked(self) -> None:
         item_ui_list = self.ui.block_list
         item_name = item_ui_list.currentItem().data(0x0100)
         item_type = item_ui_list.currentItem().data(0x0101)
         self.map_api.item_list_double_clicked(self, item_name, item_type)
+
+    def item_list_clicked(self) -> None:
+        item_ui_list = self.ui.block_list
+        item_name = item_ui_list.currentItem().data(0x0100)
+        item_type = item_ui_list.currentItem().data(0x0101)
+        self.map_api.item_list_clicked(self, item_name, item_type)
 
     #  Copy
     def copy_button_clicked(self):
