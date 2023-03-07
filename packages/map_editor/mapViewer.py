@@ -657,8 +657,9 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.update_debug_info((self.mouse_cur_x, self.mouse_cur_y))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
-        if event.button() == QtCore.Qt.LeftButton or event.buttons() == QtCore.Qt.MiddleButton:
+        if not self.is_move_mode():
             self.lmbPressed = False
+        if event.button() == QtCore.Qt.LeftButton or event.buttons() == QtCore.Qt.MiddleButton:
             self.set_offset()
             if not self.is_move_mode():
                 self.select_tiles()
@@ -816,11 +817,11 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.delete_objects()
         self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
-        self.set_tile_map()
         self.init_handlers()
         if is_new_map:
             self.create_default_map_content(size, tile_size, default_fill)
         else:
+            self.set_tile_map()
             self.set_map_viewer_sizes()
         self.set_coordinates_transformer_data()
         self.init_all_map_objects()
