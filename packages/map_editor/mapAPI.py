@@ -32,7 +32,8 @@ class MapAPI:
     _debug_line: DebugLine = None
     _history: EditorHistory = None
 
-    def __init__(self, info_json: dict, map_viewer: MapViewer, args) -> None:
+    def __init__(self, info_json: dict, map_viewer: MapViewer,
+                 args: Dict[str, Any]) -> None:
         self._map_storage = MapStorage()
         self._qt_api = QtWindowAPI(args.wkdir)
         self.info_json = info_json
@@ -41,6 +42,7 @@ class MapAPI:
         self._history = EditorHistory()
         self.change_obj_info_form = None
         self.save_map_image_form = None
+        self.wkdir = args.wkdir
         self.init_info_form = NewMapInfoForm(args.wkdir)
         self.init_info_form.send_info.connect(self.create_map_triggered)
 
@@ -102,6 +104,7 @@ class MapAPI:
         self.to_the_map_corner()
         self.set_move_mode(False)
         path = info["image_name"]
+        path = os.path.join(self.wkdir, path)
         if path:
             self._map_viewer.save_to_png(path, info["height"])
             form_yes(self._map_viewer,

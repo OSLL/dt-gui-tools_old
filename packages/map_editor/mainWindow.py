@@ -33,7 +33,7 @@ class DuckWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         # necessary in docker (otherwise Permission denied error for saving map)
-        self.copy_dir_with_map("./maps/empty_map", f"{args.wkdir}/maps/empty_map")
+        copy_dir_with_map("./maps/empty_map", f"{args.wkdir}/maps/empty_map")
         self.map_viewer = MapViewer(args.wkdir)
         self.map_viewer.setMinimumSize(540, 540)
         self.ui.horizontalLayout.addWidget(self.map_viewer)
@@ -338,6 +338,3 @@ class DuckWindow(QtWidgets.QMainWindow):
 
     def view_info_form(self, header: str, info: str) -> None:
         self.map_api.view_info_form(header, info)
-
-    def copy_dir_with_map(self, path_from: str, path_to: str) -> None:
-        copy_dir_with_map(path_from, path_to)
