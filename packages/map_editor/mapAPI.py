@@ -70,6 +70,18 @@ class MapAPI:
 
     #  Open map
     def create_map_triggered(self, info: Dict[str, Any]) -> None:
+        if info["x"] == "" or info["y"] == "":
+            self.view_info_form("Info", "One of the map sizes is not specified")
+            return
+        if info["tile_width"] == "" or info["tile_height"] == "":
+            self.view_info_form("Info", "One of the tile sizes is not specified")
+            return
+        if info["dir_name"] == "":
+            self.view_info_form("Info", "Folder not specified to save the map")
+            return
+        if info["map_name"] == "":
+            self.view_info_form("Info", "Name not specified to save the map")
+            return
         path = Path(info["dir_name"])
         if path:
             try:
