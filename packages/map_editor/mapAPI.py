@@ -256,7 +256,6 @@ class MapAPI:
                                                frame, is_draggable,
                                                possible_relative_objects, self)
         self.change_obj_info_form.get_info.connect(self.change_obj_info)
-        self.change_obj_info_form.get_info.connect(self.change_obj_info)
         self.change_obj_info_form.show()
 
     def get_possible_ids_by_type(self, type_name: str) -> List[int]:

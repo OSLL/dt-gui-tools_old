@@ -815,6 +815,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
                  size: Tuple[int, int] = (0, 0),
                  tile_size: Tuple[float, float] = (0, 0),
                  default_fill: str = "") -> None:
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         self.delete_objects()
         self.parentWidget().parent().clear_editor_history()
         self.map.load_map(MapDescription(path, map_name))
@@ -831,6 +832,7 @@ class MapViewer(QtWidgets.QGraphicsView, QtWidgets.QWidget):
         self.save_viewer_state()
         self.parentWidget().parent().to_the_map_corner()
         self.scene_update()
+        QApplication.restoreOverrideCursor()
 
     def save_state(self) -> Memento:
         # custom deepcopy
