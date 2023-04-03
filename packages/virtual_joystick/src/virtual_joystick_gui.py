@@ -27,6 +27,8 @@ KEY_S = 's'
 KEY_I = 'i'
 KEY_E = 'e'
 KEY_P = 'p'
+KEY_F = 'f'
+KEY_G = 'g'
 
 Keys = {
     'Key.up': KEY_UP,
@@ -38,7 +40,9 @@ Keys = {
     KEY_S: KEY_S,
     KEY_I: KEY_I,
     KEY_E: KEY_E,
-    KEY_P: KEY_P
+    KEY_P: KEY_P,
+    KEY_F: KEY_F,
+    KEY_G: KEY_G
 }
 
 speed_tang = 1.0
@@ -70,6 +74,13 @@ class ROSManager(QThread):
             BoolStamped,
             queue_size=1
         )
+        # parking
+        self.parking_pub = rospy.Publisher(
+            "~parking_start",
+            BoolStamped,
+            queue_size=1,
+        )
+        
         self.commands = set()
         self.standing = False
         self.estop_last_time = time.time()
@@ -141,13 +152,25 @@ class ROSManager(QThread):
                 self.shutdown()
                 self._parent.shutdown()
 
+            if KEY_F in self.commands: 
+                # start parking
+                msg_bool = BoolStamped()
+                msg_bool.data = True
+                self.parking_pub.publish(msg_bool)
+                
+            if KEY_G in self.commands:
+                # stop parking
+                msg_bool = BoolStamped()
+                msg_bool.data = False
+                self.parking_pub.publish(msg_bool)
+
+
             stands = (sum(map(abs, msg.axes)) == 0 and sum(map(abs, msg.buttons)) == 0)
 
             if not stands or not self.standing or force_joy_publish:
                 self.pub_joystick.publish(msg)
 
             self.standing = stands
-
             time.sleep(1 / HZ)
 
     def action(self, commands):
@@ -445,6 +468,8 @@ def print_hint():
     print("         [s]:    Stop lane-following")
     print("         [i]:    Toggle anti-instagram")
     print("         [e]:    Toggle emergency stop")
+    print("         [f]:    Start parking")
+    print("         [g]:    Stop parking")
     print("\n")
 
 
