@@ -1,4 +1,3 @@
-from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 from utils.constants import TILE_SIZE
@@ -22,6 +21,9 @@ class TilesLayerHandler(BasicLayerHandler):
         return super().check_config(config) and config.get("type") \
                in [t.value for t in TileType]
 
+    def fields_with_types(self) -> list:
+        return ["type"]
+
 
 class WatchtowersLayerHandler(BasicLayerHandler):
     def __init__(self, **kwargs) -> None:
@@ -31,6 +33,9 @@ class WatchtowersLayerHandler(BasicLayerHandler):
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and config.get("configuration") \
                in [t.value for t in WatchtowerType]
+
+    def fields_with_types(self) -> list:
+        return ["configuration"]
 
 
 class FramesLayerHandler(BasicLayerHandler):
@@ -49,12 +54,15 @@ class TileMapsLayerHandler(BasicLayerHandler):
 
 class TrafficSignsLayerHandler(BasicLayerHandler):
     def __init__(self, **kwargs) -> None:
-        kwargs["default_conf"] = {"type": "stop", "id": 0, "family": "36h11"}
+        kwargs["default_conf"] = {"type": "stop", "id": 1, "family": "36h11"}
         super(TrafficSignsLayerHandler, self).__init__(**kwargs)
 
     def check_config(self, config: Dict[str, Any]) -> bool:
         return super().check_config(config) and \
                config.get("type") in [t.value for t in TrafficSignType]
+
+    def fields_with_types(self) -> list:
+        return ["type"]
 
 
 class GroundTagsLayerHandler(BasicLayerHandler):
@@ -72,6 +80,9 @@ class CitizensLayerHandler(BasicLayerHandler):
         return super().check_config(config) and \
                config.get("color") in [t.value for t in CitizenType]
 
+    def fields_with_types(self) -> list:
+        return ["color"]
+
 
 class VehiclesLayerHandler(BasicLayerHandler):
     def __init__(self, **kwargs) -> None:
@@ -83,6 +94,9 @@ class VehiclesLayerHandler(BasicLayerHandler):
         return super().check_config(config) and \
                config.get("configuration") in [t.value for t in VehicleType] and \
                config.get("color") in [t.value for t in ColorType]
+
+    def fields_with_types(self) -> list:
+        return ["configuration", "color"]
 
 
 if __name__ == '__main__':

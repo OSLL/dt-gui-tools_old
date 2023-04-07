@@ -9,7 +9,6 @@ class ImageObject(QtWidgets.QLabel):
         self.init_size = size
         self.scale = 1
         self.yaw = 0
-        self.obj_map_pos = (0, 0)
         self.img_path = img_path
         self.name = object_name
         self.layer_name = layer_name
@@ -86,9 +85,6 @@ class ImageObject(QtWidgets.QLabel):
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         self.parentWidget().wheelEvent(event)
 
-    def set_obj_map_pos(self, pos: tuple) -> None:
-        self.obj_map_pos = (pos[0], pos[1])
-
     def delete_object(self) -> None:
         self.deleteLater()
 
@@ -111,6 +107,7 @@ class DraggableImage(ImageObject):
     def __init__(self, img_path: str, parent: QtWidgets.QWidget, object_name: str, layer_name: str, size: tuple = (20, 20)):
         super(DraggableImage, self).__init__(img_path, parent, object_name, layer_name, size)
         self.drag_start_pos = None
+        self.pose_before_drag = None
 
     def is_draggable(self) -> bool:
         return True
@@ -119,6 +116,7 @@ class DraggableImage(ImageObject):
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.drag_start_pos = event.pos()
+            self.pose_before_drag = self.pos()
             self.raise_()
             self.is_select = True
         elif event.button() == QtCore.Qt.RightButton:
@@ -127,14 +125,19 @@ class DraggableImage(ImageObject):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.drag_start_pos is not None:
             new_pos = self.pos() + event.pos() - self.drag_start_pos
+            diff_x = new_pos.x() - self.pos().x()
+            diff_y = new_pos.y() - self.pos().y()
+            if diff_x or diff_y:
+                self.parentWidget().move_selected_objects(diff_x, diff_y)
             self.move_object((new_pos.x(), new_pos.y()))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ArrowCursor)
             new_pos = self.pos() + event.pos() - self.drag_start_pos
-            self.change_position((new_pos.x(), new_pos.y()))
-            self.move_in_map((new_pos.x(), new_pos.y()))
+            if self.pose_before_drag.x() != new_pos.x() or self.pose_before_drag.y() != new_pos.y():
+                self.change_position((new_pos.x(), new_pos.y()))
+                self.parent().move_selected_objects_on_map(self.pose_before_drag - new_pos)
             self.drag_start_pos = None
             self.parentWidget().scene_update()
 

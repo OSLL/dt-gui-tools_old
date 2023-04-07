@@ -28,6 +28,8 @@ def main(args):
 
     # Create main window
     window = DuckWindow(args)
+    window.map_viewer.save_viewer_state()
+    window.to_the_map_corner()
 
     window.show()
     app.exec_()

@@ -8,8 +8,8 @@ from dt_maps.Map import REGISTER
 from mapStorage import MapStorage
 from utils.constants import LAYER_NAME
 from utils.maps import create_layer
-from typing import Dict, Any
-from copy import deepcopy
+from typing import Dict, Any, Optional
+from copy import deepcopy, copy
 
 
 class AbstractLayer(ABC):
@@ -44,6 +44,22 @@ class AbstractLayer(ABC):
     def set_layer_handler(self, handler: EntityHelper) -> None:
         self._layer_handler = handler
 
+    def get_layer_deepcopy(self, layer: MapLayer) -> Optional[Dict[str, Any]]:
+        if not len(layer):
+            return {}
+        new_layer = {}
+        for name, item in layer.items():
+            new_item = {}
+            for item_filed in self._default_conf:
+                new_item[item_filed] = deepcopy(layer[name][item_filed])
+                if item_filed in self.fields_with_types():
+                    new_item[item_filed] = new_item[item_filed].value
+            new_layer[name] = new_item
+        return new_layer
+
+    def fields_with_types(self) -> list:
+        return []
+
 
 class BasicLayerHandler(AbstractHandler, AbstractLayer):
     def __init__(self, **kwargs) -> None:
@@ -52,7 +68,8 @@ class BasicLayerHandler(AbstractHandler, AbstractLayer):
     def handle(self, command: Command) -> Any:
         response = command.execute(self._data, self._layer_name,
                                    deepcopy(self._default_conf),
-                                   check_config=self.check_config)
+                                   check_config=self.check_config,
+                                   get_deepcopy=self.get_layer_deepcopy)
         if response:
             return response
         return super().handle(command)
@@ -62,7 +79,7 @@ class DynamicLayer(EntityHelper):
     _fields: Dict[str, Any] = {}
     _layer_name: str = ""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(DynamicLayer, self).__init__(kwargs["map"], kwargs[LAYER_NAME])
         self._layer_name = kwargs[LAYER_NAME]
         for field_name, field_val in kwargs["conf"].items():
