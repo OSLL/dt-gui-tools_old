@@ -3,7 +3,6 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTranslator
 from PyQt5.QtGui import QIcon
-
 from mainWindow import DuckWindow
 from argparse import ArgumentParser
 from utils.logger import init_logger
@@ -29,6 +28,8 @@ def main(args):
 
     # Create main window
     window = DuckWindow(args)
+    window.map_viewer.save_viewer_state()
+    window.to_the_map_corner()
 
     window.show()
     app.exec_()

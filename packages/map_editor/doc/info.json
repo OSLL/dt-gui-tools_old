@@ -93,21 +93,13 @@
                     "name": "Городские объекты"
                 },
                 "en": {
-                    "name": "City object"
+                    "name": "City objects"
                 }
             },
             "id": "objects",
             "elements": [
-                "trafficlight",
-                "barrier",
-                "cone",
                 "citizens",
-                "vehicles",
-                "tree",
-                "house",
-                "truck",
-                "bus",
-                "building"
+                "vehicles"
             ]
         },
         {
@@ -136,6 +128,27 @@
             "id": "ground_tags",
             "elements": [
                 "ground_tags"
+            ]
+        },
+         {
+            "lang": {
+                "ru": {
+                    "name": "В планах"
+                },
+                "en": {
+                    "name": "Coming soon"
+                }
+            },
+            "id": "coming_soon",
+            "elements": [
+                "trafficlight",
+                "barrier",
+                "cone",
+                "tree",
+                "house",
+                "truck",
+                "bus",
+                "building"
             ]
         }
     ],
@@ -589,7 +602,7 @@
             "icon": "img/traffic_signs/pedestrian.png"
         },
         "truck": {
-            "type": "object",
+            "type": "truck",
             "lang": {
                 "ru": {
                     "name": "Грузовик",
@@ -645,5 +658,5 @@
             "icon": "img/objects/ground_tags.png"
         }
     },
-    "description": "Moving map: Ctrl + LMB\n\nEdit object: RMB on object\n\nHighlight area: LMB\n\nMove object: LMB on object and hold\n\nSelect item in right menu: Double click"
+    "description": "Moving map: Ctrl + LMB or Middle button\n\nEdit object: RMB on object\n\nHighlight area: LMB\n\nMove object: LMB on object and hold\n\nSelect tile type in left menu: Single click\n\nSelect object in left menu: Double click"
 }

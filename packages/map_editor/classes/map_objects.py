@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
+from painter import Painter
 
 
 class ImageObject(QtWidgets.QLabel):
@@ -8,12 +9,13 @@ class ImageObject(QtWidgets.QLabel):
         self.init_size = size
         self.scale = 1
         self.yaw = 0
-        self.obj_map_pos = (0, 0)
         self.img_path = img_path
         self.name = object_name
         self.layer_name = layer_name
-        self.setParent(parent)
+        self.is_select = False
+        self.is_to_png = False
         self.pixmap = None
+        self.setParent(parent)
         self.change_image(img_path)
         self.setMouseTracking(True)
 
@@ -27,7 +29,7 @@ class ImageObject(QtWidgets.QLabel):
             self.setFixedSize(self.pixmap.height(), self.pixmap.width())
         new_transform = QtGui.QTransform()
         new_transform.rotate(rotate_angle)
-        self.pixmap = self.pixmap.transformed(new_transform, QtCore.Qt.SmoothTransformation)
+        self.pixmap = self.pixmap.transformed(new_transform)
         self.setPixmap(self.pixmap)
 
     def change_image(self, img_path: str) -> None:
@@ -38,7 +40,11 @@ class ImageObject(QtWidgets.QLabel):
 
     def set_size_object(self, new_size: tuple) -> None:
         resize = QtCore.QSize(new_size[0], new_size[1])
-        self.pixmap = self.pixmap.scaled(resize)
+        if self.is_to_png:
+            self.pixmap = self.pixmap.scaled(resize,
+                                             transformMode=QtCore.Qt.SmoothTransformation)
+        else:
+            self.pixmap = self.pixmap.scaled(resize)
         self.setFixedSize(new_size[0], new_size[1])
         self.setPixmap(self.pixmap)
         self.show()
@@ -79,9 +85,6 @@ class ImageObject(QtWidgets.QLabel):
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         self.parentWidget().wheelEvent(event)
 
-    def set_obj_map_pos(self, pos: tuple) -> None:
-        self.obj_map_pos = (pos[0], pos[1])
-
     def delete_object(self) -> None:
         self.deleteLater()
 
@@ -92,6 +95,9 @@ class ImageObject(QtWidgets.QLabel):
     def change_obj(self) -> None:
         self.parentWidget().change_obj_info(self.layer_name, self.name)
 
+    def set_is_to_png(self, val: bool) -> None:
+        self.is_to_png = val
+
 
 class DraggableImage(ImageObject):
     """Objects draggable class
@@ -101,6 +107,7 @@ class DraggableImage(ImageObject):
     def __init__(self, img_path: str, parent: QtWidgets.QWidget, object_name: str, layer_name: str, size: tuple = (20, 20)):
         super(DraggableImage, self).__init__(img_path, parent, object_name, layer_name, size)
         self.drag_start_pos = None
+        self.pose_before_drag = None
 
     def is_draggable(self) -> bool:
         return True
@@ -109,37 +116,34 @@ class DraggableImage(ImageObject):
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.drag_start_pos = event.pos()
+            self.pose_before_drag = self.pos()
             self.raise_()
+            self.is_select = True
         elif event.button() == QtCore.Qt.RightButton:
             self.change_obj()
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         if self.drag_start_pos is not None:
             new_pos = self.pos() + event.pos() - self.drag_start_pos
+            diff_x = new_pos.x() - self.pos().x()
+            diff_y = new_pos.y() - self.pos().y()
+            if diff_x or diff_y:
+                self.parentWidget().move_selected_objects(diff_x, diff_y)
             self.move_object((new_pos.x(), new_pos.y()))
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(QtCore.Qt.ArrowCursor)
             new_pos = self.pos() + event.pos() - self.drag_start_pos
-            self.change_position((new_pos.x(), new_pos.y()))
-            self.move_in_map((new_pos.x(), new_pos.y()))
+            if self.pose_before_drag.x() != new_pos.x() or self.pose_before_drag.y() != new_pos.y():
+                self.change_position((new_pos.x(), new_pos.y()))
+                self.parent().move_selected_objects_on_map(self.pose_before_drag - new_pos)
             self.drag_start_pos = None
             self.parentWidget().scene_update()
 
-
-if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    win = QtWidgets.QWidget()
-    win.mainLayout = QtWidgets.QHBoxLayout()
-    win.setLayout(win.mainLayout)
-    win.setFixedSize(1000, 1000)
-    win.img_list = [
-        "../img/objects/watchtowers.png", "../img/objects/watchtowers.png"
-    ]
-    for img in win.img_list:
-        draggable_image = DraggableImage(img, win)
-        win.mainLayout.addWidget(draggable_image)
-    win.show()
-    sys.exit(app.exec_())
+    def paintEvent(self, QPaintEvent) -> None:
+        if self.is_select:
+            Painter.draw_border(self)
+        else:
+            painter = QtGui.QPainter(self)
+            painter.drawPixmap(self.rect(), self.pixmap)
